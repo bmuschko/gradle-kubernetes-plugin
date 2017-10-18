@@ -1,3 +1,3 @@
 # common-utils
 
-Collection of common utilties.
+Collection of common utilities.
