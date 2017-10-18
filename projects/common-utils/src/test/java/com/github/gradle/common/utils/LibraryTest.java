@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package com.pega.squid.pipeline.utilities;
+package com.github.gradle.common.utils;
 
+import com.github.gradle.common.utils.Library;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.testng.annotations.Test;

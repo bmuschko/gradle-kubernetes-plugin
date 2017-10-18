@@ -6,7 +6,7 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
         maven { 
-            url "${artifactoryURL}/repo2"
+            url artifactoryURL
             credentials {
                 username = artifactoryUser
                 password = artifactoryPassword

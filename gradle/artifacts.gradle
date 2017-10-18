@@ -24,7 +24,6 @@ task testsJar(type: Jar) {
     from sourceSets.test.output
 }
 
-
 shadowJar {
     classifier = 'all'
     mergeServiceFiles()

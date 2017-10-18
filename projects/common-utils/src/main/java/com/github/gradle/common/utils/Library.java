@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.pega.squid.pipeline.utilities;
+package com.github.gradle.common.utils;
 
 public class Library {
     public boolean someLibraryMethod() {
