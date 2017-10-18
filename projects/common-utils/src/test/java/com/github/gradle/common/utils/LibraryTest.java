@@ -17,14 +17,13 @@
 
 package com.github.gradle.common.utils;
 
-import com.github.gradle.common.utils.Library;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.testng.annotations.Test;
 
 public class LibraryTest {
 
-    @Test 
+    @Test
     public void testSomeLibraryMethod() {
         final Library classUnderTest = new Library();
         assertThat(classUnderTest.someLibraryMethod()).isTrue();

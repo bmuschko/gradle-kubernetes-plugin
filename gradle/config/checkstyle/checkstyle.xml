@@ -24,6 +24,10 @@
         <property name="eachLine" value="true"/>
     </module>
 
+    <module name="RegexpSingleline">
+        <property name="format" value="^(?!\s+\* $).*?\s+$"/>
+        <property name="message" value="Line has trailing spaces."/>
+    </module>
 
     <module name="Header"> 
         <property name="headerFile" value="gradle/config/header/java.header"/>
