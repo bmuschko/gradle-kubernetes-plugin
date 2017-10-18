@@ -4,7 +4,7 @@ Generic multi-project structure that we think represents the best gradle has to 
 
 ## Latest release
 
-Can be sourced from Artifactory like so:
+Can be sourced from Artifactory/Bintray/MavenCentral like so:
 ```
 <dependency>
     <groupId>com.github.gradle</groupId>
