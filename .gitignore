@@ -1,0 +1,36 @@
+# Build tool generated dirs and files #
+#######################################
+build/
+bin/
+out/
+src/generated/
+.gradle/
+test-output/
+.eclipse-pmd
+.pmd
+.ruleset
+
+# OS generated files #
+######################
+.DS_Store
+
+# IDE generated files #
+######################
+.settings/
+.classpath
+.project
+.README* 
+.idea 
+*.iml 
+*.ipr
+*.iws
+/.nb-gradle/
+
+# Mobile Tools for Java (J2ME) #
+################################
+.mtj.tmp/
+
+# JVM crash logs #
+##################
+hs_err_pid*
+

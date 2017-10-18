@@ -1,0 +1,73 @@
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'nebula.compile-api'
+    apply from: "$rootDir/gradle/artifacts.gradle"
+    apply from: "$rootDir/gradle/jacoco.gradle"
+    apply from: "$rootDir/gradle/pmd.gradle"
+    apply from: "$rootDir/gradle/checkstyle.gradle"
+    apply from: "$rootDir/gradle/findbugs.gradle"
+    apply from: "$rootDir/gradle/publishing.gradle"
+
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }        
+        maven { 
+            url "${artifactoryURL}/repo2" 
+            credentials {
+                username = artifactoryUser
+                password = artifactoryPassword
+            }
+        }
+    }
+
+    dependencies {
+        errorprone 'com.google.errorprone:error_prone_core:2.0.21'
+
+        testCompile ('org.testng:testng:6.12') 
+        testCompile ('org.assertj:assertj-core:3.8.0') 
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ["-Xlint:-options"]
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+    
+    tasks.withType (Test) {
+        useTestNG()
+        maxParallelForks = 2
+        testLogging {
+            showStandardStreams = true
+            events 'started', 'passed', 'failed'
+        }
+        jacoco {
+            append = false
+            destinationFile = file("$buildDir/jacoco/${name}.exec")
+            classDumpDir = file("$buildDir/jacoco/${name}_ClassDump")
+        }
+    }
+    
+    test {
+        description 'Used for running unit tests.'
+        exclude '**/**MockTest.class'
+        exclude '**/**IntegTest.class'
+    }
+    
+    task mockTest(type: Test) {
+        description 'Used for running mock tests.'
+        include '**/**MockTest.class'
+    }
+
+    task integTest(type: Test) {
+        description 'Used for running integ tests.'
+        include '**/**IntegTest.class'
+    }
+
+    build.finalizedBy jacocoTestReport, jacocoTestCoverageVerification
+}

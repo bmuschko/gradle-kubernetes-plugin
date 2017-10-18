@@ -1,0 +1,46 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven { 
+            url "${artifactoryURL}/repo2" 
+            credentials {
+                username = artifactoryUser
+                password = artifactoryPassword
+            }
+        }
+    }
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:1.7.2'
+        classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.13'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.10.0'
+    }
+}
+
+// must be set prior to 'release-opinion' plugin getting applied 
+// as they are magically used behind the scenes.
+rootProject.ext.setProperty('release.stage', releaseStage.trim())
+rootProject.ext.setProperty('release.scope', releaseScope.trim())
+
+apply plugin: 'org.ajoberstar.release-opinion'
+
+release {
+    def credentials = new org.ajoberstar.grgit.Credentials(releaseUsername, releasePassword)
+    grgit = org.ajoberstar.grgit.Grgit.open(dir: project.rootDir.absolutePath, creds: credentials)
+    versionStrategy org.ajoberstar.gradle.git.release.opinion.Strategies.FINAL
+    defaultVersionStrategy = org.ajoberstar.gradle.git.release.opinion.Strategies.SNAPSHOT
+    tagStrategy {
+        generateMessage = { version -> "Version ${->project.version}" }
+    }
+}
+
+// Ensure 'clean', 'build', and 'artifactoryPublish' are run prior to releasing.
+tasks.release.dependsOn(['clean', 'build', 'artifactoryPublish'].collect { task ->
+    subprojects.collect { ":" + it.name + ":" + task }.flatten()
+}.flatten())
+
+apply from: "$rootDir/gradle/subprojects.gradle"

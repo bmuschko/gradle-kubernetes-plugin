@@ -1,0 +1,50 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven { 
+            url "${artifactoryURL}/repo2"
+            credentials {
+                username = artifactoryUser
+                password = artifactoryPassword
+            }
+        }
+    }
+    dependencies {
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.5.0'
+    }
+}
+
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
+
+artifactory {
+    contextUrl = artifactoryURL
+    publish {
+        repository {
+            repoKey = rootProject.findProperty('release.stage') == 'final' ? releaseRepository : snapshotRepository
+            username = artifactoryUser
+            password = artifactoryPassword
+            mavenCompatible = true
+        }
+        defaults {
+            publications ('artifactoryJava')
+        }
+    }
+}
+
+publishing {
+    publications {
+        artifactoryJava (MavenPublication) {
+            from components.java             
+            artifact sourcesJar
+            artifact docsJar
+            artifact testsJar
+            artifact shadowJar
+        }
+    }
+}
