@@ -1,0 +1,36 @@
+language: java
+jdk: oraclejdk8
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "HeIfsi3ZMZX97TWe29MCExBHS1N+Hpvty5y+R1QQIzPyTDv5Kzb3zMExh5Bxr5VxIYsBk8XCIuAgM6MdVYHTabKfnimcaPl8AnMFUz8AfsJCZfYZmIf0bQ6Int858tqMCw6Q4o7iJh8PPypKQXjeeIz9kpgfdj/UCdrdntcro0XIaXxGUqD6ctZD8tzztT7H4JIF1XjlbomP2yvdIvZr9XsTqK1irqFfAf/bfGDrbOyvAXuB0Ey+mrvu6Xh6ffsgV3bZ+0kd5iUYpuh3jg5jsxJSWCk5Kxf5XPEkgBxEPOYlWYTjmrnCbgM87EVECspeZQnkN4c1D96c8NsH4Olj6stMi0JsAf3UrfRMqDaZPWlJ7U+AenGP99RQQA8ZOaZodAAS8ED21wG6iG5zwcgObiTvKF0SdcJyOWIAzW3aa15Ft2kLTlCfuwFwfB3DKDDgmMlajnJJyhQ1MA4ZtfZTxFMXYZwakdc1VDVpoIqji13snhnxmse8Au0n0yBuhyqnvG4Zg3e0WXsTNUrJIca6rYsNOk9pcUnEsi11RSvl5OS7/2xt1VdUfhva0nGtq+eyxWb7QMQQUtgSM4k0iXQ+f9ynyQpppRxO0oW3VlAQwZeZfchHReu1+pOSay6nK7J2dmvEvJHVLXfwq9EoOi1r0zTiRw560sTDFGqvzRV9CDE="
+
+
+script: ./gradlew -s -Dorg.gradle.daemon=false clean build publishToMavenLocal
+
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+addons:
+  coverity_scan:
+    project:
+      name: "project-aries/gradle-multi-project-example"
+      description: "Generic multi-project structure that we think represents the best gradle has to offer."
+    notification_email: christoforever@gmail.com
+    build_command:  ./gradlew -s -Dorg.gradle.daemon=false build
+    branch_pattern: coverity_scan
+
