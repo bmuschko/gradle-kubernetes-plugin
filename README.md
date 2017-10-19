@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/project-aries/gradle-multi-project-example.svg?branch=master)](https://travis-ci.org/project-aries/gradle-multi-project-example)
+[![codecov](https://codecov.io/gh/project-aries/gradle-multi-project-example/branch/master/graph/badge.svg)](https://codecov.io/gh/project-aries/gradle-multi-project-example)
+[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/10783.svg)](https://scan.coverity.com/projects/project-aries-gradle-multi-project-example)
+[![Download](https://api.bintray.com/packages/project-aries/libs-release-local/gradle-multi-project-example/images/download.svg) ](https://bintray.com/project-aries/libs-release-local/gradle-multi-project-example/_latestVersion)
+
 # gradle-multi-project-example
 
 Generic multi-project structure that we think represents the best gradle has to offer.
