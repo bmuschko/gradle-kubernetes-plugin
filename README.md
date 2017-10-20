@@ -44,7 +44,7 @@ analysis to look for and detect possible bugs in Java code.
 
 ## Use Of Test Libraries
 
-Currently we define `testng` and `assertj` as `testCompile` dependencies for all projects 
+Currently we define `junit` and `assertj` as `testCompile` dependencies for all projects 
 to use. Lets try to focus on using just these, and if there is a need to bring in and 
 use something else, then lets first have a discussion on it before we go adding N 
 number of dependencies to this project and break the look and feel we are trying to set.
@@ -63,5 +63,5 @@ that project would look like `com.github.gradle.calamari`. If you're adding a pr
 
 ## Additional Resources
 
-* [Release Process](https://github.com/cdancy/gradle-multi-project-example/blob/master/docs/RELEASE_PROCESS.md)
+* [Release Process](https://github.com/project-aries/gradle-multi-project-example/blob/master/docs/RELEASE_PROCESS.md)
 
