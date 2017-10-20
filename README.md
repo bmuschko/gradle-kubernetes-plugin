@@ -1,6 +1,9 @@
 [![Build Status](https://travis-ci.org/project-aries/gradle-multi-project-example.svg?branch=master)](https://travis-ci.org/project-aries/gradle-multi-project-example)
 [![codecov](https://codecov.io/gh/project-aries/gradle-multi-project-example/branch/master/graph/badge.svg)](https://codecov.io/gh/project-aries/gradle-multi-project-example)
-[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/10783.svg)](https://scan.coverity.com/projects/project-aries-gradle-multi-project-example)
+<a href="https://scan.coverity.com/projects/gradle-multi-project-example">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/14064/badge.svg"/>
+</a>
 [![Download](https://api.bintray.com/packages/project-aries/libs-release-local/gradle-multi-project-example/images/download.svg) ](https://bintray.com/project-aries/libs-release-local/gradle-multi-project-example/_latestVersion)
 
 # gradle-multi-project-example
@@ -44,7 +47,7 @@ analysis to look for and detect possible bugs in Java code.
 
 ## Use Of Test Libraries
 
-Currently we define `testng` and `assertj` as `testCompile` dependencies for all projects 
+Currently we define `junit` and `assertj` as `testCompile` dependencies for all projects 
 to use. Lets try to focus on using just these, and if there is a need to bring in and 
 use something else, then lets first have a discussion on it before we go adding N 
 number of dependencies to this project and break the look and feel we are trying to set.
@@ -63,5 +66,5 @@ that project would look like `com.github.gradle.calamari`. If you're adding a pr
 
 ## Additional Resources
 
-* [Release Process](https://github.com/cdancy/gradle-multi-project-example/blob/master/docs/RELEASE_PROCESS.md)
+* [Release Process](https://github.com/project-aries/gradle-multi-project-example/blob/master/docs/RELEASE_PROCESS.md)
 
