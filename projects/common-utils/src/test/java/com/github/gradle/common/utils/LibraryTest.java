@@ -18,8 +18,7 @@
 package com.github.gradle.common.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 public class LibraryTest {
 

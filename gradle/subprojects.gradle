@@ -29,7 +29,7 @@ subprojects {
     dependencies {
         errorprone 'com.google.errorprone:error_prone_core:2.0.21'
 
-        testCompile ('org.testng:testng:6.12') 
+        testCompile "junit:junit:4.12" 
         testCompile ('org.assertj:assertj-core:3.8.0') 
     }
 
@@ -40,7 +40,6 @@ subprojects {
     }
     
     tasks.withType (Test) {
-        useTestNG()
         maxParallelForks = 2
         testLogging {
             showStandardStreams = true
