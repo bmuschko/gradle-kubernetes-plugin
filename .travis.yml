@@ -1,15 +1,6 @@
 language: java
 jdk: oraclejdk8
 
-env:
-  global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   #   via the "travis encrypt" command using the project repo's public key
-   - secure: "IRvLLIiqatdmnN-zwWAKsg"
-
-before_install:
-  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -21,34 +12,7 @@ cache:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-
-addons:
-  coverity_scan:
-
-    # GitHub project metadata
-    # ** specific to your project **
-    project:
-      name: "project-aries/gradle-multi-project-example"
-      description: "Generic multi-project structure that we think represents the best gradle has to offer."
-
-    # Where email notification of build analysis results will be sent
-    notification_email: christoforever@gmail.com
-
-    # The command that will be added as an argument to "cov-build" to compile your project for analysis,
-    # ** likely specific to your build **
-    build_command: ./gradlew -s -Dorg.gradle.daemon=false build
-
-    # Pattern to match selecting branches that will run analysis. We recommend leaving this set to 'coverity_scan'.
-    # Take care in resource usage, and consider the build frequency allowances per
-    #   https://scan.coverity.com/faq#frequency
-    branch_pattern: coverity_scan
     
 script:
-  - if [[ "${COVERITY_SCAN_BRANCH}" == 1 ]];
-      then
-        echo "Don't build on coverty_scan branch.";
-        exit 0;
-    fi
-
   - ./gradlew -s -Dorg.gradle.daemon=false clean build publishToMavenLocal
 
