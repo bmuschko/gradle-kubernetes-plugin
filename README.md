@@ -60,6 +60,12 @@ For example: if you're adding a project named `calamari` the root package struct
 that project would look like `com.github.gradle.calamari`. If you're adding a project named 
 `tuna-casserole` then your package structure would look like `com.github.gradle.tuna.casserole`.
 
+## Docs
+
+Documentation, be it javadcos or groovydocs, can be previewed below:
+
+[common-utils](http://htmlpreview.github.io/?https://github.com/project-aries/gradle-multi-project-example/blob/common-utils-gh-pages/docs/javadoc/index.html)
+
 ## Additional Resources
 
 * [Release Process](https://github.com/project-aries/gradle-multi-project-example/blob/master/docs/RELEASE_PROCESS.md)
