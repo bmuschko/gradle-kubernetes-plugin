@@ -29,7 +29,7 @@ rootProject.ext.setProperty('release.scope', releaseScope.trim())
 apply plugin: 'org.ajoberstar.release-opinion'
 
 release {
-    def credentials = new org.ajoberstar.grgit.Credentials(githubUsername, githubPassword)
+    def credentials = new org.ajoberstar.grgit.Credentials(releaseUsername, releasePassword)
     grgit = org.ajoberstar.grgit.Grgit.open(dir: project.rootDir.absolutePath, creds: credentials)
     versionStrategy org.ajoberstar.gradle.git.release.opinion.Strategies.FINAL
     defaultVersionStrategy = org.ajoberstar.gradle.git.release.opinion.Strategies.SNAPSHOT
