@@ -24,7 +24,7 @@ buildscript {
     dependencies {
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.5.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
-        classpath 'org.ajoberstar:gradle-git:1.7.2'
+        classpath 'org.ajoberstar:gradle-git-publish:0.3.1'
     }
 }
 
@@ -32,7 +32,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 apply plugin: com.jfrog.bintray.gradle.BintrayPlugin
-apply plugin: org.ajoberstar.gradle.git.ghpages.GithubPagesPlugin
+apply plugin: org.ajoberstar.gradle.git.publish.GitPublishPlugin
 
 publishing {
     publications {
@@ -94,21 +94,21 @@ bintray {
     }
 }
 
-githubPages {
+gitPublish {
+    System.setProperty('org.ajoberstar.grgit.auth.username', resolveProperty('releaseUsername'))
+    System.setProperty('org.ajoberstar.grgit.auth.password', resolveProperty('releasePassword'))
+    System.setProperty('org.ajoberstar.grgit.auth.interactive.allow', 'false')
+
     repoUri = "https://github.com/${getGithubProjectName()}/${project.rootProject.name}.git"
     branch = "${project.name}-gh-pages"
-    pages {
+    contents {
         from(javadoc.outputs.files) {
             into 'docs/javadoc'
         }
     }
-    credentials {
-    	username = resolveProperty('releaseUsername')
-    	password = resolveProperty('releasePassword')
-    }
 }
 
-publishGhPages.dependsOn javadoc
+gitPublishPush.dependsOn javadoc
 
 /*
  * Parse project name out of git remote repo name.
