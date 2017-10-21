@@ -1,3 +1,11 @@
+/*
+ * Publish a project either to Bintray or Artifactory.
+ * 
+ * Artifacts can be uploaded to Bintray like so: ./gradlew <project-name>:bintrayUpload
+ * 
+ * Artifacts can be uploaded to Artifactory like so: ./gradlew <project-name>:artifactoryPublish
+ */
+
 buildscript {
     repositories {
         mavenLocal()
@@ -15,12 +23,26 @@ buildscript {
     }
     dependencies {
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.5.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
 }
 
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
+apply plugin: com.jfrog.bintray.gradle.BintrayPlugin
+
+publishing {
+    publications {
+        mavenJava (MavenPublication) {
+            from components.java             
+            artifact sourcesJar
+            artifact docsJar
+            artifact testsJar
+            artifact shadowJar
+        }
+    }
+}
 
 artifactory {
     contextUrl = artifactoryURL
@@ -32,19 +54,55 @@ artifactory {
             mavenCompatible = true
         }
         defaults {
-            publications ('artifactoryJava')
+            publications ('mavenJava')
         }
     }
 }
 
-publishing {
-    publications {
-        artifactoryJava (MavenPublication) {
-            from components.java             
-            artifact sourcesJar
-            artifact docsJar
-            artifact testsJar
-            artifact shadowJar
+bintray {
+
+    user = resolveProperty('bintrayUsername')
+    key = resolveProperty('bintrayKey')
+    publications = ['mavenJava']
+    publish = true
+
+    pkg {
+        repo = releaseRepository
+        name = project.name
+        websiteUrl = "https://github.com/${getGithubProjectName()}/${project.name}"
+        issueTrackerUrl = "https://github.com/${getGithubProjectName()}/${project.name}/issues"
+        vcsUrl = "https://github.com/${getGithubProjectName()}/${project.name}.git"
+        licenses = ['Apache-2.0']
+        publicDownloadNumbers = true
+        githubRepo = "${getGithubProjectName()}/${project.name}"
+        githubReleaseNotesFile = 'RELEASE_NOTES.md'
+
+        version {
+            released  = new Date()
+            vcsTag = "v${project.version}"
+
+            gpg {
+                sign = true
+                passphrase = resolveProperty('gpgPassphrase')
+            }
         }
     }
+}
+
+/*
+ * Parse project name out of git remote repo name.
+ */
+String getGithubProjectName() {
+    def outputURI = "git config --get remote.origin.url".execute().text.trim().toURL().getFile()
+    def uriAsFile = new File(outputURI)
+    uriAsFile.parent.replaceAll('/', '')
+}
+
+/*
+ * Check environment for property and if that fails 
+ * ask gradle to find property.
+ */
+String resolveProperty(String propKey) {
+    String propValue = System.getenv()[propKey]
+    return propValue ?: findProperty(propKey)
 }

@@ -39,7 +39,7 @@ release {
 }
 
 // Ensure 'clean', 'build', and 'artifactoryPublish' are run prior to releasing.
-tasks.release.dependsOn(['clean', 'build', 'artifactoryPublish'].collect { task ->
+tasks.release.dependsOn(['clean', 'build', 'bintrayUpload'].collect { task ->
     subprojects.collect { ":" + it.name + ":" + task }.flatten()
 }.flatten())
 
