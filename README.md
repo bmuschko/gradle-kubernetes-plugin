@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/project-aries/gradle-multi-project-example.svg?branch=master)](https://travis-ci.org/project-aries/gradle-multi-project-example)
 [![codecov](https://codecov.io/gh/project-aries/gradle-multi-project-example/branch/master/graph/badge.svg)](https://codecov.io/gh/project-aries/gradle-multi-project-example)
-[![Download](https://api.bintray.com/packages/project-aries/libs-release-local/gradle-multi-project-example/images/download.svg) ](https://bintray.com/project-aries/libs-release-local/gradle-multi-project-example/_latestVersion)
+[![Download](https://api.bintray.com/packages/project-aries/libs-release-local/common-utils/images/download.svg) ](https://bintray.com/project-aries/libs-release-local/common-utils/_latestVersion)
 
 # gradle-multi-project-example
 

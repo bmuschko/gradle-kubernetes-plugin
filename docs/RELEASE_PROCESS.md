@@ -10,7 +10,7 @@ For publishing we use the [build-info-extractor-gradle](https://github.com/JFrog
 plugin to push our artifacts to Artifactory.
 
 Invoking the `release` task on the root project will execute `clean`, `build`, and 
-`artifactoryPublish` on each sub-project so it's NOT necessary to put those tasks on 
+`bintrayUpload` on each sub-project so it's NOT necessary to put those tasks on 
 the command line when releasing.
 
 ## Understanding Stages
