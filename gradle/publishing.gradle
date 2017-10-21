@@ -1,9 +1,6 @@
 /*
- * Publish a project either to Bintray or Artifactory.
- * 
- * Artifacts can be uploaded to Bintray like so: ./gradlew <project-name>:bintrayUpload
- * 
- * Artifacts can be uploaded to Artifactory like so: ./gradlew <project-name>:artifactoryPublish
+ * Allows for publishing artifacts either to Bintray or to Artifactory. Bintray is
+ * the default choice but this can be configured within <root-project>/gradle.properties.
  */
 
 buildscript {
@@ -28,7 +25,7 @@ buildscript {
     }
 }
 
-// properties MUST be applied prior to applying publish plugin
+// properties MUST be applied PRIOR to applying publish plugin or they won't take effect.
 System.setProperty('org.ajoberstar.grgit.auth.username', resolveProperty('releaseUsername'))
 System.setProperty('org.ajoberstar.grgit.auth.password', resolveProperty('releasePassword'))
 System.setProperty('org.ajoberstar.grgit.auth.interactive.allow', 'false')
@@ -66,6 +63,10 @@ artifactory {
     }
 }
 
+ext {
+    githubSite = 'https://github.com'    
+}
+
 bintray {
 
     user = resolveProperty('bintrayUsername')
@@ -77,11 +78,11 @@ bintray {
         def githubProjectName = getGithubProjectName()
         
         userOrg = githubProjectName
-        repo = releaseRepository
+        repo = rootProject.findProperty('release.stage') == 'final' ? releaseRepository : snapshotRepository
         name = project.name
-        websiteUrl = "https://github.com/${githubProjectName}/${project.name}"
-        issueTrackerUrl = "https://github.com/${githubProjectName}/${project.name}/issues"
-        vcsUrl = "https://github.com/${githubProjectName}/${project.name}.git"
+        websiteUrl = "${githubSite}/${githubProjectName}/${project.name}"
+        issueTrackerUrl = "${githubSite}/${githubProjectName}/${project.name}/issues"
+        vcsUrl = "${githubSite}/${githubProjectName}/${project.name}.git"
         licenses = ['Apache-2.0']
         publicDownloadNumbers = true
         githubRepo = "${githubProjectName}/${project.name}"
@@ -100,7 +101,7 @@ bintray {
 }
 
 gitPublish {
-    repoUri = "https://github.com/${getGithubProjectName()}/${project.rootProject.name}.git"
+    repoUri = "${githubSite}/${getGithubProjectName()}/${project.rootProject.name}.git"
     branch = "${project.name}-gh-pages"
     contents {
         from(javadoc.outputs.files) {
@@ -108,11 +109,18 @@ gitPublish {
         }
     }
 }
-
 gitPublishPush.dependsOn javadoc
 
 /*
  * Parse project name out of git remote repo name.
+ * 
+ * Turns this:
+ * 
+ *     https://github.com/project-aries/gradle-multi-project-example
+ *     
+ * Into this:
+ * 
+ *     project-aries
  */
 String getGithubProjectName() {
     def outputURI = "git config --get remote.origin.url".execute().text.trim().toURL().getFile()
@@ -122,7 +130,8 @@ String getGithubProjectName() {
 
 /*
  * Check environment for property and if that fails 
- * ask gradle to find property.
+ * ask gradle to find the property somewhere within
+ * the project hierarchy.
  */
 String resolveProperty(String propKey) {
     String propValue = System.getenv()[propKey]

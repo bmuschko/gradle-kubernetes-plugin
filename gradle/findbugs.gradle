@@ -3,7 +3,7 @@ apply plugin: 'findbugs'
 findbugs {
     toolVersion = '3.0.1'
     effort = 'max'
-    showProgress = false
+    showProgress = true
     reportLevel = 'low'
 }
 
