@@ -67,14 +67,17 @@ bintray {
     publish = true
 
     pkg {
+        def githubProjectName = getGithubProjectName()
+        
+        userOrg = githubProjectName
         repo = releaseRepository
         name = project.name
-        websiteUrl = "https://github.com/${getGithubProjectName()}/${project.name}"
-        issueTrackerUrl = "https://github.com/${getGithubProjectName()}/${project.name}/issues"
-        vcsUrl = "https://github.com/${getGithubProjectName()}/${project.name}.git"
+        websiteUrl = "https://github.com/${githubProjectName}/${project.name}"
+        issueTrackerUrl = "https://github.com/${githubProjectName}/${project.name}/issues"
+        vcsUrl = "https://github.com/${githubProjectName}/${project.name}.git"
         licenses = ['Apache-2.0']
         publicDownloadNumbers = true
-        githubRepo = "${getGithubProjectName()}/${project.name}"
+        githubRepo = "${githubProjectName}/${project.name}"
         githubReleaseNotesFile = 'RELEASE_NOTES.md'
 
         version {
