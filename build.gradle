@@ -29,7 +29,7 @@ rootProject.ext.setProperty('release.scope', releaseScope.trim())
 apply plugin: 'org.ajoberstar.release-opinion'
 
 release {
-    def credentials = new org.ajoberstar.grgit.Credentials(releaseUsername, releasePassword)
+    def credentials = new org.ajoberstar.grgit.Credentials(githubUsername, githubPassword)
     grgit = org.ajoberstar.grgit.Grgit.open(dir: project.rootDir.absolutePath, creds: credentials)
     versionStrategy org.ajoberstar.gradle.git.release.opinion.Strategies.FINAL
     defaultVersionStrategy = org.ajoberstar.gradle.git.release.opinion.Strategies.SNAPSHOT
@@ -38,7 +38,7 @@ release {
     }
 }
 
-// Ensure 'clean', 'build', and 'artifactoryPublish' are run prior to releasing.
+// Ensure 'clean', 'build', and 'bintrayUpload' are run prior to releasing.
 tasks.release.dependsOn(['clean', 'build', 'bintrayUpload'].collect { task ->
     subprojects.collect { ":" + it.name + ":" + task }.flatten()
 }.flatten())
