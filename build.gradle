@@ -38,8 +38,8 @@ release {
     }
 }
 
-// Ensure 'clean', 'build', and 'bintrayUpload' are run prior to releasing.
-tasks.release.dependsOn(['clean', 'build', 'bintrayUpload'].collect { task ->
+// Ensure the following tasks are run as part of releasing a new version.
+tasks.release.dependsOn(['clean', 'build', 'bintrayUpload', 'publishGhPages'].collect { task ->
     subprojects.collect { ":" + it.name + ":" + task }.flatten()
 }.flatten())
 
