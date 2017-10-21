@@ -28,6 +28,11 @@ buildscript {
     }
 }
 
+// properties MUST be applied prior to applying publish plugin
+System.setProperty('org.ajoberstar.grgit.auth.username', resolveProperty('releaseUsername'))
+System.setProperty('org.ajoberstar.grgit.auth.password', resolveProperty('releasePassword'))
+System.setProperty('org.ajoberstar.grgit.auth.interactive.allow', 'false')
+    
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
@@ -95,10 +100,6 @@ bintray {
 }
 
 gitPublish {
-    System.setProperty('org.ajoberstar.grgit.auth.username', resolveProperty('releaseUsername'))
-    System.setProperty('org.ajoberstar.grgit.auth.password', resolveProperty('releasePassword'))
-    System.setProperty('org.ajoberstar.grgit.auth.interactive.allow', 'false')
-
     repoUri = "https://github.com/${getGithubProjectName()}/${project.rootProject.name}.git"
     branch = "${project.name}-gh-pages"
     contents {
