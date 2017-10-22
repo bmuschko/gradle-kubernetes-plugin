@@ -62,7 +62,7 @@ that project would look like `com.github.gradle.calamari`. If you're adding a pr
 
 ## Docs
 
-Documentation, be it javadcos or groovydocs, can be previewed below:
+Documentation, be it javadcos or groovydocs, can be viewed for each sub-project below:
 
 [common-utils](http://htmlpreview.github.io/?https://github.com/project-aries/gradle-multi-project-example/blob/common-utils-gh-pages/docs/javadoc/index.html)
 
