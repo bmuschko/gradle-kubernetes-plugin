@@ -1,6 +1,6 @@
 # gradle-multi-project-example
 
-Generic multi-project structure that we think represents the best gradle has to offer.
+Generic multi-project stub that we think represents the best gradle has to offer.
 
 ## Sub-Project Status
 
