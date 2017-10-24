@@ -6,7 +6,13 @@
 
 Generic multi-project structure that we think represents the best gradle has to offer.
 
-## Latest release
+## Sub-Project Status
+
+| Name | CI | Codecov | Bintray | Docs |
+| :--- | :---: | :---: | :---: | :---: |
+| [common-utils](https://github.com/project-aries/gradle-multi-project-example/tree/master/projects/common-utils) | [![Build Status](https://travis-ci.org/project-aries/gradle-multi-project-example.svg?branch=master)](https://travis-ci.org/project-aries/gradle-multi-project-example) | [![codecov](https://codecov.io/gh/project-aries/gradle-multi-project-example/branch/master/graph/badge.svg)](https://codecov.io/gh/project-aries/gradle-multi-project-example) | [![common-utils](https://api.bintray.com/packages/project-aries/libs-release-local/common-utils/images/download.svg) ](https://bintray.com/project-aries/libs-release-local/common-utils/_latestVersion) | [javadocs](http://htmlpreview.github.io/?https://github.com/project-aries/gradle-multi-project-example/blob/common-utils-gh-pages/docs/javadoc/index.html) |
+
+## Latest Release
 
 Can be sourced from Artifactory/Bintray/MavenCentral like so:
 ```
@@ -41,14 +47,12 @@ flaws like unused variables, empty catch blocks, unnecessary object creation, an
 **[FindBugs](https://github.com/findbugsproject/findbugs)**: is a tool which uses static 
 analysis to look for and detect possible bugs in Java code.
 
-## Use Of Test Libraries
+## Use Of Test Libraries and Writing Tests
 
 Currently we define `junit` and `assertj` as `testCompile` dependencies for all projects 
 to use. Lets try to focus on using just these, and if there is a need to bring in and 
 use something else, then lets first have a discussion on it before we go adding N 
 number of dependencies to this project and break the look and feel we are trying to set.
-
-## Writing Tests
 
 Code is considered done-done when all checks have passed, code can be compiled, and at the 
 very least unit and integration tests have been added to address the new code.
@@ -59,12 +63,6 @@ Your package structure should start with `com.github.gradle` with your project n
 For example: if you're adding a project named `calamari` the root package structure of 
 that project would look like `com.github.gradle.calamari`. If you're adding a project named 
 `tuna-casserole` then your package structure would look like `com.github.gradle.tuna.casserole`.
-
-## Docs
-
-Documentation, be it javadcos or groovydocs, can be viewed for each sub-project below:
-
-[common-utils](http://htmlpreview.github.io/?https://github.com/project-aries/gradle-multi-project-example/blob/common-utils-gh-pages/docs/javadoc/index.html)
 
 ## Additional Resources
 
