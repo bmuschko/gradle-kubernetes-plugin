@@ -1,8 +1,8 @@
 # gradle-multi-project-example
 
-Generic multi-project stub that we think represents the best gradle has to offer.
+Generic multi-project stub we think represents the best gradle has to offer.
 
-## Sub-Project Status
+## Sub-Project(s) Status
 
 | Name | CI | Codecov | Docs | Release |
 | :--- | :---: | :---: | :---: | :---: |
@@ -23,8 +23,8 @@ Can be sourced from Artifactory/Bintray/MavenCentral like so:
 ## Adding New Projects
 
 Developers should place their projects under the `projects` directory and model that 
-projects `build.gradle` file on existing projects. Placing the project here will have 
-it built automatically as part of this multi-project build.
+projects `build.gradle` file, if applicable, on existing projects. Placing the project 
+here will have it built automatically as part of this multi-project build.
 
 ## Jacoco, ErrorProne, Checkstyle, PMD, and FindBugs support
 
@@ -55,10 +55,12 @@ very least unit and integration tests have been added to address the new code.
 
 ## Project Structure
 
-The package structure of your project should begin with your gradle `group` followed by the projects name. 
-For example: if you're group is `comg.github.gradle` and you're adding a project named `calamari` then root 
-package structure of that project must look like `com.github.gradle.calamari`. If you're adding a project named 
-`tuna-casserole` then your package structure would look like `com.github.gradle.tuna.casserole.
+The package structure of your project should begin with your gradle `group` followed by the projects name. As
+part of building your project we will scan through its sources and ensure this pattern is met. For example: if 
+you're group is `comg.github.gradle` and you're adding a project named `calamari` then the package structure of 
+that project must look like `com/github/gradle/calamari`. 
+
+If you're adding a project whose name contains non-alphabetic characters then those characters will be converted to periods when running the previously mentioned check. For example: if your project is named `tuna-casserole` then your package structure would look like `com/github/gradle/tuna/casserole.
 
 ## Additional Resources
 
