@@ -55,10 +55,10 @@ very least unit and integration tests have been added to address the new code.
 
 ## Project Structure
 
-Your package structure should start with `com.github.gradle` with your project name following. 
-For example: if you're adding a project named `calamari` the root package structure of 
-that project would look like `com.github.gradle.calamari`. If you're adding a project named 
-`tuna-casserole` then your package structure would look like `com.github.gradle.tuna.casserole`.
+The package structure of your project should begin with your gradle `group` followed by the projects name. 
+For example: if you're group is `comg.github.gradle` and you're adding a project named `calamari` then root 
+package structure of that project must look like `com.github.gradle.calamari`. If you're adding a project named 
+`tuna-casserole` then your package structure would look like `com.github.gradle.tuna.casserole.
 
 ## Additional Resources
 
