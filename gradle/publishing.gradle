@@ -104,12 +104,11 @@ gitPublish {
     repoUri = "${githubSite}/${getGithubProjectName()}/${project.rootProject.name}.git"
     branch = "${project.name}-gh-pages"
     contents {
-        from(javadoc.outputs.files) {
-            into 'docs/javadoc'
-        }
+        from zipTree(docsJar.archivePath)
+        into 'docs'
     }
 }
-gitPublishPush.dependsOn javadoc
+gitPublishPush.dependsOn docsJar
 
 /*
  * Parse project name out of git remote repo name.
