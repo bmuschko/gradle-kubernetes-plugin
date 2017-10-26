@@ -64,7 +64,7 @@ artifactory {
 }
 
 ext {
-    githubSite = 'https://github.com'    
+    githubSite = 'https://github.com'
 }
 
 bintray {
@@ -75,17 +75,17 @@ bintray {
     publish = true
 
     pkg {
-        def githubProjectName = getGithubProjectName()
+        def orgName = rootProject.findProperty('organization')
         
-        userOrg = githubProjectName
+        userOrg = orgName
         repo = rootProject.findProperty('release.stage') == 'final' ? releaseRepository : snapshotRepository
         name = project.name
-        websiteUrl = "${githubSite}/${githubProjectName}/${project.name}"
-        issueTrackerUrl = "${githubSite}/${githubProjectName}/${project.name}/issues"
-        vcsUrl = "${githubSite}/${githubProjectName}/${project.name}.git"
+        websiteUrl = "${githubSite}/${orgName}/${project.name}"
+        issueTrackerUrl = "${githubSite}/${orgName}/${project.name}/issues"
+        vcsUrl = "${githubSite}/${orgName}/${project.name}.git"
         licenses = ['Apache-2.0']
         publicDownloadNumbers = true
-        githubRepo = "${githubProjectName}/${project.name}"
+        githubRepo = "${orgName}/${project.name}"
         githubReleaseNotesFile = 'RELEASE_NOTES.md'
 
         version {
@@ -101,7 +101,7 @@ bintray {
 }
 
 gitPublish {
-    repoUri = "${githubSite}/${getGithubProjectName()}/${project.rootProject.name}.git"
+    repoUri = "${githubSite}/${rootProject.findProperty('organization')}/${project.rootProject.name}.git"
     branch = "${project.name}-gh-pages"
     contents {
         from zipTree(docsJar.archivePath)
@@ -109,23 +109,6 @@ gitPublish {
     }
 }
 gitPublishPush.dependsOn docsJar
-
-/*
- * Parse project name out of git remote repo name.
- * 
- * Turns this:
- * 
- *     https://github.com/project-aries/gradle-multi-project-example
- *     
- * Into this:
- * 
- *     project-aries
- */
-String getGithubProjectName() {
-    def outputURI = "git config --get remote.origin.url".execute().text.trim().toURL().getFile()
-    def uriAsFile = new File(outputURI)
-    uriAsFile.parent.replaceAll('/', '')
-}
 
 /*
  * Check environment for property and if that fails 

@@ -1,3 +1,5 @@
+rootProject.name = 'gradle-multi-project-example'
+
 // add all projects under the 'projects' directory to this multi-module build 
 // ensuring we ONLY add the projects and not the 'projects' folder itself.
 new File("$rootDir/projects").listFiles().each {
