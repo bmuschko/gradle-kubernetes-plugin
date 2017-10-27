@@ -48,4 +48,4 @@ tasks.release.dependsOn(releaseTasks.collect { task ->
     subprojects.collect { ":" + it.name + ":" + task }.flatten()
 }.flatten())
 
-apply from: "$rootDir/gradle/subprojects.gradle"
+apply from: "$rootDir/gradle/projects.gradle"
