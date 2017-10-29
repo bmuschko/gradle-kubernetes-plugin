@@ -16,7 +16,7 @@ Can be sourced from Artifactory/Bintray/MavenCentral like so:
     <groupId>com.aries</groupId>
     <artifactId>project-name</artifactId>
     <version>X.Y.Z</version>
-    <classifier>sources|tests|javadoc|all</classifier> (Optional)
+    <classifier>sources|tests|docs|all</classifier> (Optional)
 </dependency>
 ```
 
