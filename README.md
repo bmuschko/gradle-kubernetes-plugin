@@ -13,8 +13,8 @@ Generic multi-project stub we think represents the best gradle has to offer.
 Can be sourced from Artifactory/Bintray/MavenCentral like so:
 ```
 <dependency>
-    <groupId>com.github.gradle</groupId>
-    <artifactId>sub-project-name</artifactId>
+    <groupId>com.aries</groupId>
+    <artifactId>project-name</artifactId>
     <version>X.Y.Z</version>
     <classifier>sources|tests|javadoc|all</classifier> (Optional)
 </dependency>
