@@ -9,10 +9,9 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
     
 script:
   - ./gradlew -s -Dorg.gradle.daemon=false clean build publishToMavenLocal
 
+after_script:
+  - bash <(curl -s https://codecov.io/bash)
