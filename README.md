@@ -57,10 +57,10 @@ very least unit and integration tests have been added to address the new code.
 
 The package structure of your project should begin with your gradle `group` followed by the projects name. As
 part of building your project we will scan through its sources and ensure this pattern is met. For example: if 
-you're group is `comg.github.gradle` and you're adding a project named `calamari` then the package structure of 
+your group is `com.github.gradle` and you're adding a project named `calamari` then the package structure of 
 that project must look like `com/github/gradle/calamari`. 
 
-If you're adding a project whose name contains non-alphabetic characters then those characters will be converted to periods when running the previously mentioned check. For example: if your project is named `tuna-casserole` then your package structure would look like `com/github/gradle/tuna/casserole.
+If you're adding a project whose name contains non-alphabetic characters then those characters will be converted to forward-slashes when running the previously mentioned check. For example: if your project is named `tuna-casserole` then your package structure would look like `com/github/gradle/tuna/casserole.
 
 ## Additional Resources
 
