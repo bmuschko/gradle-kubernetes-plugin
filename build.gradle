@@ -17,7 +17,6 @@ buildscript {
         classpath 'org.ajoberstar:gradle-git:1.4.2'
         classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.13'
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
-        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.10.0'
     }
 }
 

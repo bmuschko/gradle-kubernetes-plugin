@@ -3,7 +3,6 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'net.ltgt.errorprone'
     apply plugin: 'com.github.johnrengelman.shadow'
-    apply plugin: 'nebula.compile-api'
     apply from: "$rootDir/gradle/artifacts.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
     apply from: "$rootDir/gradle/pmd.gradle"

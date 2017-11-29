@@ -21,7 +21,7 @@ buildscript {
     dependencies {
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.5.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
-        classpath 'org.ajoberstar:gradle-git-publish:0.3.1'
+        classpath 'org.ajoberstar:gradle-git-publish:0.3.2'
     }
 }
 
