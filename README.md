@@ -10,7 +10,7 @@ Generic single/multi-project stub we think represents the best gradle has to off
 
 ## Latest Release
 
-Can be sourced from Artifactory/Bintray/MavenCentral like so:
+Can be sourced from Artifactory/Bintray like so:
 ```
 <dependency>
     <groupId>com.aries</groupId>
