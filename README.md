@@ -1,6 +1,6 @@
 # gradle-multi-project-example
 
-Generic multi-project stub we think represents the best gradle has to offer.
+Generic single/multi-project stub we think represents the best gradle has to offer.
 
 ## Sub-Project(s) Status
 
@@ -22,9 +22,25 @@ Can be sourced from Artifactory/Bintray/MavenCentral like so:
 
 ## Adding New Projects
 
-Developers should place their projects under the `projects` directory and model that 
-projects `build.gradle` file, if applicable, on existing projects. Placing the project 
-here will have it built automatically as part of this multi-project build.
+For _stand-alone projects_ you can create the typical `src/main/<language>` directory
+at the root of this project and things will work as expected. In this model it is OK
+to remove the `projects` directory once you have things in place.
+
+For _multi projects_ you need to create/place said project(s) under the `projects` directory. 
+Placing the project(s) here will have them built automatically as part of this multi-project 
+build.
+
+For either case you may have to twiddle the knobs a bit within the `gradle/projects.gradle` 
+file depending on which type of project you want to create.
+
+## Project Structure
+
+The package structure of your project should begin with your gradle `group` followed by the projects name. As
+part of building your project we will scan through its sources and ensure this pattern is met. For example: if 
+your group is `com.github.gradle` and you're adding a project named `calamari` then the package structure of 
+that project must look like `com/github/gradle/calamari`. 
+
+If you're adding a project whose name contains non-alphabetic characters then those characters will be converted to forward-slashes when running the previously mentioned check. For example: if your project is named `tuna-casserole` then your package structure would look like `com/github/gradle/tuna/casserole.
 
 ## Jacoco, ErrorProne, Checkstyle, PMD, and FindBugs support
 
@@ -52,15 +68,6 @@ number of dependencies to this project and break the look and feel we are trying
 
 Code is considered done-done when all checks have passed, code can be compiled, and at the 
 very least unit and integration tests have been added to address the new code.
-
-## Project Structure
-
-The package structure of your project should begin with your gradle `group` followed by the projects name. As
-part of building your project we will scan through its sources and ensure this pattern is met. For example: if 
-your group is `com.github.gradle` and you're adding a project named `calamari` then the package structure of 
-that project must look like `com/github/gradle/calamari`. 
-
-If you're adding a project whose name contains non-alphabetic characters then those characters will be converted to forward-slashes when running the previously mentioned check. For example: if your project is named `tuna-casserole` then your package structure would look like `com/github/gradle/tuna/casserole.
 
 ## Additional Resources
 
