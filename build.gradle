@@ -37,14 +37,23 @@ release {
     }
 }
 
-// Ensure the following tasks are run as part of releasing a new version.
-def releaseTasks = ['clean', 'build', uploadTask]
-if (Boolean.valueOf(publishGithubPages).booleanValue()) {
-    releaseTasks << 'gitPublishPush'
-}
+// 1.) The release process must first build the main/sub projects.
+def buildTasks = ['build']
+tasks.release.dependsOn(buildTasks.collect { task ->
+    allprojects.collect {
+        rootProject.name == it.name ? ":${task}" : ":${it.name}:${task}"
+    }.flatten()
+}.flatten())
 
-tasks.release.dependsOn(releaseTasks.collect { task ->
-    subprojects.collect { ":" + it.name + ":" + task }.flatten()
+// 2.) The release process, when finished, can now upload artifacts.
+def publishTasks = [uploadTask]
+if (Boolean.valueOf(publishGithubPages).booleanValue() && releaseStage.trim().equals('final')) {
+    publishTasks << 'gitPublishPush'
+}
+tasks.release.finalizedBy(publishTasks.collect { task ->
+    allprojects.collect {
+        rootProject.name == it.name ? ":${task}" : ":${it.name}:${task}"
+    }.flatten()
 }.flatten())
 
 apply from: "$rootDir/gradle/projects.gradle"
