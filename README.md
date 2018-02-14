@@ -1,22 +1,22 @@
-# gradle-multi-project-example
+# gradle-kubernetes-plugin
 
-Generic single/multi-project stub we think represents the best gradle has to offer.
+Gradle plugin for working with Kubernetes.
 
-## Sub-Project(s) Status
+## Project(s) Status
 
-| Name | Questions | CI | Codecov | Docs | Release |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| [common-utils](https://github.com/project-aries/gradle-multi-project-example/tree/master/projects/common-utils) | [![Stack Overflow](https://img.shields.io/badge/stack-overflow-4183C4.svg)](https://stackoverflow.com/questions/tagged/common-utils) | [![Build Status](https://travis-ci.org/project-aries/gradle-multi-project-example.svg?branch=master)](https://travis-ci.org/project-aries/gradle-multi-project-example) | [![codecov](https://codecov.io/gh/project-aries/gradle-multi-project-example/branch/master/graph/badge.svg)](https://codecov.io/gh/project-aries/gradle-multi-project-example) | [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://htmlpreview.github.io/?https://github.com/project-aries/gradle-multi-project-example/blob/common-utils-gh-pages/docs/index.html) | [![common-utils](https://api.bintray.com/packages/project-aries/libs-release-local/common-utils/images/download.svg) ](https://bintray.com/project-aries/libs-release-local/common-utils/_latestVersion) |
+| Questions | CI | Codecov | Docs | Release |
+| :---: | :---: | :---: | :---: | :---: |
+| [![Stack Overflow](https://img.shields.io/badge/stack-overflow-4183C4.svg)](https://stackoverflow.com/questions/tagged/gradle-kubernetes-plugin) | [![Build Status](https://travis-ci.org/bmuschko/gradle-kubernetes-plugin.svg?branch=master)](https://travis-ci.org/bmuschko/gradle-kubernetes-plugin) | [![codecov](https://codecov.io/gh/bmuschko/gradle-kubernetes-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/bmuschko/gradle-kubernetes-plugin) | [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://htmlpreview.github.io/?https://github.com/bmuschko/gradle-kubernetes-plugin/blob/gh-pages/docs/index.html) | [![gradle-kubernetes-plugin](https://api.bintray.com/packages/bmuschko/libs-release-local/gradle-kubernetes-plugin/images/download.svg) ](https://bintray.com/bmuschko/libs-release-local/gradle-kubernetes-plugin/_latestVersion) |
 
 ## Latest Release
 
-Can be sourced from Artifactory/Bintray like so:
+Can be sourced from JCenter/Artifactory like so:
 ```
 <dependency>
-    <groupId>com.aries</groupId>
-    <artifactId>project-name</artifactId>
+    <groupId>com.bmuschko</groupId>
+    <artifactId>gradle-kubernetes-plugin</artifactId>
     <version>X.Y.Z</version>
-    <classifier>sources|tests|docs|all</classifier> (Optional)
+    <classifier>sources|tests|docs</classifier> (Optional)
 </dependency>
 ```
 
@@ -71,5 +71,5 @@ very least unit and integration tests have been added to address the new code.
 
 ## Additional Resources
 
-* [Release Process](https://github.com/project-aries/gradle-multi-project-example/blob/master/docs/RELEASE_PROCESS.md)
+* [Release Process](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/docs/RELEASE_PROCESS.md)
 
