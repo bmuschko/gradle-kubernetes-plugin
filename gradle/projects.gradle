@@ -1,8 +1,7 @@
 allprojects {
 
-    apply plugin: 'java'
+    apply plugin: 'groovy'
     apply plugin: 'net.ltgt.errorprone'
-    apply plugin: 'com.github.johnrengelman.shadow'
     apply from: "$rootDir/gradle/artifacts.gradle"
     apply from: "$rootDir/gradle/jacoco.gradle"
     apply from: "$rootDir/gradle/pmd.gradle"
@@ -32,7 +31,7 @@ allprojects {
         testCompile ('org.assertj:assertj-core:3.8.0') 
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(GroovyCompile) {
         options.compilerArgs += ['-Xlint:-options', '-XepAllDisabledChecksAsWarnings', '-Xep:Var:OFF', '-Werror']
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
