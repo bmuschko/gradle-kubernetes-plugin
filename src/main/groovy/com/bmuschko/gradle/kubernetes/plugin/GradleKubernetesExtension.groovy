@@ -17,7 +17,6 @@
 package com.bmuschko.gradle.kubernetes.plugin
 
 /**
- *
  *  Extension point for the gradle-kubernetes-plugin. Currently this
  *  class serves only to provide a mapping to the `Config` instance
  *  of the `KubernetesClient`. Instead of defining a thousand properties

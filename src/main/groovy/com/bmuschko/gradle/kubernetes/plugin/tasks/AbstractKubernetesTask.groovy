@@ -32,16 +32,53 @@ abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask {
     @Internal
     KubernetesContextLoader contextLoader
 
+    /**
+     * Possibly null response object returned from the execution.
+     */
+    @Internal
+    private def response
+
     @Override
-    void runReactiveStream() {
+    def runReactiveStream() {
+        def response
         runInKubernetesClassPath { kubernetesClient ->
-            runRemoteCommand(kubernetesClient)
+            response = runRemoteCommand(kubernetesClient)
         }
+        response
     }
 
     void runInKubernetesClassPath(final Closure closure) {
         contextLoader.withClasspath(closure)
     }
 
-    abstract void runRemoteCommand(kubernetesClient)
+    /**
+     *  Optionally return a valid Object to pass to super-class
+     *  invocation of `onNext` reactive-stream. If it doesn't
+     *  make sense to return something than returning a `null`
+     *  will suffice.
+     */
+    abstract def runRemoteCommand(kubernetesClient)
+
+    /**
+     *  Response, possibly null, returned from execution. This is an attempt
+     *  at creating a generic way all tasks of this plugin return data. The
+     *  data itself can be anything and is not restricted by any rules imposed
+     *  by our super-class `AbstractReactiveStreamsTask`. This CAN be the data
+     *  returned from `runRemoteCommand` but does not necessarily have to be.
+     *
+     *  Internal tasks should take careful care to invoke the `registerResponse(def)`
+     *  method, generally as the last line of execution, to give external downstream tasks
+     *  (i.e. tasks/code not from this plugin) something to work with.
+     */
+    def response() {
+        response
+    }
+
+    /**
+     *  Internal helper method for all tasks of this plugin to explicitly
+     *  register a response object for external downstream use.
+     */
+    protected def registerResponse(final def responseToRegister) {
+        this.response = responseToRegister
+    }
 }
