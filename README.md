@@ -8,68 +8,102 @@ Gradle plugin for working with Kubernetes.
 | :---: | :---: | :---: | :---: | :---: |
 | [![Build Status](https://travis-ci.org/bmuschko/gradle-kubernetes-plugin.svg?branch=master)](https://travis-ci.org/bmuschko/gradle-kubernetes-plugin) | [![codecov](https://codecov.io/gh/bmuschko/gradle-kubernetes-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/bmuschko/gradle-kubernetes-plugin) | [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://htmlpreview.github.io/?https://github.com/bmuschko/gradle-kubernetes-plugin/blob/gh-pages/docs/index.html) | [![Stack Overflow](https://img.shields.io/badge/stack-overflow-4183C4.svg)](https://stackoverflow.com/questions/tagged/gradle-kubernetes-plugin) | [![gradle-kubernetes-plugin](https://api.bintray.com/packages/bmuschko/gradle-plugins/gradle-kubernetes-plugin/images/download.svg) ](https://bintray.com/bmuschko/gradle-plugins/gradle-kubernetes-plugin/_latestVersion) |
 
-## Latest Release
+## How to Setup
 
-Can be sourced from JCenter/Artifactory like so:
 ```
-<dependency>
-    <groupId>com.bmuschko</groupId>
-    <artifactId>gradle-kubernetes-plugin</artifactId>
-    <version>X.Y.Z</version>
-    <classifier>sources|tests|docs</classifier> (Optional)
-</dependency>
+buildscript() {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'com.bmuschko', name: 'gradle-kubernetes-plugin', version: 'X.Y.Z'
+    }
+ }
+
+ apply plugin: 'gradle-kubernetes-plugin'
+ ```
+
+## How to Configure
+
+The `kubernetes` extension acts as a mapper to the [Config](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/Config.java) object provided by the [kubernetes-client](https://github.com/fabric8io/kubernetes-client) library which we use in the backend. This allows you to configure this plugin in exactly the same way you would configure the java client.
+
+```
+ kubernetes {
+    config {
+        withMasterUrl("https://mymaster.com")
+    }
+ }
+```
+The magic here is in the `config` closure which we use to map directly to the aforementioned `Config` object in the `kubernetes-client`. Thus, any `set*/with*` method that exists there can also be used here. 
+
+All [additional options](https://github.com/fabric8io/kubernetes-client#configuring-the-client) that exist to configure the client are also honored here.
+
+## Tasks
+### Namespace operations
+
+| Name | Description |
+| --- | --- |
+| [ListNamespaces](https://github.com/cdancy/gradle-bitbucket-rest-plugin/blob/master/src/main/groovy/com/github/gradle/bitbucket/rest/tasks/branch/DeleteBranch.groovy) | List available namespaces |
+
+## Reactive-Streams
+
+[reactive-streams](https://github.com/reactive-streams/reactive-streams-jvm) support is an optional feature you can take advantage of and works for all tasks. We try to align with best practices but given that we are executing within a gradle context we break the expected API from time to time to keep the look and feel of our plugin. Each task generally behaves the same but if one doesn't please visit have a look at the task definition itself for any documentaiton or nuance surrounding its use.
+
+Documentation on how we implement this feature can be found in our [HERE]().
+Examples to help you get started can be found [HERE]().
+
+### onError
+
+The `onError` closure is passed the exception that is thrown for YOU to handle. If you silently ignore we will not throw the exception behind the scenes.
+The below example is a common use-case that arises when someone wants to remove a container whether it exists or not but does not want to fail hard.
+
+```
+import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
+
+task listAllNamespaces(type: ListNamespaces) {
+    onError { exception ->
+        if (exception.message.contains('something I care about'))
+            throw exception
+    }
+}
 ```
 
-## Adding New Projects
+### onNext
 
-For _stand-alone projects_ you can create the typical `src/main/<language>` directory
-at the root of this project and things will work as expected. In this model it is OK
-to remove the `projects` directory once you have things in place.
+The `onNext` closure is passed the next iterative response upon execution or if the response contains a list then the next item in that list. For all other tasks we simply hand you back the object that is given to us by the execution. Thus, and much like the `onException` closure, all delegation is now in your control. Any properties/values expected to be set will not be done unless YOU do them.
 
-For _multi projects_ you need to create/place said project(s) under the `projects` directory. 
-Placing the project(s) here will have them built automatically as part of this multi-project 
-build.
+Iterative tasks are things like `ListNamespaces`. These tasks have output which can be iterated over or return a list (e.g.` Collection` or `Object[]`) of some sort.
 
-For either case you may have to twiddle the knobs a bit within the `gradle/projects.gradle` 
-file depending on which type of project you want to create.
+Suppose we want to list out, or simply work with, each available namespace. We might do something like:
+```
+import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
-## Project Structure
+task listAllNamespaces(type: ListNamespaces) {
+    onNext { namespace ->
+        logger.quiet "Found namespace: ${namespace.name()}"
+    }
+}
+```
+If `4` namespaces were present then the above `onNext` closure would execute for each found.
 
-The package structure of your project should begin with your gradle `group` followed by the projects name. As
-part of building your project we will scan through its sources and ensure this pattern is met. For example: if 
-your group is `com.github.gradle` and you're adding a project named `calamari` then the package structure of 
-that project must look like `com/github/gradle/calamari`. 
+### onComplete
 
-If you're adding a project whose name contains non-alphabetic characters then those characters will be converted to forward-slashes when running the previously mentioned check. For example: if your project is named `tuna-casserole` then your package structure would look like `com/github/gradle/tuna/casserole.
+The `onComplete` closure is not passed anything upon execution. It works in the same fashion that `doLast` does but is instead part of this task and thus executes before `doLast` does. This closure executes ONLY upon success. The below example demonstrates how this works.
 
-## Jacoco, ErrorProne, Checkstyle, PMD, and FindBugs support
+```
+import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
-**[Jacoco](https://github.com/jacoco/jacoco)**: is a tool that ensures new code has 
-proper test coverage.
-
-**[ErrorProne](https://github.com/google/error-prone)**: is a static analysis tool 
-for Java that catches common programming mistakes at compile-time and suggests fixes. 
-
-**[Checkstyle](https://github.com/checkstyle/checkstyle)**: is a development tool that 
-forces programmers to write code that adheres to a common standard.
-
-**[PMD](https://github.com/pmd/pmd)**: is a source code analyzer that finds common programming 
-flaws like unused variables, empty catch blocks, unnecessary object creation, and so forth.
-
-**[FindBugs](https://github.com/findbugsproject/findbugs)**: is a tool which uses static 
-analysis to look for and detect possible bugs in Java code.
-
-## Use Of Test Libraries and Writing Tests
-
-Currently we define `junit` and `assertj` as `testCompile` dependencies for all projects 
-to use. Lets try to focus on using just these, and if there is a need to bring in and 
-use something else, then lets first have a discussion on it before we go adding N 
-number of dependencies to this project and break the look and feel we are trying to set.
-
-Code is considered done-done when all checks have passed, code can be compiled, and at the 
-very least unit and integration tests have been added to address the new code.
+task listAllNamespaces(type: ListNamespaces) {
+    onComplete {
+        logger.quiet 'Executes first'
+    }
+    doLast {
+        logger.quiet 'Executes second'
+    }
+}
+```
 
 ## Additional Resources
-
+* [Kubernetes Client](https://github.com/fabric8io/kubernetes-client)
+* [Kubernetes Setup](https://kubernetes.io/docs/setup/pick-right-solution/)
 * [Release Process](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/docs/RELEASE_PROCESS.md)
-
