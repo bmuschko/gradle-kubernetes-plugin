@@ -23,6 +23,10 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 
+/*
+ * Responsible for passing along a fully created and loaded `KubernetesClient` to the
+ * downstream task that extends this class.
+ */
 abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask {
 
     @Internal
