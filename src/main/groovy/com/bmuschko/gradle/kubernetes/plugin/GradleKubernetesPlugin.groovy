@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.docker
+package com.bmuschko.gradle.kubernetes.plugin
 
-import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesExtension
+import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import com.bmuschko.gradle.kubernetes.plugin.utils.KubernetesContextLoader
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -50,11 +51,11 @@ class GradleKubernetesPlugin implements Plugin<Project> {
             .setTransitive(true)
             .setDescription('The Kubernetes java client used by this project.')
             .defaultDependencies { dependencies ->
-                def kubeDep = project.dependencies.create("io.fabric8:kubernetes-client:$KUBERNETES_CLIENT_DEFAULT_VERSION")
+                def kubeDep = project.dependencies.create("io.fabric8:kubernetes-openshift-uberjar:$KUBERNETES_CLIENT_DEFAULT_VERSION")
                 dependencies.add(kubeDep)
             }
 
-        final GradleKubernetesExtension extension = project.extensions.create(EXTENSION_NAME, GradleKubernetesExtension, project)
+        final GradleKubernetesExtension extension = project.extensions.create(EXTENSION_NAME, GradleKubernetesExtension)
         extension.classpath = config
 
         configureAbstractKubernetesTask(project, extension)
