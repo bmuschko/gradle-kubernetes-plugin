@@ -79,14 +79,20 @@ class GradleKubernetesPlugin implements Plugin<Project> {
         if (possibleConfig) {
             possibleConfig
         } else {
-            project.configurations.create(KUBERNETES_CLIENT_CONFIGURATION_NAME)
+            final createdConfig = project.configurations.create(KUBERNETES_CLIENT_CONFIGURATION_NAME)
                 .setVisible(false)
                 .setTransitive(true)
-                .setDescription('The Kubernetes java client used by this project.')
+                .setDescription('The Kubernetes java client used by this plugin.')
                 .defaultDependencies { dependencies ->
-                    def kubeDep = project.dependencies.create("io.fabric8:kubernetes-openshift-uberjar:$KUBERNETES_CLIENT_DEFAULT_VERSION")
+                    final def kubeDep = project.dependencies.create("io.fabric8:kubernetes-openshift-uberjar:$KUBERNETES_CLIENT_DEFAULT_VERSION")
                     dependencies.add(kubeDep)
-                }   
+                    final def slf4jDep = project.dependencies.create('org.slf4j:slf4j-simple:1.7.5')
+                    dependencies.add(slf4jDep)
+                }
+                .exclude(group: 'org.slf4j')
+                .exclude(group: 'log4j')
+
+            createdConfig
         }
     }
 
