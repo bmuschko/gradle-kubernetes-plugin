@@ -43,13 +43,13 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 
 | Name | Description |
 | --- | --- |
-| [ListNamespaces](https://github.com/cdancy/gradle-bitbucket-rest-plugin/blob/master/src/main/groovy/com/github/gradle/bitbucket/rest/tasks/branch/DeleteBranch.groovy) | List available namespaces |
+| [ListNamespaces](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | List available namespaces |
 
 ## Reactive-Streams
 
 [reactive-streams](https://github.com/reactive-streams/reactive-streams-jvm) support is an optional feature you can take advantage of and works for all tasks. We try to align with best practices but given that we are executing within a gradle context we break the expected API from time to time to keep the look and feel of our plugin. Each task generally behaves the same but if one doesn't please visit have a look at the task definition itself for any documentaiton or nuance surrounding its use.
 
-Documentation on how we implement this feature can be found in our [HERE]().
+Documentation on how we implement this feature can be found in our [HERE](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/AbstractReactiveStreamsTask.groovy).
 Examples to help you get started can be found [HERE]().
 
 ### onError
