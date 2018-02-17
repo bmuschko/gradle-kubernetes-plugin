@@ -17,31 +17,39 @@
 package com.bmuschko.gradle.kubernetes.plugin.utils
 
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesExtension
+
+import org.gradle.util.ConfigureUtil
+import org.gradle.api.file.FileCollection
+
+import java.lang.reflect.Constructor
+import java.lang.reflect.Field
 import java.lang.reflect.Method
 
 /**
  *
+ *  Responsible for setting up the context to execute various commands with
+ *  the `KubernetesClient`. To make things as efficient as possible, and
+ *  potentially not very gradle-like, we load the client jars dynamically
+ *  at runtime and only when they are first accessed.
+ *
  */
 class KubernetesContextLoader {
-    public static final String MODEL_PACKAGE = 'com.github.dockerjava.api.model'
-    public static final String COMMAND_PACKAGE = 'com.github.dockerjava.core.command'
-    private static final TRAILING_WHIESPACE = /\s+$/
 
+    private final FileCollection kubernetesFileCollection
     private final GradleKubernetesExtension kubernetesExtension
+    private def kubernetesClient // lazily created `KubernetesClient`
 
-    public KubernetesContextLoader(final GradleKubernetesExtension kubernetesExtension) {
+    public KubernetesContextLoader(final FileCollection kubernetesFileCollection,
+                                    final GradleKubernetesExtension kubernetesExtension) {
+        this.kubernetesFileCollection = kubernetesFileCollection
         this.kubernetesExtension = kubernetesExtension
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void withClasspath(final Set<File> classpath, final Closure closure) {
+    void withClasspath(final Closure closure) {
         final ClassLoader originalClassLoader = getClass().classLoader
 
         try {
-            Thread.currentThread().contextClassLoader = createClassLoader(classpath ?: kubernetesExtension.classpath?.files)
+            Thread.currentThread().contextClassLoader = createClassLoader(kubernetesFileCollection.files)
             closure.resolveStrategy = Closure.DELEGATE_FIRST
             closure.delegate = this
             closure(getKubernetesClient())
@@ -71,41 +79,28 @@ class KubernetesContextLoader {
     }
 
     /**
-     * Creates Kubernetes client from ClassLoader.
+     * Get, and possibly create, the `KubernetesClient` instance.
      */
-    private getKubernetesClient() {
+    synchronized def getKubernetesClient() {
+        if (!kubernetesClient) {
+            final Class configClass = loadClass('io.fabric8.kubernetes.client.Config')
+            final Class configBuilderClass = loadClass('io.fabric8.kubernetes.client.ConfigBuilder')
+            def configBuilder = configBuilderClass.getConstructor().newInstance();
+            if (kubernetesExtension.config()) {
+                configBuilder = ConfigureUtil.configure(kubernetesExtension.config(), configBuilder)
+            }
 
-        // Create configuration
-        Class dockerClientConfigClass = loadClass('com.github.dockerjava.core.DockerClientConfig')
-        Class dockerClientConfigClassImpl = loadClass('com.github.dockerjava.core.DefaultDockerClientConfig')
-        Method dockerClientConfigMethod = dockerClientConfigClassImpl.getMethod('createDefaultConfigBuilder')
-        def dockerClientConfigBuilder = dockerClientConfigMethod.invoke(null)
-        dockerClientConfigBuilder.withDockerHost(dockerUrl)
-
-        if (dockerCertPath) {
-            dockerClientConfigBuilder.withDockerTlsVerify(true)
-            dockerClientConfigBuilder.withDockerCertPath(dockerCertPath.canonicalPath)
-        } else {
-            dockerClientConfigBuilder.withDockerTlsVerify(false)
+            final Class clientClass = loadClass('io.fabric8.kubernetes.client.DefaultKubernetesClient')
+            def clientConstructor = clientClass.getConstructor(configClass)
+            kubernetesClient = clientConstructor.newInstance(configBuilder.build());
         }
 
-        if (apiVersion) {
-            dockerClientConfigBuilder.withApiVersion(apiVersion)
-        }
-
-        def dockerClientConfig = dockerClientConfigBuilder.build()
-
-        // Create client
-        Class dockerClientBuilderClass = loadClass('com.github.dockerjava.core.DockerClientBuilder')
-        Method method = dockerClientBuilderClass.getMethod('getInstance', dockerClientConfigClass)
-        def dockerClientBuilder = method.invoke(null, dockerClientConfig)
-        dockerClientBuilder.build()
+        kubernetesClient
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
     Class loadClass(final String className) {
         Thread.currentThread().contextClassLoader.loadClass(className)
     }

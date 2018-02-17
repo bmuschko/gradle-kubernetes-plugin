@@ -35,7 +35,7 @@ class GradleKubernetesPlugin implements Plugin<Project> {
     public static final String DEFAULT_TASK_GROUP = 'Kubernetes'
 
     @Override
-    void apply(Project project) {
+    void apply(final Project project) {
 
         // if no repositories were defined fallback to buildscript
         // repositories to resolve dependencies as a last resort
@@ -45,27 +45,60 @@ class GradleKubernetesPlugin implements Plugin<Project> {
             }
         }
 
-        final Configuration config = project.configurations
-            .create(KUBERNETES_CLIENT_CONFIGURATION_NAME)
-            .setVisible(false)
-            .setTransitive(true)
-            .setDescription('The Kubernetes java client used by this project.')
-            .defaultDependencies { dependencies ->
-                def kubeDep = project.dependencies.create("io.fabric8:kubernetes-openshift-uberjar:$KUBERNETES_CLIENT_DEFAULT_VERSION")
-                dependencies.add(kubeDep)
-            }
-
-        final GradleKubernetesExtension extension = project.extensions.create(EXTENSION_NAME, GradleKubernetesExtension)
-        extension.classpath = config
-
-        configureAbstractKubernetesTask(project, extension)
+        // configure all tasks for execution
+        configureAbstractKubernetesTask(project)
     }
 
-    private void configureAbstractKubernetesTask(final Project project, final GradleKubernetesExtension extension) {
-        def kubernetesContextLoader = new KubernetesContextLoader(extension)
+    /*
+     * Configure all instances of AbsractKubernetesTask for dynamic execution.
+     */
+    private void configureAbstractKubernetesTask(final Project project) {
+        final KubernetesContextLoader kubernetesContextLoader = createKubernetesContextLoader(project)
         project.tasks.withType(AbstractKubernetesTask) {
             group = DEFAULT_TASK_GROUP
             contextLoader = kubernetesContextLoader
+        }
+    }
+
+    /*
+     * Create the KubernetesContextLoader required for execution.
+     */
+    private KubernetesContextLoader createKubernetesContextLoader(final Project project) {
+        final Configuration kubernetesConfiguration = getKubernetesClientConfiguration(project)
+        final GradleKubernetesExtension kubernetesExtension = getGradleKubernetesExtension(project)
+        new KubernetesContextLoader(kubernetesConfiguration, kubernetesExtension)
+    }
+
+    /*
+     * Get, and possibly create, the Kubernetes client configuration. We've coded things
+     * in such a way that it is possible for the end-user, should they really want to,
+     * to define their own kubernetes-client-config to use for execution.
+     */
+    private Configuration getKubernetesClientConfiguration(final Project project) {
+        final Configuration possibleConfig = project.configurations.findByName(KUBERNETES_CLIENT_CONFIGURATION_NAME)
+        if (possibleConfig) {
+            possibleConfig
+        } else {
+            project.configurations.create(KUBERNETES_CLIENT_CONFIGURATION_NAME)
+                .setVisible(false)
+                .setTransitive(true)
+                .setDescription('The Kubernetes java client used by this project.')
+                .defaultDependencies { dependencies ->
+                    def kubeDep = project.dependencies.create("io.fabric8:kubernetes-openshift-uberjar:$KUBERNETES_CLIENT_DEFAULT_VERSION")
+                    dependencies.add(kubeDep)
+                }   
+        }
+    }
+
+    /*
+     * Get, and possibly create, the GradleKubernetesExtension.
+     */
+    private GradleKubernetesExtension getGradleKubernetesExtension(final Project project) {
+        final def possibleExtension = project.extensions.findByName(EXTENSION_NAME)
+        if (possibleExtension) {
+            possibleExtension
+        } else {
+            project.extensions.create(EXTENSION_NAME, GradleKubernetesExtension)
         }
     }
 }
