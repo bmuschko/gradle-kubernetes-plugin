@@ -8,6 +8,7 @@ allprojects {
     apply from: "$rootDir/gradle/checkstyle.gradle"
     //apply from: "$rootDir/gradle/findbugs.gradle"
     apply from: "$rootDir/gradle/publishing.gradle"
+    apply from: "$rootDir/gradle/functional-test.gradle"
 
     repositories {
         mavenLocal()

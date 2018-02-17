@@ -25,7 +25,7 @@ class ListNamespaces extends AbstractKubernetesTask {
     @Override
     def runRemoteCommand(kubernetesClient) {
 
-        logger.quiet "Listing namespaces..."
+        logger.quiet 'Listing namespaces...'
         final def namespaces = kubernetesClient.namespaces()
 
         // register response for downstream use and return list of items
