@@ -16,20 +16,31 @@
 
 package com.bmuschko.gradle.kubernetes.plugin
 
-import org.gradle.api.file.FileCollection
-import org.gradle.api.Project
-
+/**
+ *
+ *  Extension point for the gradle-kubernetes-plugin. Currently this
+ *  class serves only to provide a mapping to the `Config` instance
+ *  of the `KubernetesClient`. Instead of defining a thousand properties
+ *  here, which are already defined elsewhere, we can instead do
+ *  something like:
+ *  
+ *      kubernetes {
+ *          config {
+ *              withMasterUrl("https://mymaster.com")
+ *          }
+ *      }
+ *
+ *  Through the use of an annotation builder all setter methods of the
+ *  `Config` class can optionally use `with*` versions as well.
+ */
 class GradleKubernetesExtension {
-    FileCollection classpath
 
-    Closure<String> url
-
-    private Project project
-
-    public DockerExtension(final Project project) {
-        this.project = project
-    }
-
-    void url(Closure<String> closure) { url = closure }
-    String url() { url ? url.call() : null }
+    /**
+     * Provides a direct mapping to the `Config` class.
+     *
+     * @see <a href="https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/Config.java">Config</a>
+     */
+    private Closure config
+    void config(final Closure closure) { config = closure }
+    Closure config() { config }
 }
