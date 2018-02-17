@@ -120,6 +120,13 @@ class KubernetesContextLoader {
             final Class configClass = kubernetesClientClassLoader.loadClass(configClassName)
             def clientConstructor = clientClass.getConstructor(configClass)
             kubernetesClient = clientConstructor.newInstance(configBuilder.build());
+
+            // 5.) register shutdown-hook to close kubernetes client.
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    kubernetesClient.close();
+                }
+            });
         }
 
         kubernetesClient
