@@ -19,38 +19,25 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks
 import com.bmuschko.gradle.kubernetes.plugin.utils.KubernetesContextLoader
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 
 abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask {
-
-    /**
-     * Classpath for Kubernetes client libraries.
-     */
-    @InputFiles
-    @Optional
-    FileCollection classpath
-
-    /**
-     * Kubernetes master URL.
-     */
-    @Input
-    @Optional
-    String url
 
     @Internal
     KubernetesContextLoader contextLoader
 
     @Override
     void runReactiveStream() {
-        runInKubernetesClassPath { dockerClient ->
-            runRemoteCommand(dockerClient)
+        runInKubernetesClassPath { kubernetesClient ->
+            runRemoteCommand(kubernetesClient)
         }
     }
 
-    void runInKubernetesClassPath(Closure closure) {
-        contextLoader.withClasspath(getClasspath()?.files, closure)
+    void runInKubernetesClassPath(final Closure closure) {
+        contextLoader.withClasspath(closure)
     }
 
-    abstract void runRemoteCommand(dockerClient)
+    abstract void runRemoteCommand(kubernetesClient)
 }
