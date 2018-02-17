@@ -16,6 +16,8 @@
 
 package com.bmuschko.gradle.kubernetes.plugin
 
+import com.bmuschko.gradle.kubernetes.plugin.utils.ConfigAware
+
 /**
  *  Extension point for the gradle-kubernetes-plugin. Currently this
  *  class serves only to provide a mapping to the `Config` instance
@@ -31,15 +33,12 @@ package com.bmuschko.gradle.kubernetes.plugin
  *
  *  Through the use of an annotation builder all setter methods of the
  *  `Config` class can optionally use `with*` versions as well.
+ *
+ *
+ *  Class provides a direct mapping to the `Config` class @
+ *
+ *  @see <a href="https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/Config.java">Config</a>
  */
-class GradleKubernetesExtension {
+class GradleKubernetesExtension extends ConfigAware {
 
-    /**
-     * Provides a direct mapping to the `Config` class.
-     *
-     * @see <a href="https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/Config.java">Config</a>
-     */
-    private Closure config
-    void config(final Closure closure) { config = closure }
-    Closure config() { config }
 }

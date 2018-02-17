@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.utils
+package com.bmuschko.gradle.kubernetes.plugin
 
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesExtension
 import groovy.transform.Synchronized
@@ -53,7 +53,7 @@ import java.lang.reflect.Method
  *  we initialize below. Failure to do so will cause all kinds of headaches you
  *  probably want to avoid.
  */
-class KubernetesContextLoader {
+class GradleKubernetesContextLoader {
 
     private final FileCollection kubernetesFileCollection
     private final GradleKubernetesExtension kubernetesExtension
@@ -61,7 +61,7 @@ class KubernetesContextLoader {
     private JarClassLoader kubernetesClientClassLoader // lazily created ClassLoader
     private JclObjectFactory kubernetesClientObjectFactory // lazily created object factory from ClassLoader
 
-    public KubernetesContextLoader(final FileCollection kubernetesFileCollection,
+    public GradleKubernetesContextLoader(final FileCollection kubernetesFileCollection,
                                     final GradleKubernetesExtension kubernetesExtension) {
         this.kubernetesFileCollection = kubernetesFileCollection
         this.kubernetesExtension = kubernetesExtension
@@ -107,9 +107,7 @@ class KubernetesContextLoader {
             def configBuilder = kubernetesClientObjectFactory.create(kubernetesClientClassLoader, configBuilderClassName);
 
             // 2.) map any configs passed in through extension to the configBuilder instance.
-            if (kubernetesExtension.config()) {
-                configBuilder = ConfigureUtil.configure(kubernetesExtension.config(), configBuilder)
-            }
+            configBuilder = kubernetesExtension.configureOn(configBuilder)
 
             // 3.) load `KubernetesClient` from our custom class-loader.
             final String clientClassName = 'io.fabric8.kubernetes.client.DefaultKubernetesClient'

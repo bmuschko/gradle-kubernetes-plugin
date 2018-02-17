@@ -17,7 +17,6 @@
 package com.bmuschko.gradle.kubernetes.plugin
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
-import com.bmuschko.gradle.kubernetes.plugin.utils.KubernetesContextLoader
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -53,7 +52,7 @@ class GradleKubernetesPlugin implements Plugin<Project> {
      * Configure all instances of AbsractKubernetesTask for dynamic execution.
      */
     private void configureAbstractKubernetesTask(final Project project) {
-        final KubernetesContextLoader kubernetesContextLoader = createKubernetesContextLoader(project)
+        final GradleKubernetesContextLoader kubernetesContextLoader = createGradleKubernetesContextLoader(project)
         project.tasks.withType(AbstractKubernetesTask) {
             group = DEFAULT_TASK_GROUP
             contextLoader = kubernetesContextLoader
@@ -61,12 +60,12 @@ class GradleKubernetesPlugin implements Plugin<Project> {
     }
 
     /*
-     * Create the KubernetesContextLoader required for execution.
+     * Create the GradleKubernetesContextLoader required for execution.
      */
-    private KubernetesContextLoader createKubernetesContextLoader(final Project project) {
+    private GradleKubernetesContextLoader createGradleKubernetesContextLoader(final Project project) {
         final Configuration kubernetesConfiguration = getKubernetesClientConfiguration(project)
         final GradleKubernetesExtension kubernetesExtension = getGradleKubernetesExtension(project)
-        new KubernetesContextLoader(kubernetesConfiguration, kubernetesExtension)
+        new GradleKubernetesContextLoader(kubernetesConfiguration, kubernetesExtension)
     }
 
     /*
