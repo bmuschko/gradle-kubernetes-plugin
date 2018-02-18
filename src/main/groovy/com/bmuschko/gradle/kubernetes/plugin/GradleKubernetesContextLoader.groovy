@@ -19,15 +19,10 @@ package com.bmuschko.gradle.kubernetes.plugin
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesExtension
 import groovy.transform.Synchronized
 
-import org.gradle.util.ConfigureUtil
 import org.xeustechnologies.jcl.JarClassLoader
 import org.xeustechnologies.jcl.JclObjectFactory
 
 import org.gradle.api.file.FileCollection
-
-import java.lang.reflect.Constructor
-import java.lang.reflect.Field
-import java.lang.reflect.Method
 
 /**
  *  Responsible for setting up the context to execute commands with the

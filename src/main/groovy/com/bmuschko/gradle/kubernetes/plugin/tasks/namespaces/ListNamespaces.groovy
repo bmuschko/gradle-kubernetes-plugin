@@ -23,7 +23,7 @@ import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 class ListNamespaces extends AbstractKubernetesTask {
 
     @Override
-    def runRemoteCommand(kubernetesClient) {
+    def handleClient(kubernetesClient) {
 
         logger.quiet 'Listing namespaces...'
         final def namespaces = kubernetesClient.namespaces()

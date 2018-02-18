@@ -38,7 +38,7 @@ abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask implem
     def runReactiveStream() {
         def executionResponse
         runInKubernetesClassPath { kubernetesClient ->
-            executionResponse = runRemoteCommand(kubernetesClient)
+            executionResponse = handleClient(kubernetesClient)
         }
         executionResponse
     }
@@ -48,10 +48,13 @@ abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask implem
     }
 
     /**
+     *  Pass the fully created `KubernetesClient` to the implementing
+     *  class to do work.
+     *
      *  Optionally return a valid Object to pass to super-class
      *  invocation of `onNext` reactive-stream. If it doesn't
      *  make sense to return something than returning a `null`
      *  will suffice.
      */
-    abstract def runRemoteCommand(kubernetesClient)
+    abstract def handleClient(kubernetesClient)
 }

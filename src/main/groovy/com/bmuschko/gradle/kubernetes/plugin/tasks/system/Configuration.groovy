@@ -23,7 +23,7 @@ import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 class Configuration extends AbstractKubernetesTask {
 
     @Override
-    def runRemoteCommand(kubernetesClient) {
+    def handleClient(kubernetesClient) {
 
         final def configuration = kubernetesClient.getConfiguration()
         logger.quiet "Api-Version: ${configuration.getApiVersion()}"
