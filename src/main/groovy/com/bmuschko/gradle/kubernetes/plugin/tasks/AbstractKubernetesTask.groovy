@@ -17,6 +17,8 @@
 package com.bmuschko.gradle.kubernetes.plugin.tasks
 
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesContextLoader
+import com.bmuschko.gradle.kubernetes.plugin.utils.ConfigAware
+import com.bmuschko.gradle.kubernetes.plugin.utils.ResponseAware
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -25,26 +27,20 @@ import org.gradle.api.tasks.Internal
 
 /*
  * Responsible for passing along a fully created and loaded `KubernetesClient` to the
- * downstream task that extends this class.
+ * downstream implementing task.
  */
-abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask {
+abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask implements ConfigAware, ResponseAware {
 
     @Internal
     GradleKubernetesContextLoader contextLoader
 
-    /**
-     * Possibly null response object returned from the execution.
-     */
-    @Internal
-    private def response
-
     @Override
     def runReactiveStream() {
-        def response
+        def executionResponse
         runInKubernetesClassPath { kubernetesClient ->
-            response = runRemoteCommand(kubernetesClient)
+            executionResponse = runRemoteCommand(kubernetesClient)
         }
-        response
+        executionResponse
     }
 
     void runInKubernetesClassPath(final Closure closure) {
@@ -58,27 +54,4 @@ abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask {
      *  will suffice.
      */
     abstract def runRemoteCommand(kubernetesClient)
-
-    /**
-     *  Response, possibly null, returned from execution. This is an attempt
-     *  at creating a generic way all tasks of this plugin return data. The
-     *  data itself can be anything and is not restricted by any rules imposed
-     *  by our super-class `AbstractReactiveStreamsTask`. This CAN be the data
-     *  returned from `runRemoteCommand` but does not necessarily have to be.
-     *
-     *  Internal tasks should take careful care to invoke the `registerResponse(def)`
-     *  method, generally as the last line of execution, to give external downstream tasks
-     *  (i.e. tasks/code not from this plugin) something to work with.
-     */
-    def response() {
-        response
-    }
-
-    /**
-     *  Internal helper method for all tasks of this plugin to explicitly
-     *  register a response object for external downstream use.
-     */
-    protected def registerResponse(final def responseToRegister) {
-        this.response = responseToRegister
-    }
 }
