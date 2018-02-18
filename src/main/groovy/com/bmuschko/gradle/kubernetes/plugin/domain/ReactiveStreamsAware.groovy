@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bmuschko.gradle.kubernetes.plugin.utils
+package com.bmuschko.gradle.kubernetes.plugin.domain
 
 /**
  *  Trait that provides a generic `reactive-streams` API.

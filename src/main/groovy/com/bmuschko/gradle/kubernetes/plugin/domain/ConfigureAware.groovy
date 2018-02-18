@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.utils
+package com.bmuschko.gradle.kubernetes.plugin.domain
 
 import org.gradle.util.ConfigureUtil
 
@@ -69,30 +69,20 @@ import org.gradle.util.ConfigureUtil
  *          config sharedConfig
  *      }
  */
-trait ConfigAware {
+trait ConfigureAware {
 
-    // list of configs to apply against an arbitrary delegate.
-    private final List<Closure> config = []
-
-    /**
-     *  Add a Closure to configure against an arbitrary object.
-     */
-    void config(final Closure closure) {
-        if (closure) {
-            config.add(closure)
-        }
-    }
-
-    /**
-     *  Configure all closures on passed delegate.
-     */
-    def configureOn(final def delegate) {
-        if (config && delegate) {
+    private final List<Closure> config = [] // internal list of held closures to apply.
+    void config(final Closure closure) { config.add(closure) } // public method to set X number of closures.
+    def configureOn(final def delegate) { // internal method for configuring THIS on a passed delegate.
+        def configuredDelegate = delegate
+        if (config && configuredDelegate) {
             config.each { passedConfig ->
-                ConfigureUtil.configure(passedConfig, delegate)
+                if (passedConfig) {
+                    configuredDelegate = ConfigureUtil.configure(passedConfig, configuredDelegate)
+                }
             }
         }
-        delegate
+        configuredDelegate
     }
 }
 

@@ -26,11 +26,12 @@ class ListNamespaces extends AbstractKubernetesTask {
     def handleClient(kubernetesClient) {
 
         logger.quiet 'Listing namespaces...'
-        final def namespaces = kubernetesClient.namespaces()
+        def namespaces = kubernetesClient.namespaces()
+        namespaces = configureOn(namespaces)
 
         // register response for downstream use and return list of items
         // for `onNext` execution.
-        response(namespaces.list()).getItems()
+        responseOn(namespaces.list()).getItems()
     }
 }
 

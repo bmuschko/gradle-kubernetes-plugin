@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.utils
+package com.bmuschko.gradle.kubernetes.plugin.domain
 
 import org.gradle.api.Nullable
 
@@ -47,26 +47,15 @@ import org.gradle.api.Nullable
  *
  *  For tasks that implement this trait it is THEIR RESPONSIBILITY to call,
  *  possibly as the last line of code in their `handleClient` impl, the
- *  `response(object)` method.
+ *  `response(def)` method.
  *  
  */
 trait ResponseAware {
 
-    /**
-     *  Response, possibly null, returned from execution. This is an attempt
-     *  at creating a generic way all tasks of this plugin return data. The
-     *  data itself can be anything and is not restricted by any rules imposed
-     *  by our super-class `AbstractReactiveStreamsTask`. This CAN be the data
-     *  returned from `runRemoteCommand` but does not necessarily have to be.
-     *
-     *  Internal tasks should take careful care to invoke the `registerResponse(def)`
-     *  method, generally as the last line of execution, to give external downstream tasks
-     *  (i.e. tasks/code not from this plugin) something to work with.
-     */
     @Nullable
-    private def response
-    def response() { response }
-    def response(final def responseToRegister) {
+    private def response // internal and arbitrary response object.
+    def response() { response } // public method to get THIS `response` object.
+    def responseOn(final def responseToRegister) { // internal method to register an arbitrary response object.
         this.response = responseToRegister
     }
 }

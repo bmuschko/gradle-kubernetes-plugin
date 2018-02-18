@@ -17,9 +17,9 @@
 package com.bmuschko.gradle.kubernetes.plugin.tasks
 
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesContextLoader
-import com.bmuschko.gradle.kubernetes.plugin.utils.ConfigAware
-import com.bmuschko.gradle.kubernetes.plugin.utils.ResponseAware
-import com.bmuschko.gradle.kubernetes.plugin.utils.ReactiveStreamsAware
+import com.bmuschko.gradle.kubernetes.plugin.domain.ConfigureAware
+import com.bmuschko.gradle.kubernetes.plugin.domain.ResponseAware
+import com.bmuschko.gradle.kubernetes.plugin.domain.ReactiveStreamsAware
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -29,9 +29,38 @@ import org.gradle.api.tasks.Internal
  *  Base abstract task that all tasks of this plugin are required to extend.
  *
  *  Downstream implementations need to take careful care of the traits implemeted
- *  here and how they work with custom tasks.
+ *  here and how they work with custom tasks. A typical example might look like:
+ *
+ *      class SomeKubernetesTask extends AbstractKubernetesTask {
+ *
+ *          @Override
+ *          def handleClient(kubernetesClient) {
+ *
+ *              // 1.) Used passed `kubernetesClient` to get `pods` object.
+ *              def foundPods = kubernetesClient.pods()
+ *
+ *              // 2.) Configure any passed `config` closures on `foundPods` thus
+ *              //     honoring the contract set by the `ConfigAware` trait.
+ *              foundPods = configureOn(foundsPods)
+ *
+ *              // 3.) Do some work with the `foundPods` object
+ *              def podList = foundPods.list()
+ *
+ *              // 4.) Register a response object for downstream use thus
+ *              //     honoring the contact set by the `ResponseAware` trait.
+ *              //
+ *              //     Furthermore, and because `response(object)` returns the
+ *              //     passed object, we can honor the reactive-stream `onNext`
+ *              //     contract by returning an arbitrary object which, at least
+ *              //     in this case, is a list of items via the `getItems()`
+ *              //     method.
+ *              responseOn(podList).getItems()
+ *          }
+ *      }
+ *
+ *
  */
-abstract class AbstractKubernetesTask extends DefaultTask implements ConfigAware, ResponseAware, ReactiveStreamsAware {
+abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAware, ResponseAware, ReactiveStreamsAware {
 
     @Internal
     GradleKubernetesContextLoader contextLoader
@@ -76,7 +105,7 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigAware
 
     /**
      *  Pass the fully created `KubernetesClient` to the implementing
-     *  class to do work with.
+     *  class to do some work with.
      *
      *  Optionally return a valid Object to pass to super-class
      *  invocation of `onNext` reactive-stream. If it doesn't
