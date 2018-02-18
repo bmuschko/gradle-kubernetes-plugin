@@ -19,9 +19,11 @@ package com.bmuschko.gradle.kubernetes.plugin.utils
 import org.gradle.util.ConfigureUtil
 
 /**
- * Generic implementation to configure an arbitrary object.
+ * Trait that provides a generic `config` API for implementing
+ * classes and then to be able to configure said class against
+ * an arbitrary delegate.
  */
-abstract class ConfigAware {
+trait ConfigAware {
 
     private Closure config
     void config(final Closure closure) { config = closure }

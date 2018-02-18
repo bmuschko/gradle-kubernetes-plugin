@@ -39,6 +39,6 @@ import com.bmuschko.gradle.kubernetes.plugin.utils.ConfigAware
  *
  *  @see <a href="https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/Config.java">Config</a>
  */
-class GradleKubernetesExtension extends ConfigAware {
+class GradleKubernetesExtension implements ConfigAware {
 
 }
