@@ -31,7 +31,7 @@ class Configuration extends AbstractKubernetesTask {
 
         // register response for downstream use and return list of items
         // for `onNext` execution.
-        registerResponse(configuration)
+        response(configuration)
     }
 }
 

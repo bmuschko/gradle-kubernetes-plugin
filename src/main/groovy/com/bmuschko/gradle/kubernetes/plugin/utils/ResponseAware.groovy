@@ -17,7 +17,6 @@
 package com.bmuschko.gradle.kubernetes.plugin.utils
 
 import org.gradle.api.Nullable
-import org.gradle.util.ConfigureUtil
 
 /**
  *  Trait that provides a generic `response` API.
@@ -48,16 +47,10 @@ import org.gradle.util.ConfigureUtil
  *
  *  For tasks that implement this trait it is THEIR RESPONSIBILITY to call,
  *  possibly as the last line of code in their `handleClient` impl, the
- *  `registerResponse(object)` method.
+ *  `response(object)` method.
  *  
  */
 trait ResponseAware {
-
-    /**
-     * Response object, possibly NULL, returned from the execution.
-     */
-    @Nullable
-    private def response
 
     /**
      *  Response, possibly null, returned from execution. This is an attempt
@@ -70,15 +63,10 @@ trait ResponseAware {
      *  method, generally as the last line of execution, to give external downstream tasks
      *  (i.e. tasks/code not from this plugin) something to work with.
      */
-    def response() {
-        response
-    }
-
-    /**
-     *  Internal helper method for all tasks of this plugin to explicitly
-     *  register a response object for external downstream use.
-     */
-    def registerResponse(final def responseToRegister) {
+    @Nullable
+    private def response
+    def response() { response }
+    def response(final def responseToRegister) {
         this.response = responseToRegister
     }
 }

@@ -19,37 +19,64 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesContextLoader
 import com.bmuschko.gradle.kubernetes.plugin.utils.ConfigAware
 import com.bmuschko.gradle.kubernetes.plugin.utils.ResponseAware
-import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.InputFiles
+import com.bmuschko.gradle.kubernetes.plugin.utils.ReactiveStreamsAware
+
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Internal
 
 /*
- * Responsible for passing along a fully created and loaded `KubernetesClient` to the
- * downstream implementing task.
+ *  Base abstract task that all tasks of this plugin are required to extend.
+ *
+ *  Downstream implementations need to take careful care of the traits implemeted
+ *  here and how they work with custom tasks.
  */
-abstract class AbstractKubernetesTask extends AbstractReactiveStreamsTask implements ConfigAware, ResponseAware {
+abstract class AbstractKubernetesTask extends DefaultTask implements ConfigAware, ResponseAware, ReactiveStreamsAware {
 
     @Internal
     GradleKubernetesContextLoader contextLoader
 
-    @Override
-    def runReactiveStream() {
-        def executionResponse
-        runInKubernetesClassPath { kubernetesClient ->
-            executionResponse = handleClient(kubernetesClient)
-        }
-        executionResponse
-    }
+    @TaskAction
+    void start() {
+        boolean executionFailed = false
+        try {
 
-    void runInKubernetesClassPath(final Closure closure) {
-        contextLoader.withClasspath(closure)
+            // 1.) Execute the overridden `handleClient` method on our custom
+            //     `KubernetesClient` classpath.
+            def executionResponse = contextLoader.withClasspath { handleClient(it) }
+
+            // 2.) Honor the reactive-stream `onNext` callback if we have a
+            //     non-null response.
+            if (executionResponse && onNext()) {
+                if (executionResponse instanceof Collection || executionResponse instanceof Object[]) {
+                    for (def responseIteration : executionResponse) {
+                        onNext().call(responseIteration)
+                    }
+                } else {
+                    onNext().call(executionResponse)
+                }
+            }
+        } catch (final Exception possibleException) {
+
+            // 3.) Honor the reactive-stream `onError` callback, if applicable,
+            //     with the just thrown Exception.
+            executionFailed = true
+            if (onError()) {
+                onError().call(possibleException)
+            } else {
+                throw possibleException
+            }
+        }
+
+        // 4.) Honor the reactive-stream `onComplete` callback if applicable.
+        if(!executionFailed && onComplete()) {
+            onComplete().call()
+        }
     }
 
     /**
      *  Pass the fully created `KubernetesClient` to the implementing
-     *  class to do work.
+     *  class to do work with.
      *
      *  Optionally return a valid Object to pass to super-class
      *  invocation of `onNext` reactive-stream. If it doesn't

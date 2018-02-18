@@ -41,7 +41,7 @@ import org.gradle.api.file.FileCollection
  *  from some arbitrary source.
  *  
  *  We also create, again lazily, an object factory from the supplied custom
- *  class-loader. Working with the JclObjectFactory can be a bit finicky to use
+ *  class-loader. Working with the `JclObjectFactory` can be a bit finicky to use
  *  so we're not requiring it but leaving it open as an option. What we ARE
  *  requiring is for tasks/code, if they need to create/load a class from the
  *  `KubernetesClient` classpath, to ensure they load from the custom class-loader
@@ -62,7 +62,7 @@ class GradleKubernetesContextLoader {
         this.kubernetesExtension = kubernetesExtension
     }
 
-    void withClasspath(final Closure closure) {
+    def withClasspath(final Closure closure) {
         initializeKubernetesClassLoader()
 
         closure.resolveStrategy = Closure.DELEGATE_FIRST

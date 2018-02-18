@@ -30,7 +30,7 @@ class ListNamespaces extends AbstractKubernetesTask {
 
         // register response for downstream use and return list of items
         // for `onNext` execution.
-        registerResponse(namespaces.list()).getItems()
+        response(namespaces.list()).getItems()
     }
 }
 
