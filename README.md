@@ -1,3 +1,11 @@
+# ********************
+# ********************
+#
+# WIP: if you would like to help out with the initial development to get this project off the ground please open an ISSUE to ask about what needs to be done or what you would like to work on.
+#
+# ********************
+# ********************
+
 # gradle-kubernetes-plugin
 
 Gradle plugin for working with Kubernetes.
