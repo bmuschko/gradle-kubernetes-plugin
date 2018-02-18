@@ -34,7 +34,6 @@ The `kubernetes` extension acts as a mapper to the [Config](https://github.com/f
     }
  }
 ```
-The magic here is in the `config` closure which we use to map directly to the aforementioned `Config` object in the `kubernetes-client`. Thus, any `set*/with*` method that exists there can also be used here. 
 
 All [additional options](https://github.com/fabric8io/kubernetes-client#configuring-the-client) that exist to configure the client are also honored here.
 
