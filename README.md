@@ -42,9 +42,9 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 ## Tasks
 ### Namespace operations
 
-| Name | Description |
-| --- | --- |
-| [ListNamespaces](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | List available namespaces |
+| Name | `config{}` maps to | `resource()` maps to | `onNext()` maps to |
+| --- | --- | --- | --- |
+| [ListNamespaces](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | [NonNamespaceOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/NonNamespaceOperation.html) | [NamespaceList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceList.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) |
 
 ### System operations
 
