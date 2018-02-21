@@ -40,17 +40,24 @@ The `kubernetes` extension acts as a mapper to the [Config](https://github.com/f
 All [additional options](https://github.com/fabric8io/kubernetes-client#configuring-the-client) that exist to configure the client are also honored here.
 
 ## Tasks
+
+- **Name**: name of the gradle task
+- **`config{}`**: Object the `config{}` closure maps to
+- **`onNext{}`**: Object the next iteration of `onNext{}` will receive
+- **`resource()`**: Object the `resource()` method returns AFTER execution
+
 ### Namespace operations
 
-| Name | `config{}` maps to | `resource()` maps to | `onNext()` maps to |
+| Name | `config{}` | `onNext{}` | `resource()` |
 | --- | --- | --- | --- |
-| [ListNamespaces](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | [NonNamespaceOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/NonNamespaceOperation.html) | [NamespaceList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceList.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) |
+| [ListNamespaces](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | [NonNamespaceOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/NonNamespaceOperation.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) | [NamespaceList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceList.html) |
+| [CreateNamespace](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/CreateNamespace.groovy) | [MetadataNestedImpl](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceFluentImpl.MetadataNestedImpl.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) |
 
 ### System operations
 
-| Name | Description |
-| --- | --- |
-| [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) | Get the system configuration |
+| Name | `config{}` | `onNext{}` | `resource()` |
+| --- | --- | --- | --- |
+| [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) | N/A | [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) | [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) |
 
 ## Reactive-Streams
 

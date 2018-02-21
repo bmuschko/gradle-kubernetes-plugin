@@ -19,26 +19,25 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 
 /**
- * List available Namespaces.
+ * Create a namespace.
  */
-class ListNamespaces extends AbstractKubernetesTask {
+class CreateNamespace extends AbstractKubernetesTask {
 
     @Override
     def handleClient(kubernetesClient) {
 
-        logger.quiet 'Listing namespaces...'
-        def namespaces = kubernetesClient.namespaces()
+        logger.quiet 'Creating namespace...'
+        def namespaceMetadata = kubernetesClient.namespaces().createNew().withNewMetadata()
 
-        // configure on the namespaces instance itself
-        namespaces = configureOn(namespaces)
+        // configure on meta-data
+        namespaceMetadata = configureOn(namespaceMetadata)
 
-        // get the `NamespaceList` object which in itself is NOT a list.
-        def localResponse = namespaces.list()
-
-        // register response for downstream use and return list of items
-        // for `onNext` execution. The `getItems()` call will return null
-        // if no items were found.
-        responseOn(localResponse).getItems()
+        // finalize creation of namespace
+        def localResponse = namespaceMetadata.endMetadata().done()
+                   
+        // register response for downstream use which in this case
+        // is just a `Namespace` instance.
+        responseOn(localResponse)
     }
 }
 

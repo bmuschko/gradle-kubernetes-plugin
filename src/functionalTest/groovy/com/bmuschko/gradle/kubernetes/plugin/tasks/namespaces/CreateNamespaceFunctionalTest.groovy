@@ -22,16 +22,55 @@ import spock.lang.Requires
 
 /**
  *
- * All functional tests for the `ListNamespaces` task.
+ * All functional tests for the `CreateNamespace` task.
  *
  */
-class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
+class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
 
-    def "List namespaces, execute reactive-streams, with no config"() {
+    def "Create namespace, execute reactive-streams, and fail with no config"() {
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
-            task namespaceWork(type: ListNamespaces) {
+            task namespaceWork(type: CreateNamespace) {
+                onError { exc -> 
+                    logger.quiet "\${exc.message}"
+                }
+                onNext { output ->
+                    logger.quiet '$SHOULD_NOT_REACH_HERE'
+                }
+                onComplete {
+                    logger.quiet '$SHOULD_NOT_REACH_HERE'
+                }
+                doLast {
+                    if (response()) {
+                        logger.quiet '$RESPONSE_SET_MESSAGE'
+                    }
+                }
+            }
+
+            task workflow(dependsOn: namespaceWork)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Creating namespace...')
+            result.output.contains('Required value: name or generateName is required')
+            !result.output.contains(SHOULD_NOT_REACH_HERE)
+    }
+
+    def "Create namespace, execute reactive-streams, and with config"() {
+
+        def generatedNamespaceName = randomString()
+
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
+
+            task namespaceWork(type: CreateNamespace) {
+                config {
+                    withName("${generatedNamespaceName}")
+                }
                 onError {
                     logger.quiet '$ON_ERROR_NOT_REACHED'
                 }
@@ -57,47 +96,10 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Listing namespaces...')
-            !result.output.contains(ON_ERROR_NOT_REACHED)
-            result.output.contains(ON_NEXT_REACHED)
-            result.output.contains(ON_COMPLETE_REACHED)
-            result.output.contains(RESPONSE_SET_MESSAGE)
-    }
-
-    def "List namespaces, execute reactive-streams, and with config"() {
-        buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
-
-            task namespaceWork(type: ListNamespaces) {
-                config {
-                    withLabel("${randomString()}")
-                }
-                onError {
-                    logger.quiet '$ON_ERROR_NOT_REACHED'
-                }
-                onNext { output ->
-                    logger.quiet '$SHOULD_NOT_REACH_HERE'
-                }
-                onComplete {
-                    logger.quiet '$ON_COMPLETE_REACHED'
-                }
-                doLast {
-                    if (response()) {
-                        logger.quiet '$RESPONSE_SET_MESSAGE'
-                    }
-                }
-            }
-
-            task workflow(dependsOn: namespaceWork)
-        """
-
-        when:
-            BuildResult result = build('workflow')
-
-        then:
-            result.output.contains('Listing namespaces...')
+            result.output.contains('Creating namespace...')
             !result.output.contains(ON_ERROR_NOT_REACHED)
             !result.output.contains(SHOULD_NOT_REACH_HERE)
+            result.output.contains(ON_NEXT_REACHED + " with name ${generatedNamespaceName}")
             result.output.contains(ON_COMPLETE_REACHED)
             result.output.contains(RESPONSE_SET_MESSAGE)
     }
