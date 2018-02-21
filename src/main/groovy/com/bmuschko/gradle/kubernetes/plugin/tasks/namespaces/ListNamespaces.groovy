@@ -30,7 +30,8 @@ class ListNamespaces extends AbstractKubernetesTask {
         namespaces = configureOn(namespaces)
 
         // register response for downstream use and return list of items
-        // for `onNext` execution.
+        // for `onNext` execution. The `getItems()` call will return null
+        // if no items were found.
         responseOn(namespaces.list()).getItems()
     }
 }

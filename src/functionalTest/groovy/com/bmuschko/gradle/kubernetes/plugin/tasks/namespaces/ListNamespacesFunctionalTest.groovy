@@ -22,12 +22,12 @@ import spock.lang.Requires
 
 /**
  *
- * All functional tests for the `namespaces` package.
+ * All functional tests for the `ListNamespaces` task.
  *
  */
 class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
 
-    def "Can list Kubernetes namespaces and execute reactive-streams"() {
+    def "List namespaces, execute reactive-streams, with default config"() {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
@@ -37,7 +37,7 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
                 }
                 onNext { output ->
                     if (output) {
-                        logger.quiet '$ON_NEXT_REACHED'
+                        logger.quiet "$ON_NEXT_REACHED with name \${output.getMetadata().getName()}"
                     }
                 }
                 onComplete {
@@ -60,6 +60,44 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
             result.output.contains('Listing namespaces...')
             !result.output.contains(ON_ERROR_NOT_REACHED)
             result.output.contains(ON_NEXT_REACHED)
+            result.output.contains(ON_COMPLETE_REACHED)
+            result.output.contains(RESPONSE_SET_MESSAGE)
+    }
+
+    def "List namespaces, execute reactive-streams, with config"() {
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
+
+            task kubeNamespaces(type: ListNamespaces) {
+                config {
+                    withLabel("${randomString()}")
+                }
+                onError {
+                    logger.quiet '$ON_ERROR_NOT_REACHED'
+                }
+                onNext { output ->
+                    logger.quiet '$SHOULD_NOT_REACH_HERE'
+                }
+                onComplete {
+                    logger.quiet '$ON_COMPLETE_REACHED'
+                }
+                doLast {
+                    if (response()) {
+                        logger.quiet '$RESPONSE_SET_MESSAGE'
+                    }
+                }
+            }
+
+            task workflow(dependsOn: kubeNamespaces)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Listing namespaces...')
+            !result.output.contains(ON_ERROR_NOT_REACHED)
+            !result.output.contains(SHOULD_NOT_REACH_HERE)
             result.output.contains(ON_COMPLETE_REACHED)
             result.output.contains(RESPONSE_SET_MESSAGE)
     }
