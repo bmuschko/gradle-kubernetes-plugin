@@ -85,7 +85,7 @@ class GradleKubernetesContextLoader {
 
             // 3.) OPTIONAL object factory to use for creating objects from
             // our custom class-loader. As it can be a bit finicky to use
-            // it's not required to long as calling/creating code loads
+            // it's not required so long as calling/creating code loads
             // classes from our custom class-loader and not some other source.
             kubernetesClientObjectFactory = JclObjectFactory.getInstance()
         }

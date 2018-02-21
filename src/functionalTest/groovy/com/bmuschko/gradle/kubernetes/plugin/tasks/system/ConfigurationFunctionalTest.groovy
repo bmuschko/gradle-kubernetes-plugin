@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin
+package com.bmuschko.gradle.kubernetes.plugin.tasks.system
 
+import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
 import spock.lang.Requires
 
 /**
  *
- * All functional tests for the `namespaces` package.
+ *  Functional tests for the `Configuration` task.
  *
  */
-class KubernetesNamespacesFunctionalTest extends AbstractFunctionalTest {
+class ConfigurationFunctionalTest extends AbstractFunctionalTest {
 
-    def "Can list Kubernetes namespaces and execute reactive-streams"() {
+    def "Can get Kubernetes Configuration and execute reactive-streams"() {
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.system.Configuration
 
-            task kubeNamespaces(type: ListNamespaces) {
+            task kubeConfig(type: Configuration) {
                 onError {
                     logger.quiet '$ON_ERROR_NOT_REACHED'
                 }
@@ -49,14 +50,15 @@ class KubernetesNamespacesFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: kubeNamespaces)
+            task workflow(dependsOn: kubeConfig)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Listing namespaces...')
+            result.output.contains('Api-Version: ')
+            result.output.contains('Master-URL: ')
             !result.output.contains(ON_ERROR_NOT_REACHED)
             result.output.contains(ON_NEXT_REACHED)
             result.output.contains(ON_COMPLETE_REACHED)
