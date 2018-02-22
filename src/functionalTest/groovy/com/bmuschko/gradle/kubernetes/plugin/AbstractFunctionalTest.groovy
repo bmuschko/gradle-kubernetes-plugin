@@ -33,7 +33,8 @@ abstract class AbstractFunctionalTest extends Specification {
     public static final String ON_ERROR_NOT_REACHED = 'onError: we should NOT reach here'
     public static final String ON_NEXT_REACHED = 'onNext: output is NOT null'
     public static final String ON_COMPLETE_REACHED = 'onComplete: we are done'
-    public static final String SHOULD_NOT_REACH_HERE = "should not reach here"
+    public static final String SHOULD_NOT_REACH_HERE = "NOT A GOOD PLACE TO BE"
+    public static final String SHOULD_REACH_HERE = "WE ARE HERE"
 
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -91,7 +92,7 @@ abstract class AbstractFunctionalTest extends Specification {
         GradleRunner.create().withProjectDir(projectDir).withArguments(args).withPluginClasspath()
     }
 
-    public String randomString() {
+    public static String randomString() {
         UUID.randomUUID().toString().replaceAll("-", "")
     }
 }

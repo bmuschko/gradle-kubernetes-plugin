@@ -17,26 +17,30 @@
 package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
+import org.gradle.api.GradleException
 
 /**
- * Create a namespace.
+ * Delete a namespace.
  */
-class CreateNamespace extends AbstractKubernetesTask {
+class DeleteNamespace extends AbstractKubernetesTask {
 
     @Override
     def handleClient(kubernetesClient) {
 
-        logger.quiet 'Creating namespace...'
-        def namespaceMetadata = kubernetesClient.namespaces().createNew().withNewMetadata()
+        logger.quiet 'Deleting namespace...'
+        def objToConfigure = kubernetesClient.namespaces()
 
-        // configure on meta-data
-        namespaceMetadata = configureOn(namespaceMetadata)
+        // configure on namespace
+        def objReconfigured = configureOn(objToConfigure)
 
-        // finalize creation of namespace
-        def localResponse = namespaceMetadata.endMetadata().done()
-                   
+        // invoke method to delete
+        def localResponse = objReconfigured.delete()
+        if (!localResponse) {
+            throw new GradleException("Failed deleting namespace")
+        }
+          
         // register response for downstream use which in this case
-        // is just a `Namespace` instance.
+        // is just a `Boolean` instance.
         responseOn(localResponse)
     }
 }

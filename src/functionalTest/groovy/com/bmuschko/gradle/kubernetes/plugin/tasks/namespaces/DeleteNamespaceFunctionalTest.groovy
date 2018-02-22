@@ -22,61 +22,33 @@ import spock.lang.Requires
 
 /**
  *
- * All functional tests for the `CreateNamespace` task.
+ * All functional tests for the `DeleteNamespace` task.
  *
  */
-class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
+class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
 
-    def "Create namespace, execute reactive-streams, and fail with no config"() {
+    def "Create namespace, execute reactive-streams, and delete namespace with config"() {
+
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
 
-            task namespaceWork(type: CreateNamespace) {
-                onError { exc -> 
-                    logger.quiet "\${exc.message}"
-                }
-                onNext { output ->
-                    logger.quiet '$SHOULD_NOT_REACH_HERE'
-                }
-                onComplete {
-                    logger.quiet '$SHOULD_NOT_REACH_HERE'
-                }
-                doLast {
-                    if (response()) {
-                        logger.quiet '$RESPONSE_SET_MESSAGE'
-                    }
+            task createNamespace(type: CreateNamespace) {
+                config {
+                    withName("${randomString()}")
                 }
             }
 
-            task workflow(dependsOn: namespaceWork)
-        """
-
-        when:
-            BuildResult result = build('workflow')
-
-        then:
-            result.output.contains('Creating namespace...')
-            result.output.contains('Required value: name or generateName is required')
-            !result.output.contains(SHOULD_NOT_REACH_HERE)
-    }
-
-    def "Create namespace, execute reactive-streams, and with config"() {
-
-        def generatedNamespaceName = randomString()
-
-        buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
-
-            task namespaceWork(type: CreateNamespace) {
+            task deleteNamespace(type: DeleteNamespace, dependsOn: createNamespace) {
                 config {
-                    withName("${generatedNamespaceName}")
+                    withName(tasks.createNamespace.response().getMetadata().getName())
                 }
-                onError {
-                    logger.quiet '$ON_ERROR_NOT_REACHED'
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc.message}"
                 }
                 onNext { output ->
                     if (output) {
-                        logger.quiet "$ON_NEXT_REACHED with name \${output.getMetadata().getName()}"
+                        logger.quiet "$ON_NEXT_REACHED"
                     }
                 }
                 onComplete {
@@ -89,18 +61,42 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: namespaceWork)
+            task workflow(dependsOn: deleteNamespace)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Creating namespace...')
-            !result.output.contains(ON_ERROR_NOT_REACHED)
+            result.output.contains('Deleting namespace...')
             !result.output.contains(SHOULD_NOT_REACH_HERE)
-            result.output.contains(ON_NEXT_REACHED + " with name ${generatedNamespaceName}")
+            result.output.contains(ON_NEXT_REACHED)
             result.output.contains(ON_COMPLETE_REACHED)
             result.output.contains(RESPONSE_SET_MESSAGE)
+    }
+
+    def "Delete non-existent namespace"() {
+
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+
+            task deleteNamespace(type: DeleteNamespace) {
+                config {
+                    withName("${randomString()}")
+                }
+                onError { exc ->
+                    logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
+                }
+            }
+
+            task workflow(dependsOn: deleteNamespace)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Deleting namespace...')
+            result.output.contains(SHOULD_REACH_HERE)
     }
 }

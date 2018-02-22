@@ -25,15 +25,15 @@ class Configuration extends AbstractKubernetesTask {
     @Override
     def handleClient(kubernetesClient) {
 
-        def configuration = kubernetesClient.getConfiguration()
-        configuration = configureOn(configuration)
+        def objToConfigure = kubernetesClient.getConfiguration()
+        def objReconfigured = configureOn(objToConfigure)
 
-        logger.quiet "Api-Version: ${configuration.getApiVersion()}"
-        logger.quiet "Master-URL: ${configuration.getMasterUrl()}"
+        logger.quiet "Api-Version: ${objReconfigured.getApiVersion()}"
+        logger.quiet "Master-URL: ${objReconfigured.getMasterUrl()}"
 
         // register response for downstream use and return list of items
         // for `onNext` execution.
-        responseOn(configuration)
+        responseOn(objReconfigured)
     }
 }
 

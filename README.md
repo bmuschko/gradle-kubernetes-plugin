@@ -42,9 +42,9 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 ## Tasks
 
 - **Name**: name of the gradle task
-- **`config{}`**: Object the `config{}` closure maps to
-- **`onNext{}`**: Object the next iteration of `onNext{}` will receive
-- **`resource()`**: Object the `resource()` method returns AFTER execution
+- **`config{}`**: Object the `config{}` closure maps to and is furhter documented below.
+- **`onNext{}`**: Object the next iteration of `onNext{}` will receive and is further documented below.
+- **`resource()`**: Object the `resource()` method returns AFTER execution of a given task has completed.
 
 ### Namespace operations
 
@@ -52,12 +52,52 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 | --- | --- | --- | --- |
 | [ListNamespaces](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | [NonNamespaceOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/NonNamespaceOperation.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) | [NamespaceList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceList.html) |
 | [CreateNamespace](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/CreateNamespace.groovy) | [MetadataNestedImpl](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceFluentImpl.MetadataNestedImpl.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) |
+| [DeleteNamespace](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/DeleteNamespace.groovy) | [MetadataNestedImpl](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceFluentImpl.MetadataNestedImpl.html) | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) |
 
 ### System operations
 
 | Name | `config{}` | `onNext{}` | `resource()` |
 | --- | --- | --- | --- |
 | [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) | N/A | [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) | [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) |
+
+
+## On `config{}`
+
+All Objects (e.g. Tasks, Extensions, etc) implement the [ConfigAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ConfigureAware.groovy) trait. As such the end-user can take advantage of the `config{}` closure to further configure said objects. The respective `config{}` closure maps to the backing/documented object. A typical use-case would be to configure a task like so:
+```
+task myCustomNameSpace(type: CreateNamespace) {
+    config {
+        withName("hello-world")
+    }
+}
+```
+The `config{}` closure has its delegate (as well as the first parameter) set to the object you're allowed to configure within a given context. In the example above, and documented in the table below, the `CreateNamespace` task allows you to configure the `MetadataNestedImpl` object which really can just be thought of as a super-class to the internal `Namespace` instance. In java, and using the same `kubernetes-client`, this would look something like:
+```
+NonNamespaceOperation<Namespace, NamespaceList, DoneableNamespace, Resource<Namespace, DoneableNamespace>> namespaces = client.namespaces();
+Resource<Namespace, DoneableNamespace> withName = namespaces.withName("hello-world");
+```
+The `config{}` closure is an attempt at trying to provide a common means of configuring Objects in a very gradle like fashion.
+
+## On `response()`
+
+All tasks implement the [ResponseAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ResponseAware.groovy) trait. As such the end-user, and ONLY upon completion of a given task, will be able to query for a given tasks `response()` object. Furthermore the Object returned is different for each task and is documented in the table below.
+
+As each task does some work in the backend it's sometimes helpful, or even desired, to get the returned object for further downstream inspection. Suppose you wanted a programmatic way of getting the name of the namespace you just created. You could do something like:
+```
+task myCustomNameSpace(type: CreateNamespace) {
+    config { specialConfig ->
+        withName("hello-world")
+    }
+}
+
+task downstreamTask(dependsOn: myCustomNameSpace) {
+    doLast {
+        def foundName = myCustomNameSpace.response().getMetadata().getName()
+        // now do something with the `foundName` String
+    }
+}
+```
+Much like the `config{}` closure the `response()` method is an attempt at providing a standard way across all tasks of accessing the returned Object from the internal `kubernetes-client` invocation.
 
 ## Reactive-Streams
 
@@ -74,7 +114,7 @@ The below example is a common use-case that arises when someone wants to remove 
 ```
 import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
-task listAllNamespaces(type: ListNamespaces) {
+task listNamespaces(type: ListNamespaces) {
     onError { exception ->
         if (exception.message.contains('something I care about'))
             throw exception
@@ -92,7 +132,7 @@ Suppose we want to list out, or simply work with, each available namespace. We m
 ```
 import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
-task listAllNamespaces(type: ListNamespaces) {
+task listNamespaces(type: ListNamespaces) {
     onNext { namespace ->
         logger.quiet "Found namespace: ${namespace.name()}"
     }
@@ -107,7 +147,7 @@ The `onComplete` closure is not passed anything upon execution. It works in the 
 ```
 import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
-task listAllNamespaces(type: ListNamespaces) {
+task listNamespaces(type: ListNamespaces) {
     onComplete {
         logger.quiet 'Executes first'
     }
@@ -116,6 +156,11 @@ task listAllNamespaces(type: ListNamespaces) {
     }
 }
 ```
+
+
+## Examples
+
+The [functionalTests](https://github.com/bmuschko/gradle-kubernetes-plugin/tree/master/src/functionalTest/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks) provide many examples that you can use for inspiration within your own code. If there are any questions about how to use a given feature feel free to open an issue and just ask.
 
 ## Additional Resources
 * [Kubernetes Client](https://github.com/fabric8io/kubernetes-client)

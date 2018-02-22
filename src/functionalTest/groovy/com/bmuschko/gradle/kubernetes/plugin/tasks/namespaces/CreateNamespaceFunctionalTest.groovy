@@ -31,7 +31,7 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
-            task namespaceWork(type: CreateNamespace) {
+            task createNamespace(type: CreateNamespace) {
                 onError { exc -> 
                     logger.quiet "\${exc.message}"
                 }
@@ -48,7 +48,7 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: namespaceWork)
+            task workflow(dependsOn: createNamespace)
         """
 
         when:
@@ -62,17 +62,16 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
 
     def "Create namespace, execute reactive-streams, and with config"() {
 
-        def generatedNamespaceName = randomString()
-
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
 
-            task namespaceWork(type: CreateNamespace) {
+            task createNamespace(type: CreateNamespace) {
                 config {
-                    withName("${generatedNamespaceName}")
+                    withName("${randomString()}")
                 }
-                onError {
-                    logger.quiet '$ON_ERROR_NOT_REACHED'
+                onError { exc ->
+                    logger.quiet "$ON_ERROR_NOT_REACHED: exc=\${exc.message}"
                 }
                 onNext { output ->
                     if (output) {
@@ -89,7 +88,15 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: namespaceWork)
+            task deleteNamespace(type: DeleteNamespace) {
+                config {
+                    withName(tasks.createNamespace.response().getMetadata().getName())
+                }
+            }
+
+            task workflow(dependsOn: createNamespace) {
+                finalizedBy deleteNamespace
+            }
         """
 
         when:
@@ -99,7 +106,7 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             result.output.contains('Creating namespace...')
             !result.output.contains(ON_ERROR_NOT_REACHED)
             !result.output.contains(SHOULD_NOT_REACH_HERE)
-            result.output.contains(ON_NEXT_REACHED + " with name ${generatedNamespaceName}")
+            result.output.contains(ON_NEXT_REACHED)
             result.output.contains(ON_COMPLETE_REACHED)
             result.output.contains(RESPONSE_SET_MESSAGE)
     }
