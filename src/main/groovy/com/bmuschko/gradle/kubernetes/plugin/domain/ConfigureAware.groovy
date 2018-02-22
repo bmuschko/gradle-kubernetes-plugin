@@ -16,14 +16,13 @@
 
 package com.bmuschko.gradle.kubernetes.plugin.domain
 
-import org.gradle.util.ConfigureUtil
-
 /**
  *  Trait that provides a generic `config` API.
  *
  *  The idea here is that the implementing class can have potentially
  *  X number of `config` closures set which, and when calling `configureOn(delegate)`,
- *  we will apply each of those to an arbitrary Object (assuming it can done).
+ *  we will apply each of those to an arbitrary Object (assuming it can done) and
+ *  return a potentially newly created Object.
  *  
  *  A typical example would look like:
  *
@@ -73,16 +72,18 @@ trait ConfigureAware {
 
     private final List<Closure> config = [] // internal list of held closures to apply.
     void config(final Closure closure) { config.add(closure) } // public method to set X number of closures.
-    def configureOn(final def delegate) { // internal method for configuring THIS on a passed delegate.
-        def configuredDelegate = delegate
-        if (config && configuredDelegate) {
+    def configureOn(def target) { // internal method for configuring THIS on a passed delegate.
+        def newTarget = target
+        if (config && newTarget) {
             config.each { passedConfig ->
                 if (passedConfig) {
-                    configuredDelegate = ConfigureUtil.configure(passedConfig, configuredDelegate)
+                    passedConfig.resolveStrategy = Closure.DELEGATE_FIRST
+                    passedConfig.delegate = newTarget
+                    newTarget = passedConfig.call(newTarget)
                 }
             }
         }
-        configuredDelegate
+        newTarget
     }
 }
 
