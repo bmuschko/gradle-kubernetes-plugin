@@ -18,7 +18,6 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 
 import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
-import spock.lang.Requires
 
 /**
  *
@@ -32,8 +31,8 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
             task namespaceWork(type: ListNamespaces) {
-                onError {
-                    logger.quiet '$ON_ERROR_NOT_REACHED'
+                onError { exc ->
+                    logger.quiet "$ON_ERROR_NOT_REACHED value=\${exc}"
                 }
                 onNext { output ->
                     if (output) {

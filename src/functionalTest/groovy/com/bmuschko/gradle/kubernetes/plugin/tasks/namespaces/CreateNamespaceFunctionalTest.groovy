@@ -18,7 +18,6 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 
 import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
-import spock.lang.Requires
 
 /**
  *
@@ -32,8 +31,8 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
             task createNamespace(type: CreateNamespace) {
-                onError { exc -> 
-                    logger.quiet "\${exc.message}"
+                onError { exc ->
+                    logger.quiet "\${exc}"
                 }
                 onNext { output ->
                     logger.quiet '$SHOULD_NOT_REACH_HERE'
@@ -71,7 +70,7 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                     withName("${randomString()}")
                 }
                 onError { exc ->
-                    logger.quiet "$ON_ERROR_NOT_REACHED: exc=\${exc.message}"
+                    logger.quiet "$ON_ERROR_NOT_REACHED: exc=\${exc}"
                 }
                 onNext { output ->
                     if (output) {

@@ -18,7 +18,6 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 
 import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
-import spock.lang.Requires
 
 /**
  *
@@ -27,15 +26,20 @@ import spock.lang.Requires
  */
 class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
 
+    def generateName = randomString()
     def "Create namespace, execute reactive-streams, and delete namespace with config"() {
 
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
             task createNamespace(type: CreateNamespace) {
+                doFirst {
+                    logger.quiet "Creating namespace ${generateName}"
+                }
                 config {
-                    withName("${randomString()}")
+                    withName("${generateName}")
                 }
             }
 
@@ -44,7 +48,7 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
                     withName(tasks.createNamespace.response().getMetadata().getName())
                 }
                 onError { exc ->
-                    logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc.message}"
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
                 }
                 onNext { output ->
                     if (output) {
@@ -61,7 +65,19 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: deleteNamespace)
+            task listNamespaces(type: ListNamespaces, dependsOn: deleteNamespace) {
+                doFirst {
+                  // sleep to give kubernetes time to delete the resource
+                  sleep 10000
+                }
+                onNext { output ->
+                    if (output.getMetadata().getName() == "${generateName}") {
+                        logger.quiet "$SHOULD_NOT_REACH_HERE with name ${generateName}"
+                    }
+                }
+            }
+
+            task workflow(dependsOn: listNamespaces)
         """
 
         when:
