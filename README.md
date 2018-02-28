@@ -42,13 +42,13 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 ## Tasks
 
 - **Name**: name of the gradle task
-- **`config{}`**: Object the `config{}` closure maps to and is furhter documented below.
+- **`config{}`**: Object the `config{}` closure maps to and is further documented below.
 - **`onNext{}`**: Object the next iteration of `onNext{}` will receive and is further documented below.
-- **`resource()`**: Object the `resource()` method returns AFTER execution of a given task has completed.
+- **`response()`**: Object the `response()` method returns AFTER execution of a given task has completed.
 
 ### Namespace operations
 
-| Name | `config{}` | `onNext{}` | `resource()` |
+| Name | `config{}` | `onNext{}` | `response()` |
 | --- | --- | --- | --- |
 | [ListNamespaces](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | [NonNamespaceOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/NonNamespaceOperation.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) | [NamespaceList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceList.html) |
 | [CreateNamespace](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/CreateNamespace.groovy) | [MetadataNestedImpl](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/NamespaceFluentImpl.MetadataNestedImpl.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) | [Namespace](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Namespace.html) |
@@ -56,7 +56,7 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 
 ### System operations
 
-| Name | `config{}` | `onNext{}` | `resource()` |
+| Name | `config{}` | `onNext{}` | `response()` |
 | --- | --- | --- | --- |
 | [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) | N/A | [Configuration](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/Config.html) | [Configuration](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/Config.html) |
 
