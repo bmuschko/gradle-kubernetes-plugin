@@ -21,17 +21,18 @@ import org.gradle.testkit.runner.BuildResult
 
 /**
  *
- * All functional tests for the `DeleteNamespace` task.
+ * All functional tests for the `GetNamespace` task.
  *
  */
-class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
+class GetNamespaceFunctionalTest extends AbstractFunctionalTest {
 
     def generateName = randomString()
-    def "Create namespace, execute reactive-streams, and delete namespace with config"() {
+    def "Create, Get, Delete and then List namespaces"() {
 
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.GetNamespace
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
             task createNamespace(type: CreateNamespace) {
@@ -43,9 +44,18 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task deleteNamespace(type: DeleteNamespace, dependsOn: createNamespace) {
+            task getNamespace(type: GetNamespace, dependsOn: createNamespace) {
+                namespace { tasks.createNamespace.response().getMetadata().getName() }
+                doLast {
+                    if (response().getMetadata().getName() != "${generateName}") {
+                        logger.quiet "$SHOULD_NOT_REACH_HERE: foundName=\${response().getMetadata().getName()}, expected=${generateName}"
+                    }
+                }
+            }
+
+            task deleteNamespace(type: DeleteNamespace, dependsOn: getNamespace) {
                 config {
-                    withName(tasks.createNamespace.response().getMetadata().getName())
+                    withName(tasks.getNamespace.response().getMetadata().getName())
                 }
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
@@ -84,6 +94,7 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
             BuildResult result = build('workflow')
 
         then:
+            result.output.contains('Getting namespace...')
             result.output.contains('Deleting namespace...')
             !result.output.contains(SHOULD_NOT_REACH_HERE)
             result.output.contains(ON_NEXT_REACHED)
@@ -91,28 +102,27 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
             result.output.contains(RESPONSE_SET_MESSAGE)
     }
 
-    def "Delete non-existent namespace"() {
+    def "Get non-existent namespace"() {
 
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.GetNamespace
 
-            task deleteNamespace(type: DeleteNamespace) {
-                config {
-                    withName("${randomString()}")
-                }
+            task getNamespace(type: GetNamespace) {
+                namespace { "${randomString()}" }
                 onError { exc ->
                     logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
                 }
             }
 
-            task workflow(dependsOn: deleteNamespace)
+            task workflow(dependsOn: getNamespace)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Deleting namespace...')
+            result.output.contains('Getting namespace...')
             result.output.contains(SHOULD_REACH_HERE)
+            result.output.contains('could not be found.')
     }
 }

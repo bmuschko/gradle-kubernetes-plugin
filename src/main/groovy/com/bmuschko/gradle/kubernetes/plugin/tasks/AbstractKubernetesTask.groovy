@@ -131,7 +131,7 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
      * than naught as the `kubernetes-client` uses builders for
      * everything).
      */
-    def applyUserDefinedInputs(objectToApplyInputsTo) {
-        objectToApplyInputsTo 
+    def applyUserDefinedInputs(objectToApplyInputsOn) {
+        objectToApplyInputsOn 
     }
 }
