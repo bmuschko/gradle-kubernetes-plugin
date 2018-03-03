@@ -54,9 +54,9 @@ class GetNamespaceFunctionalTest extends AbstractFunctionalTest {
             }
 
             task deleteNamespace(type: DeleteNamespace, dependsOn: getNamespace) {
-                config {
-                    withName(tasks.getNamespace.response().getMetadata().getName())
-                }
+                namespace { tasks.getNamespace.response().getMetadata().getName() } 
+                gracePeriod { 5000 }
+
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
                 }

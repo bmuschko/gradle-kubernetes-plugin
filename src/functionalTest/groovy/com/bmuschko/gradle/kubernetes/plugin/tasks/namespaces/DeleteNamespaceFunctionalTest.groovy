@@ -44,9 +44,9 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
             }
 
             task deleteNamespace(type: DeleteNamespace, dependsOn: createNamespace) {
-                config {
-                    withName(tasks.createNamespace.response().getMetadata().getName())
-                }
+                namespace { tasks.createNamespace.response().getMetadata().getName() } 
+                gracePeriod { 5000 }
+
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
                 }
@@ -97,9 +97,9 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
 
             task deleteNamespace(type: DeleteNamespace) {
-                config {
-                    withName("${randomString()}")
-                }
+                namespace { "${randomString()}" } 
+                gracePeriod { 5000 }
+
                 onError { exc ->
                     logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
                 }

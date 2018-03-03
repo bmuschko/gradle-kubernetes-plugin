@@ -88,9 +88,8 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             }
 
             task deleteNamespace(type: DeleteNamespace) {
-                config {
-                    withName(tasks.createNamespace.response().getMetadata().getName())
-                }
+                namespace { tasks.createNamespace.response().getMetadata().getName() } 
+                gracePeriod { 5000 }
             }
 
             task workflow(dependsOn: createNamespace) {

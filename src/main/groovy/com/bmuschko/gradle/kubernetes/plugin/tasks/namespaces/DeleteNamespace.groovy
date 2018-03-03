@@ -18,11 +18,20 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 
 /**
  * Delete a namespace.
  */
 class DeleteNamespace extends AbstractKubernetesTask {
+
+    @Input
+    Closure<String> namespace
+
+    @Input
+    @Optional
+    Closure<Long> gracePeriod
 
     @Override
     def handleClient(kubernetesClient) {
@@ -45,6 +54,16 @@ class DeleteNamespace extends AbstractKubernetesTask {
         // register response for downstream use which in this case
         // is just a `Boolean` instance.
         responseOn(localResponse)
+    }
+
+    def applyUserDefinedInputs(objectToApplyInputsOn) {
+        def objWithInputs = objectToApplyInputsOn.withName(namespace.call())
+        
+        if (gracePeriod) {
+            objWithInputs = objWithInputs.withGracePeriod(gracePeriod.call())
+        }
+
+        objWithInputs
     }
 }
 
