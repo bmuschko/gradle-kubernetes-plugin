@@ -30,8 +30,11 @@ class DeleteNamespace extends AbstractKubernetesTask {
         logger.quiet 'Deleting namespace...'
         def objToConfigure = kubernetesClient.namespaces()
 
+        // apply user-defined inputs
+        def objWithUserInputs = applyUserDefinedInputs(objToConfigure)
+        
         // configure on namespace
-        def objReconfigured = configureOn(objToConfigure)
+        def objReconfigured = configureOn(objWithUserInputs)
 
         // invoke method to delete
         def localResponse = objReconfigured.delete()

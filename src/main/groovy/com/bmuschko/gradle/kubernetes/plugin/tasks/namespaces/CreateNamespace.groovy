@@ -29,8 +29,11 @@ class CreateNamespace extends AbstractKubernetesTask {
         logger.quiet 'Creating namespace...'
         def objToConfigure = kubernetesClient.namespaces().createNew().withNewMetadata()
 
+        // apply user-defined inputs
+        def objWithUserInputs = applyUserDefinedInputs(objToConfigure)
+        
         // configure on meta-data
-        def objReconfigured = configureOn(objToConfigure)
+        def objReconfigured = configureOn(objWithUserInputs)
 
         // finalize creation of namespace
         def localResponse = objReconfigured.endMetadata().done()

@@ -29,8 +29,11 @@ class ListNamespaces extends AbstractKubernetesTask {
         logger.quiet 'Listing namespaces...'
         def objToConfigure = kubernetesClient.namespaces()
 
+        // apply user-defined inputs
+        def objWithUserInputs = applyUserDefinedInputs(objToConfigure)
+        
         // configure on the namespaces instance itself
-        def objReconfigured = configureOn(objToConfigure)
+        def objReconfigured = configureOn(objWithUserInputs)
 
         // get the `NamespaceList` object which in itself is NOT a list.
         def localResponse = objReconfigured.list()
