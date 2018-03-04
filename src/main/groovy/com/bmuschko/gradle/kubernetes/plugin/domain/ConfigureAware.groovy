@@ -24,7 +24,7 @@ package com.bmuschko.gradle.kubernetes.plugin.domain
  *  we will apply each of those to an arbitrary Object (assuming it can done) and
  *  return a potentially newly created Object.
  *  
- *  A typical example would look like:
+ *  A typical example when applied to the extension point:
  *
  *      kubernetes {
  *          config {

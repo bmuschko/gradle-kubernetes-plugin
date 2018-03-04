@@ -30,6 +30,7 @@ allprojects {
 
         compile localGroovy(), gradleApi()
         compile group: 'org.xeustechnologies', name: 'jcl-core', version: '2.8'
+        compile group: 'net.jodah', name: 'failsafe', version: '1.0.5'
 
         testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
             exclude group: 'org.codehaus.groovy'

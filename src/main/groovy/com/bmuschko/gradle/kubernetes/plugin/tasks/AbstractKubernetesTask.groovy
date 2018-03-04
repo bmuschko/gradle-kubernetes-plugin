@@ -16,10 +16,17 @@
 
 package com.bmuschko.gradle.kubernetes.plugin.tasks
 
+import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesPlugin
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesContextLoader
+import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesExtension
 import com.bmuschko.gradle.kubernetes.plugin.domain.ConfigureAware
 import com.bmuschko.gradle.kubernetes.plugin.domain.ResponseAware
+import com.bmuschko.gradle.kubernetes.plugin.domain.RetryAware
 import com.bmuschko.gradle.kubernetes.plugin.domain.ReactiveStreamsAware
+
+import net.jodah.failsafe.Failsafe
+import net.jodah.failsafe.RetryPolicy
+import net.jodah.failsafe.function.ContextualCallable
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -38,11 +45,11 @@ import org.gradle.api.tasks.Internal
  *
  *              // 1.) Used passed `kubernetesClient` to get `pods` object.
  *              def objToConfigure = kubernetesClient.pods()
- *              
+ *
  *              // 2.) Configure any passed `config` closures on `foundPods` thus
  *              //     honoring the contract set by the `ConfigAware` trait.
  *              obj objReconfigured = configureOn(objToConfigure)
- *              
+ *
  *              // 3.) Apply any user-defined inputs AFTER we satisfy `ConfigAware` contract.
  *              def objWithUserInputs = applyUserDefinedInputs(objReconfigured)
  *
@@ -63,7 +70,10 @@ import org.gradle.api.tasks.Internal
  *
  *
  */
-abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAware, ResponseAware, ReactiveStreamsAware {
+abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAware, ResponseAware, ReactiveStreamsAware, RetryAware {
+
+    @Internal
+    private static final RetryPolicy DEFAULT_RETRY_POLICY = RetryPolicy.NEVER
 
     @Internal
     GradleKubernetesContextLoader contextLoader
@@ -92,13 +102,20 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
     /**
      *  Internal method for handling the `onNext` contract.
      */
-    private handleOnNext() {
+    protected handleOnNext() {
 
-        // 1.) Execute the overridden `handleClient` method on our custom
+        // 1.) Honor the `RetryAware` policy first checking if one has been defined on the extension point,
+        //     and if not valid then check this task if one has been defined, and then as a last resort
+        //     fallback to the default which is akin to normal execution (i.e. no retries).
+        final GradleKubernetesExtension extension = project.extensions.getByName(GradleKubernetesPlugin.EXTENSION_NAME)
+        final RetryPolicy retryPolicy = extension.retry() ?: (retry() ?: DEFAULT_RETRY_POLICY)
+
+        // 2.) Execute the overridden `handleClient` method on our custom
         //     `KubernetesClient` classpath.
-        def executionResponse = contextLoader.withClasspath { handleClient(it) }
+        final Closure executionClosure = { contextLoader.withClasspath { handleClient(it) } }
+        def executionResponse = Failsafe.with(retryPolicy).get(executionClosure as ContextualCallable)
 
-        // 2.) Honor the reactive-stream `onNext` callback but ONLY if we have a
+        // 3.) Honor the reactive-stream `onNext` callback but ONLY if we have a
         //     non-null response.
         if (executionResponse && onNext()) {
             if (executionResponse instanceof Collection || executionResponse instanceof Object[]) {
@@ -114,18 +131,18 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
     /**
      *  Internal method for handling the `onError` contract.
      */
-    private handleOnError(final Exception possibleException) {
+    protected handleOnError(final Exception possibleException) {
         if (onError()) {
             onError().call(possibleException)
         } else {
             throw possibleException
-        }    
+        }
     }
 
     /**
      *  Internal method for handling the `onComplete` contract.
      */
-    private handleOnComplete() {
+    protected handleOnComplete() {
         if (onComplete()) {
             onComplete().call()
         }
@@ -146,10 +163,10 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
      * Single method where tasks will apply any user-defined inputs.
      * These inputs/properties MUST be applied AFTER the contract
      * set by `ConfigAware` and thus after calling `configureOn`.
-     * 
+     *
      * If no inputs are defined then calling this super-class
      * version, which just returns the Object passed in, is OK.
-     * 
+     *
      * If inputs are defined then the downstream task must override
      * this method, apply any user-defined inputs, and return
      * the potentially newly created Object (this happens more times
@@ -157,6 +174,6 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
      * everything).
      */
     def applyInputs(objectToApplyInputsOn) {
-        objectToApplyInputsOn 
+        objectToApplyInputsOn
     }
 }
