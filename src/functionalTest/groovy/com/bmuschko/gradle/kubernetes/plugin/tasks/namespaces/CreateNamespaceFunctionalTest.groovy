@@ -26,19 +26,19 @@ import org.gradle.testkit.runner.BuildResult
  */
 class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
 
-    def "Create namespace, execute reactive-streams, and fail with no config"() {
+    def "Create namespace with dynamic name, execute reactive-streams"() {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
             task createNamespace(type: CreateNamespace) {
                 onError { exc ->
-                    logger.quiet "\${exc}"
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
                 }
                 onNext { output ->
-                    logger.quiet '$SHOULD_NOT_REACH_HERE'
+                    logger.quiet "$SHOULD_REACH_HERE: next=\${output}"
                 }
                 onComplete {
-                    logger.quiet '$SHOULD_NOT_REACH_HERE'
+                    logger.quiet '$ON_COMPLETE_REACHED'
                 }
                 doLast {
                     if (response()) {
@@ -55,7 +55,47 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
 
         then:
             result.output.contains('Creating namespace...')
-            result.output.contains('Required value: name or generateName is required')
+            result.output.contains(RESPONSE_SET_MESSAGE)
+            result.output.contains(SHOULD_REACH_HERE)
+            result.output.contains(ON_COMPLETE_REACHED)
+            !result.output.contains(SHOULD_NOT_REACH_HERE)
+    }
+
+    def "Create namespace with dynamic name, execute reactive-streams, and with no config"() {
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
+
+            task createNamespace(type: CreateNamespace) {
+                namespace { "${randomString()}" }
+                withLabels = ["${randomString()}" : "${randomString()}"]
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
+                onNext { output ->
+                    logger.quiet "$SHOULD_REACH_HERE: next=\${output}"
+                }
+                onComplete {
+                    logger.quiet '$ON_COMPLETE_REACHED'
+                }
+                doLast {
+                    if (response()) {
+                        logger.quiet '$RESPONSE_SET_MESSAGE'
+                    }
+                }
+            }
+
+            task workflow(dependsOn: createNamespace)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Creating namespace...')
+            result.output.contains(RESPONSE_SET_MESSAGE)
+            result.output.contains(SHOULD_REACH_HERE)
+            result.output.contains(ON_COMPLETE_REACHED)
             !result.output.contains(SHOULD_NOT_REACH_HERE)
     }
 

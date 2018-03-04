@@ -17,11 +17,21 @@
 package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 
 /**
  * List available Namespaces.
  */
 class ListNamespaces extends AbstractKubernetesTask {
+
+    @Input
+    @Optional
+    Map<String, String> withLabels
+
+    @Input
+    @Optional
+    Map<String, String> withoutLabels
 
     @Override
     def handleClient(kubernetesClient) {
@@ -42,6 +52,21 @@ class ListNamespaces extends AbstractKubernetesTask {
         // for `onNext` execution. The `getItems()` call will return null
         // if no items were found.
         responseOn(localResponse).getItems()
+    }
+
+    @Override
+    def applyInputs(objectToApplyInputsOn) {
+        def objWithInputs = objectToApplyInputsOn
+        
+        if (withLabels) {
+            objWithInputs = objWithInputs.withLabels(withLabels)
+        }
+
+        if (withoutLabels) {
+            objWithInputs = objWithInputs.withoutLabels(withoutLabels)
+        }
+
+        objWithInputs
     }
 }
 

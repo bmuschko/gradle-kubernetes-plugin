@@ -30,9 +30,9 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
-            task namespaceWork(type: ListNamespaces) {
+            task listNamespaces(type: ListNamespaces) {
                 onError { exc ->
-                    logger.quiet "$ON_ERROR_NOT_REACHED value=\${exc}"
+                    logger.quiet "$ON_ERROR_NOT_REACHED exception=\${exc}"
                 }
                 onNext { output ->
                     if (output) {
@@ -49,7 +49,7 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: namespaceWork)
+            task workflow(dependsOn: listNamespaces)
         """
 
         when:
@@ -67,12 +67,12 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
 
-            task namespaceWork(type: ListNamespaces) {
+            task listNamespaces(type: ListNamespaces) {
                 config {
                     withLabel("${randomString()}")
                 }
-                onError {
-                    logger.quiet '$ON_ERROR_NOT_REACHED'
+                onError { exc ->
+                    logger.quiet "$ON_ERROR_NOT_REACHED: exception=\${exc}"
                 }
                 onNext { output ->
                     logger.quiet '$SHOULD_NOT_REACH_HERE'
@@ -87,7 +87,45 @@ class ListNamespacesFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: namespaceWork)
+            task workflow(dependsOn: listNamespaces)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Listing namespaces...')
+            !result.output.contains(ON_ERROR_NOT_REACHED)
+            !result.output.contains(SHOULD_NOT_REACH_HERE)
+            result.output.contains(ON_COMPLETE_REACHED)
+            result.output.contains(RESPONSE_SET_MESSAGE)
+    }
+
+    def "List non-existent namespaces"() {
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
+
+            task listNamespaces(type: ListNamespaces) {
+                withLabels = ["${randomString()}" : "${randomString()}"]
+                withoutLabels = ["${randomString()}" : "${randomString()}"]
+
+                onError { exc ->
+                    logger.quiet "$ON_ERROR_NOT_REACHED: exception=\${exc}"
+                }
+                onNext { output ->
+                    logger.quiet '$SHOULD_NOT_REACH_HERE'
+                }
+                onComplete {
+                    logger.quiet '$ON_COMPLETE_REACHED'
+                }
+                doLast {
+                    if (response()) {
+                        logger.quiet '$RESPONSE_SET_MESSAGE'
+                    }
+                }
+            }
+
+            task workflow(dependsOn: listNamespaces)
         """
 
         when:
