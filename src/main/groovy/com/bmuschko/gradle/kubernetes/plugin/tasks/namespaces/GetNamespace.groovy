@@ -34,14 +34,14 @@ class GetNamespace extends AbstractKubernetesTask {
         logger.quiet 'Getting namespace...'
         def objToConfigure = kubernetesClient.namespaces()
 
+        // no real options to supply so should amount to a no-op
+        def objReconfigured = configureOn(objToConfigure)
+
         // apply user-defined inputs
-        def objWithUserInputs = applyUserDefinedInputs(objToConfigure)
-        
-        // no real options so supply so should amount to a no-op
-        def objReconfigured = configureOn(objWithUserInputs)
+        def objWithUserInputs = applyInputs(objReconfigured)
 
         // get the namespace
-        def localResponse = objReconfigured.fromServer().get()
+        def localResponse = objWithUserInputs.fromServer().get()
         if (!localResponse) {
             throw new GradleException("Namespace '" + namespace.call() + "' could not be found.")
         }
@@ -50,8 +50,9 @@ class GetNamespace extends AbstractKubernetesTask {
         // is just a `Namespace` instance.
         responseOn(localResponse)
     }
-    
-    def applyUserDefinedInputs(objectToApplyInputsOn) {
+
+    @Override
+    def applyInputs(objectToApplyInputsOn) {
         objectToApplyInputsOn.withName(namespace.call())
     }
 }

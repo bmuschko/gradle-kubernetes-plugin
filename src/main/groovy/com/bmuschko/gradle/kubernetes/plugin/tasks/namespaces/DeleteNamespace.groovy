@@ -27,6 +27,7 @@ import org.gradle.api.tasks.Optional
 class DeleteNamespace extends AbstractKubernetesTask {
 
     @Input
+    @Optional
     Closure<String> namespace
 
     @Input
@@ -39,14 +40,14 @@ class DeleteNamespace extends AbstractKubernetesTask {
         logger.quiet 'Deleting namespace...'
         def objToConfigure = kubernetesClient.namespaces()
 
-        // apply user-defined inputs
-        def objWithUserInputs = applyUserDefinedInputs(objToConfigure)
-        
         // configure on namespace
-        def objReconfigured = configureOn(objWithUserInputs)
+        def objReconfigured = configureOn(objToConfigure)
+        
+        // apply user-defined inputs
+        def objWithUserInputs = applyInputs(objReconfigured)
 
         // invoke method to delete
-        def localResponse = objReconfigured.delete()
+        def localResponse = objWithUserInputs.delete()
         if (!localResponse) {
             throw new GradleException("Failed deleting namespace")
         }
@@ -56,8 +57,13 @@ class DeleteNamespace extends AbstractKubernetesTask {
         responseOn(localResponse)
     }
 
-    def applyUserDefinedInputs(objectToApplyInputsOn) {
-        def objWithInputs = objectToApplyInputsOn.withName(namespace.call())
+    @Override
+    def applyInputs(objectToApplyInputsOn) {
+        def objWithInputs = objectToApplyInputsOn
+
+        if (namespace) {
+            objWithInputs = objWithInputs.withName(namespace.call())
+        }
         
         if (gracePeriod) {
             objWithInputs = objWithInputs.withGracePeriod(gracePeriod.call())

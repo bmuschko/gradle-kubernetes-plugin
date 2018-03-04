@@ -38,16 +38,16 @@ import org.gradle.api.tasks.Internal
  *
  *              // 1.) Used passed `kubernetesClient` to get `pods` object.
  *              def objToConfigure = kubernetesClient.pods()
- *
- *              // 2.) Apply any user-defined inputs first before we configure
- *              def objWithUserInputs = applyUserDefinedInputs(objToConfigure)
- *
- *              // 3.) Configure any passed `config` closures on `foundPods` thus
+ *              
+ *              // 2.) Configure any passed `config` closures on `foundPods` thus
  *              //     honoring the contract set by the `ConfigAware` trait.
- *              obj objReconfigured = configureOn(objWithUserInputs)
+ *              obj objReconfigured = configureOn(objToConfigure)
+ *              
+ *              // 3.) Apply any user-defined inputs AFTER we satisfy `ConfigAware` contract.
+ *              def objWithUserInputs = applyUserDefinedInputs(objReconfigured)
  *
  *              // 4.) Do some work with the `foundPods` object
- *              def localResponse = objReconfigured.list()
+ *              def localResponse = objWithUserInputs.list()
  *
  *              // 5.) Register a response object for downstream use thus
  *              //     honoring the contact set by the `ResponseAware` trait.
@@ -119,19 +119,19 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
 
     /**
      * Single method where tasks will apply any user-defined inputs.
-     * These inputs/properties MUST be applied BEFORE the `configureOn`
-     * method is called as that is the contract we are creating.
+     * These inputs/properties MUST be applied AFTER the contract
+     * set by `ConfigAware` and thus after calling `configureOn`.
      * 
      * If no inputs are defined then calling this super-class
-     * version, which just returns the Object, is OK.
+     * version, which just returns the Object passed in, is OK.
      * 
      * If inputs are defined then the downstream task must override
      * this method, apply any user-defined inputs, and return
      * the potentially newly created Object (this happens more times
-     * than naught as the `kubernetes-client` uses builders for
+     * than naught as the `kubernetes-client` uses fluents/builders for
      * everything).
      */
-    def applyUserDefinedInputs(objectToApplyInputsOn) {
+    def applyInputs(objectToApplyInputsOn) {
         objectToApplyInputsOn 
     }
 }
