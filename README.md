@@ -4,13 +4,22 @@
 
 Gradle plugin for working with Kubernetes.
 
-## Project(s) Status
+## Status
 
 | CI | Codecov | Docs | Questions | Release |
 | :---: | :---: | :---: | :---: | :---: |
 | [![Build Status](https://travis-ci.org/bmuschko/gradle-kubernetes-plugin.svg?branch=master)](https://travis-ci.org/bmuschko/gradle-kubernetes-plugin) | [![codecov](https://codecov.io/gh/bmuschko/gradle-kubernetes-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/bmuschko/gradle-kubernetes-plugin) | [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](http://htmlpreview.github.io/?https://github.com/bmuschko/gradle-kubernetes-plugin/blob/gh-pages/docs/index.html) | [![Stack Overflow](https://img.shields.io/badge/stack-overflow-4183C4.svg)](https://stackoverflow.com/questions/tagged/gradle-kubernetes-plugin) | [![gradle-kubernetes-plugin](https://api.bintray.com/packages/bmuschko/gradle-plugins/gradle-kubernetes-plugin/images/download.svg) ](https://bintray.com/bmuschko/gradle-plugins/gradle-kubernetes-plugin/_latestVersion) |
 
-## How to Setup
+## Design Goals
+
+Learning from, and building upon, the work done and lessons learned with the [gradle-docker-plugin]() we sought to create a plugin that was easy to use up front but with the proper hooks in place to allow for more complicated scenarios should the developer want to take advantage of them. Things like (but not limited to):
+- Dependent libraries loaded into their own class-loader so as not to clobber `buildscript` classpath.
+- Provide common inputs/properties on tasks themselves, but give users full access to the backing `kubernetes-client` objects via use of the `config{}` closure, should the need arise.
+- Allow for retrieval of all response objects returned from internal task execution via the `response()` method.
+- Full use of `reactive-streams` to give users a more dynamic experience when working with tasks.
+- More streamlined, simplifed, and documented codebase allowing for easier contributions from the community.
+
+## Getting Started
 
 ```
 buildscript() {
@@ -25,7 +34,7 @@ buildscript() {
  apply plugin: 'gradle-kubernetes-plugin'
  ```
 
-## How to Configure
+## The `kubernetes` extension point
 
 The `kubernetes` extension acts as a mapper to the [Config](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/Config.java) object provided by the [kubernetes-client](https://github.com/fabric8io/kubernetes-client) library which we use in the backend. This allows you to configure this plugin in exactly the same way you would configure the java client.
 
@@ -41,10 +50,16 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 
 ## Tasks
 
-- **Name**: name of the gradle task
-- **`config{}`**: Object the `config{}` closure maps to and is further documented below.
-- **`onNext{}`**: Object the next iteration of `onNext{}` will receive and is further documented below.
-- **`response()`**: Object the `response()` method returns AFTER execution of a given task has completed.
+The below table(s) document each of our tasks and their respective `features` in depth details of which are provided further below. Special care should be taken when using the `config{}` construct as it's considered an **ADVANCED** feature and developers should favor using the OOTB inputs/properties of the task itself whenever possible vs configuring things directly on the backing `kubernetes-client` object.
+
+**key table**
+
+| Column | Description |
+| --- | --- |
+| Name | Name and hyperlink to Task source. |
+| `config{}` | Object `config{}` closure maps to. |
+| `onNext{}` | Object next iteration of `onNext{}` closure will receive. |
+| `response()` | Object `response()` method returns AFTER task execution has finished. |
 
 ### Namespace operations
 
@@ -61,8 +76,11 @@ All [additional options](https://github.com/fabric8io/kubernetes-client#configur
 | --- | --- | --- | --- |
 | [Configuration](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/system/Configuration.groovy) | [N/A]() | [Configuration](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/Config.html) | [Configuration](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/Config.html) |
 
+## Features
 
-## On `config{}`
+This plugin provides various means of configuring, working with, and accessing properties and values of a given `Task`. Through the use of `config{}`, `response()`, and `reactive-streams`, which are each further documented below, the user is given full access to configure their `Task` however the choose, have full access to the response or output of a given `Task`, and be able to work more closely with the life-cycle of a given task.
+
+### On `config{}`
 
 All Objects (e.g. Tasks, Extensions, etc) implement the [ConfigAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ConfigureAware.groovy) trait. As such the end-user can take advantage of the `config{}` closure to further configure said objects. The respective `config{}` closure maps to the backing/documented object. A typical use-case would be to configure a task like so:
 ```
@@ -77,9 +95,9 @@ The `config{}` closure has its delegate (as well as the first parameter) set to 
 NonNamespaceOperation<Namespace, NamespaceList, DoneableNamespace, Resource<Namespace, DoneableNamespace>> namespaces = client.namespaces();
 Resource<Namespace, DoneableNamespace> withName = namespaces.withName("hello-world");
 ```
-The `config{}` closure is an attempt at trying to provide a common means of configuring Objects in a very gradle like fashion.
+The `config{}` closure is an attempt at trying to provide a common means of configuring Objects in a very gradle like fashion. This is considered an **ADVANCED** feature so please only use if the OOTB supplied properties are not enough.
 
-## On `response()`
+### On `response()`
 
 All tasks implement the [ResponseAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ResponseAware.groovy) trait. As such the end-user, and ONLY upon completion of a given task, will be able to query for a given tasks `response()` object. Furthermore the Object returned is different for each task and is documented in the table below.
 
@@ -100,34 +118,37 @@ task downstreamTask(dependsOn: myCustomNameSpace) {
 ```
 Much like the `config{}` closure the `response()` method is an attempt at providing a standard way across all tasks of accessing the returned Object from the internal `kubernetes-client` invocation.
 
-## Reactive-Streams
+### On `reactive-streams`
 
 [reactive-streams](https://github.com/reactive-streams/reactive-streams-jvm) support is an optional feature you can take advantage of and works for all tasks. We try to align with best practices but given that we are executing within a gradle context we break the expected API from time to time to keep the look and feel of our plugin. Each task generally behaves the same but if one doesn't please visit have a look at the task definition itself for any documentaiton or nuance surrounding its use.
 
 Documentation on how we implement this feature can be found in our [HERE](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/AbstractReactiveStreamsTask.groovy).
 Examples to help you get started can be found [HERE]().
 
-### onError
+#### onError stream
 
-The `onError` closure is passed the exception that is thrown for YOU to handle. If you silently ignore we will not throw the exception behind the scenes.
-The below example is a common use-case that arises when someone wants to remove a container whether it exists or not but does not want to fail hard.
+The `onError` closure is passed the exception that is thrown for YOU to handle. If you silently ignore we will not throw/re-throw the exception behind the scenes. Suppose you want to automate the creation of a `Namespace` but you don't want to fail if the namespace already exists. In this scenario you could do something like the below:
 
 ```
-import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
+import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
-task listNamespaces(type: ListNamespaces) {
+task createNamespace(type: CreateNamespace) {
+    namespace { "namespace-that-possibly-exists" }
     onError { exception ->
-        if (exception.message.contains('something I care about'))
-            throw exception
+        if (exception.message.contains('namespace already exists')) { // not an actual message just an example
+            // do nothing
+        } else {
+            throw execption
+        }
     }
 }
 ```
 
-### onNext
+#### onNext stream
 
-The `onNext` closure is passed the next iterative response upon execution or if the response contains a list then the next item in that list. For all other tasks we simply hand you back the object that is given to us by the execution. Thus, and much like the `onException` closure, all delegation is now in your control. Any properties/values expected to be set will not be done unless YOU do them.
+The `onNext` closure is passed the next iterative response upon execution or if the response contains a list then the next item in that list. For all other tasks we simply hand back the object that is given to us by the execution.
 
-Iterative tasks are things like `ListNamespaces`. These tasks have output which can be iterated over or return a list (e.g.` Collection` or `Object[]`) of some sort.
+Iterative tasks are things like `ListNamespaces` or `ListPods`. These tasks have output which can be iterated over or return a list (e.g.` Collection` or `Object[]`) of some sort.
 
 Suppose we want to list out, or simply work with, each available namespace. We might do something like:
 ```
@@ -141,14 +162,15 @@ task listNamespaces(type: ListNamespaces) {
 ```
 If `4` namespaces were present then the above `onNext` closure would execute for each found.
 
-### onComplete
+#### onComplete stream
 
-The `onComplete` closure is not passed anything upon execution. It works in the same fashion that `doLast` does but is instead part of this task and thus executes before `doLast` does. This closure executes ONLY upon success. The below example demonstrates how this works.
+The `onComplete` closure is not passed anything upon execution. It works in the same fashion that `doLast` does but is instead part of this task and thus executes before `doLast` kicks. This closure executes ONLY upon success. The below example demonstrates how this works.
 
 ```
-import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.ListNamespaces
+import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.GetNamespace
 
-task listNamespaces(type: ListNamespaces) {
+task getNamespace(type: GetNamespace) {
+    namespace { "my-namespace" }
     onComplete {
         logger.quiet 'Executes first'
     }
