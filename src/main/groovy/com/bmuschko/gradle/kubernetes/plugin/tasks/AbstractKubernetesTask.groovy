@@ -73,41 +73,66 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
         boolean executionFailed = false
         try {
 
-            // 1.) Execute the overridden `handleClient` method on our custom
-            //     `KubernetesClient` classpath.
-            def executionResponse = contextLoader.withClasspath { handleClient(it) }
+            // 1.) Honor the reactive-streams `onNext` callback.
+            handleOnNext()
 
-            // 2.) Honor the reactive-stream `onNext` callback if we have a
-            //     non-null response.
-            if (executionResponse && onNext()) {
-                if (executionResponse instanceof Collection || executionResponse instanceof Object[]) {
-                    for (def responseIteration : executionResponse) {
-                        onNext().call(responseIteration)
-                    }
-                } else {
-                    onNext().call(executionResponse)
-                }
-            }
         } catch (final Exception possibleException) {
 
-            // 3.) Honor the reactive-stream `onError` callback, if applicable,
-            //     with the just thrown Exception.
+            // 2.) Honor the reactive-streams `onError` callback.
             executionFailed = true
-            if (onError()) {
-                onError().call(possibleException)
-            } else {
-                throw possibleException
-            }
+            handleOnError(possibleException)
         }
 
-        // 4.) Honor the reactive-stream `onComplete` callback if applicable.
-        if(!executionFailed && onComplete()) {
+        // 3.) Honor the reactive-streams `onError` callback.
+        if(!executionFailed) {
+            handleOnComplete()
+        }
+    }
+
+    /**
+     *  Internal method for handling the `onNext` contract.
+     */
+    private handleOnNext() {
+
+        // 1.) Execute the overridden `handleClient` method on our custom
+        //     `KubernetesClient` classpath.
+        def executionResponse = contextLoader.withClasspath { handleClient(it) }
+
+        // 2.) Honor the reactive-stream `onNext` callback but ONLY if we have a
+        //     non-null response.
+        if (executionResponse && onNext()) {
+            if (executionResponse instanceof Collection || executionResponse instanceof Object[]) {
+                for (def responseIteration : executionResponse) {
+                    onNext().call(responseIteration)
+                }
+            } else {
+                onNext().call(executionResponse)
+            }
+        }
+    }
+
+    /**
+     *  Internal method for handling the `onError` contract.
+     */
+    private handleOnError(final Exception possibleException) {
+        if (onError()) {
+            onError().call(possibleException)
+        } else {
+            throw possibleException
+        }    
+    }
+
+    /**
+     *  Internal method for handling the `onComplete` contract.
+     */
+    private handleOnComplete() {
+        if (onComplete()) {
             onComplete().call()
         }
     }
 
     /**
-     *  Pass the fully created `KubernetesClient` to the implementing
+     *  Pass the fully created `kubernetes-client` to the implementing
      *  class to do some work with.
      *
      *  Optionally return a valid Object to pass to super-class
