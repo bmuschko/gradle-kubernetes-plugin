@@ -31,7 +31,7 @@ jobs:
       script: skip
       deploy:
         provider: script
-        script: ./gradlew -s clean assemble bintrayUpload gitPublishPush -Dorg.ajoberstar.grgit.auth.username=bmuschko -Dorg.ajoberstar.grgit.auth.password=$GH_TOKEN
+        script: ./gradlew -s clean productionRelease -PbintrayUsername=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PreleaseUsername=bmuschko -PreleasePassword=$GH_TOKEN -PreleaseRepository=gradle-plugins
         on:
           tags: true
 
