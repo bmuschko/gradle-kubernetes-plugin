@@ -14,10 +14,10 @@ Gradle plugin for working with Kubernetes.
 
 Learning from, and building upon, the work done, lessons learned, and features requested, with the [gradle-docker-plugin]() we sought to create a plugin that was easy to use up front but with the proper hooks/constructs in place to allow for more flexible solutions and complicated scenarios should the developer want to take advantage of them. Things like (but not limited to):
 - Dependent libraries loaded into their own class-loader so as not to clobber `buildscript` classpath.
-- Provide common inputs/properties on tasks themselves, but give users full access to the backing `kubernetes-client` objects via use of the `config{}` closure, should the need arise.
-- Ability to retry task execution via the `retry{}` closure.
-- Allow for retrieval of all response objects returned from internal task execution via the `response()` method.
-- Full use of `reactive-streams` to give users a more dynamic experience when working with tasks.
+- [config{}](#On-config{}) provides a common means of configuring the backing object of that Tasks are based upon. Instead of exposing every possible property the backing `kubernetes-client` may provide we instead expose the most common ones and let the user further configure things through this construct shoudl the need arise.
+- [retry{}](#On-retry{}) provides a common means of configuring retries for a given Task. The construct itself can be provided globally on the extension point or upon each individual task for more granular use-cases.
+- [response()](#On-response()) hands back to the user, once task execution has finished, the actual response object given to us by the `kubernetes-client` thereby allowing downstream tasks to query a previously ran task for its output.
+- [reactive-streams](#On-reactive-streams) gives users a more dynamic experience when working with a tasks life-cycle.
 - More streamlined, simplifed, and documented codebase allowing for easier contributions from the community.
 
 ## Getting Started
@@ -81,7 +81,7 @@ The below table(s) document each of our tasks and their respective `features` in
 
 This plugin provides various means of configuring, working with, and accessing properties and values of a given `Task`. Through the use of `config{}`, `response()`, and `reactive-streams`, which are each further documented below, the user is given full access to configure their `Task` however the choose, have full access to the response or output of a given `Task`, and be able to work more closely with the life-cycle of a given task.
 
-### On `config{}`
+### On config{}
 
 All Objects (e.g. Tasks, Extensions, etc) implement the [ConfigAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ConfigureAware.groovy) trait. As such the end-user can take advantage of the `config{}` closure to further configure said objects. The respective `config{}` closure maps to the backing/documented object. A typical use-case would be to configure a task like so:
 ```
@@ -98,7 +98,7 @@ Resource<Namespace, DoneableNamespace> withName = namespaces.withName("hello-wor
 ```
 The `config{}` closure is an attempt at trying to provide a common means of configuring Objects in a very gradle like fashion. This is considered an **ADVANCED** feature so please only use if the OOTB supplied properties are not enough.
 
-### On `retry{}`
+### On retry{}
 
 All tasks, as well as the `kubernetes` extension point, expose the `retry{}` closure. This allows the developer to define a common means, if used on the extension point, or a more granular way, if used on the task itself, to retry the internal task execution should things fail.
 
@@ -126,7 +126,7 @@ Task definitions of the `retry{}` closure take precedence over those defined on 
 We use the [failsafe](https://github.com/jhalterman/failsafe) library behind the scenes to execute code internally. As such when you define/code a `retry{}` closure you're actually configuring a newly created instance of [RetryPolicy](http://jodah.net/failsafe/javadoc/net/jodah/failsafe/RetryPolicy.html).
 
 
-### On `response()`
+### On response()
 
 All tasks implement the [ResponseAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ResponseAware.groovy) trait. As such the end-user, and ONLY upon completion of a given task, will be able to query for a given tasks `response()` object. Furthermore the Object returned is different for each task and is documented in the table below.
 
@@ -147,7 +147,7 @@ task downstreamTask(dependsOn: myCustomNameSpace) {
 ```
 Much like the `config{}` closure the `response()` method is an attempt at providing a standard way across all tasks of accessing the returned Object from the internal `kubernetes-client` invocation.
 
-### On `reactive-streams`
+### On reactive-streams
 
 [reactive-streams](https://github.com/reactive-streams/reactive-streams-jvm) support is an optional feature you can take advantage of and works for all tasks. We try to align with best practices but given that we are executing within a gradle context we break the expected API from time to time to keep the look and feel of our plugin. Each task generally behaves the same but if one doesn't please visit have a look at the task definition itself for any documentaiton or nuance surrounding its use.
 
