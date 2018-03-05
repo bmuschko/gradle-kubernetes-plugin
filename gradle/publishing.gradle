@@ -10,7 +10,7 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
-        maven { 
+        maven {
             url artifactoryURL
             credentials {
                 username = artifactoryUser
@@ -29,7 +29,7 @@ buildscript {
 System.setProperty('org.ajoberstar.grgit.auth.username', resolveProperty('releaseUsername'))
 System.setProperty('org.ajoberstar.grgit.auth.password', resolveProperty('releasePassword'))
 System.setProperty('org.ajoberstar.grgit.auth.interactive.allow', 'false')
-    
+
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
@@ -39,7 +39,7 @@ apply plugin: org.ajoberstar.gradle.git.publish.GitPublishPlugin
 publishing {
     publications {
         mavenJava (MavenPublication) {
-            from components.java             
+            from components.java
             artifact sourcesJar
             artifact docsJar
             artifact testsJar
@@ -66,6 +66,8 @@ ext {
     githubSite = 'https://github.com'
 }
 
+def orgName = rootProject.findProperty('organization')
+
 bintray {
 
     user = resolveProperty('bintrayUsername')
@@ -74,11 +76,9 @@ bintray {
     publish = true
 
     pkg {
-        def orgName = rootProject.findProperty('organization')
-        
         userOrg = orgName
         repo = rootProject.findProperty('release.stage') == 'final' ? releaseRepository : snapshotRepository
-        name = project.name
+        name = rootProject.name
         websiteUrl = "${githubSite}/${orgName}/${project.name}"
         issueTrackerUrl = "${githubSite}/${orgName}/${project.name}/issues"
         vcsUrl = "${githubSite}/${orgName}/${project.name}.git"
@@ -100,7 +100,7 @@ bintray {
 }
 
 gitPublish {
-    repoUri = "${githubSite}/${rootProject.findProperty('organization')}/${project.rootProject.name}.git"
+    repoUri = "${githubSite}/${orgName}/${project.name}.git"
     branch = "${project.name}-gh-pages"
     contents {
         from zipTree(docsJar.archivePath)
@@ -110,7 +110,7 @@ gitPublish {
 gitPublishPush.dependsOn docsJar
 
 /*
- * Check environment for property and if that fails 
+ * Check environment for property and if that fails
  * ask gradle to find the property somewhere within
  * the project hierarchy.
  */
