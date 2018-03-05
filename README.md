@@ -12,9 +12,10 @@ Gradle plugin for working with Kubernetes.
 
 ## Design Goals
 
-Learning from, and building upon, the work done and lessons learned with the [gradle-docker-plugin]() we sought to create a plugin that was easy to use up front but with the proper hooks in place to allow for more complicated scenarios should the developer want to take advantage of them. Things like (but not limited to):
+Learning from, and building upon, the work done, lessons learned, and features requested, with the [gradle-docker-plugin]() we sought to create a plugin that was easy to use up front but with the proper hooks/constructs in place to allow for more flexible solutions and complicated scenarios should the developer want to take advantage of them. Things like (but not limited to):
 - Dependent libraries loaded into their own class-loader so as not to clobber `buildscript` classpath.
 - Provide common inputs/properties on tasks themselves, but give users full access to the backing `kubernetes-client` objects via use of the `config{}` closure, should the need arise.
+- Ability to retry task execution via the `retry{}` closure.
 - Allow for retrieval of all response objects returned from internal task execution via the `response()` method.
 - Full use of `reactive-streams` to give users a more dynamic experience when working with tasks.
 - More streamlined, simplifed, and documented codebase allowing for easier contributions from the community.
@@ -96,6 +97,34 @@ NonNamespaceOperation<Namespace, NamespaceList, DoneableNamespace, Resource<Name
 Resource<Namespace, DoneableNamespace> withName = namespaces.withName("hello-world");
 ```
 The `config{}` closure is an attempt at trying to provide a common means of configuring Objects in a very gradle like fashion. This is considered an **ADVANCED** feature so please only use if the OOTB supplied properties are not enough.
+
+### On `retry{}`
+
+All tasks, as well as the `kubernetes` extension point, expose the `retry{}` closure. This allows the developer to define a common means, if used on the extension point, or a more granular way, if used on the task itself, to retry the internal task execution should things fail.
+
+When defined on the extension:
+```
+kubernetes {
+   retry {
+       withDelay(10, TimeUnit.SECONDS)
+       withMaxRetries(3)
+   }
+}
+```
+When defined on a task:
+```
+task getNamespace(type: GetNamespace) {
+    namespace { "${randomString()}" }
+    retry {
+        withDelay(10, TimeUnit.SECONDS)
+        withMaxRetries(3)
+    }
+}
+```
+Task definitions of the `retry{}` closure take precedence over those defined on the extension point.
+
+We use the [failsafe](https://github.com/jhalterman/failsafe) library behind the scenes to execute code internally. As such when you define/code a `retry{}` closure you're actually configuring a newly created instance of [RetryPolicy](http://jodah.net/failsafe/javadoc/net/jodah/failsafe/RetryPolicy.html).
+
 
 ### On `response()`
 
