@@ -14,10 +14,10 @@ Gradle plugin for working with Kubernetes.
 
 Learning from, and building upon, the work done, lessons learned, and features requested, with the [gradle-docker-plugin]() we sought to create a plugin that was easy to use up front but with the proper hooks/constructs in place to allow for more flexible solutions and complicated scenarios should the developer want to take advantage of them. Things like (but not limited to):
 - Dependent libraries loaded into their own class-loader so as not to clobber `buildscript` classpath.
-- [config{}](#on-config) provides a common means of configuring the backing object of that Tasks are based upon. Instead of exposing every possible property the backing `kubernetes-client` may provide we instead expose the most common ones and let the user further configure things through this construct shoudl the need arise.
-- [retry{}](#on-retry) provides a common means of configuring retries for a given Task. The construct itself can be provided globally on the extension point or upon each individual task for more granular use-cases.
-- [response()](#on-response) hands back to the user, once task execution has finished, the actual response object given to us by the `kubernetes-client` thereby allowing downstream tasks to query a previously ran task for its output.
-- [reactive-streams](#on-reactive-streams) gives users a more dynamic experience when working with a tasks life-cycle.
+- [config{}](#on-config) provides a common means of configuring the backing object Tasks are based upon. Instead of exposing every possible property the backing `kubernetes-client` may provide we instead expose the most common ones and let the user further configure things through this construct should the need arise.
+- [retry{}](#on-retry) provides a common means of configuring retries for a given Task. The construct itself can be provided globally on the extension point, for all tasks to inherit, or upon each individual task for more granular use-cases.
+- [response()](#on-response) hands back to the user, once task execution has finished, the object given to us by the `kubernetes-client` execution. This allows downstream tasks to query a previously ran Task for its output and potentially design more complicated scenarios with it.
+- [reactive-streams](#on-reactive-streams) gives users a more dynamic experience when working with a give tasks life-cycle.
 - More streamlined, simplifed, and documented codebase allowing for easier contributions from the community.
 
 ## Getting Started
