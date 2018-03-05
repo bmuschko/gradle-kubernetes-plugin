@@ -108,7 +108,7 @@ abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAw
         //     and if not valid then check this task if one has been defined, and then as a last resort
         //     fallback to the default which is akin to normal execution (i.e. no retries).
         final GradleKubernetesExtension extension = project.extensions.getByName(GradleKubernetesPlugin.EXTENSION_NAME)
-        final RetryPolicy retryPolicy = extension.retry() ?: (retry() ?: DEFAULT_RETRY_POLICY)
+        final RetryPolicy retryPolicy = retry() ?: (extension.retry() ?: DEFAULT_RETRY_POLICY)
 
         // 2.) Execute the overridden `handleClient` method on our custom
         //     `KubernetesClient` classpath.

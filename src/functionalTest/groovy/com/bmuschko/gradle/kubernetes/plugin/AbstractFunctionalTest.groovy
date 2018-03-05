@@ -95,5 +95,23 @@ abstract class AbstractFunctionalTest extends Specification {
     public static String randomString() {
         UUID.randomUUID().toString().replaceAll("-", "")
     }
-}
 
+    /**
+     * Count the number of instances of substring within a string.
+     *
+     * @param string     String to look for substring in.
+     * @param substring  Sub-string to look for.
+     * @return           Count of substrings in string.
+     */
+    public static int count(final String string, final String substring) {
+       int count = 0;
+       int idx = 0;
+
+       while ((idx = string.indexOf(substring, idx)) != -1) {
+          idx++;
+          count++;
+       }
+
+       return count;
+    }
+}
