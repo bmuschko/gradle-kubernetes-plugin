@@ -5,17 +5,11 @@ env:
 
 language: java
 jdk: oraclejdk8
+install: true
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-
-install: true
 
 before_script:
 # Download kubectl, which is a requirement for using minikube.
@@ -28,9 +22,20 @@ before_script:
 # Wait for Kubernetes to be up and ready.
 - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
 
-script:
-- kubectl cluster-info 
-- ./gradlew -s -Dorg.gradle.daemon=false clean build functionalTest publishToMavenLocal
-  
-after_script:
-- bash <(curl -s https://codecov.io/bash)
+jobs:
+  include:
+    - stage: all tests
+      script: kubectl cluster-info && ./gradlew -s -Dorg.gradle.daemon=false clean build functionalTest publishToMavenLocal
+      after_script: bash <(curl -s https://codecov.io/bash)
+    - stage: release
+      script: skip
+      deploy:
+        provider: script
+        script: ./gradlew -s clean assemble bintrayUpload gitPublishPush -Dorg.ajoberstar.grgit.auth.username=bmuschko -Dorg.ajoberstar.grgit.auth.password=$GH_TOKEN
+        on:
+          tags: true
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
