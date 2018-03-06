@@ -90,11 +90,6 @@ bintray {
         version {
             released  = new Date()
             vcsTag = "v${project.version}"
-
-            gpg {
-                sign = true
-                passphrase = resolveProperty('gpgPassphrase')
-            }
         }
     }
 }
