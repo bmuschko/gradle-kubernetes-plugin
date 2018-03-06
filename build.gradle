@@ -40,7 +40,9 @@ release {
 
 // Task used for CI releases
 task productionRelease {
-    logger.quiet "Releasing version ${->project.version}"
+    doLast {
+        logger.quiet "Releasing version ${->project.version}"
+    }
 }
 
 // 1.) The release process must first build the main/sub projects.
