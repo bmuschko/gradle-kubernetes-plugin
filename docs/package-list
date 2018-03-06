@@ -1,0 +1,5 @@
+com.bmuschko.gradle.kubernetes.plugin
+com.bmuschko.gradle.kubernetes.plugin.domain
+com.bmuschko.gradle.kubernetes.plugin.tasks
+com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
+com.bmuschko.gradle.kubernetes.plugin.tasks.system
