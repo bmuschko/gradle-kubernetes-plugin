@@ -22,8 +22,10 @@ buildscript {
 
 // must be set prior to 'release-opinion' plugin getting applied
 // as they are magically used behind the scenes.
-rootProject.ext.setProperty('release.stage', releaseStage.trim())
-rootProject.ext.setProperty('release.scope', releaseScope.trim())
+if (ciRelease) {
+    rootProject.ext.setProperty('release.stage', releaseStage.trim())
+    rootProject.ext.setProperty('release.scope', releaseScope.trim())
+}
 
 apply plugin: 'org.ajoberstar.release-opinion'
 
@@ -31,6 +33,7 @@ apply plugin: 'org.ajoberstar.release-opinion'
 release {
     def credentials = new org.ajoberstar.grgit.Credentials(releaseUsername, releasePassword)
     grgit = org.ajoberstar.grgit.Grgit.open(dir: project.rootDir.absolutePath, creds: credentials)
+    versionStrategy org.ajoberstar.gradle.git.release.semver.RebuildVersionStrategy.INSTANCE
     versionStrategy org.ajoberstar.gradle.git.release.opinion.Strategies.FINAL
     defaultVersionStrategy = org.ajoberstar.gradle.git.release.opinion.Strategies.SNAPSHOT
     tagStrategy {
@@ -38,30 +41,27 @@ release {
     }
 }
 
-// Task used for CI releases
-task productionRelease {
-    doLast {
-        logger.quiet "Releasing version ${->project.version}"
+// only publish to Bintray and Github if done from CI environment.
+if (ciRelease) {
+
+    // 1.) The release process must first build the main/sub projects.
+    def buildTasks = ['build']
+    tasks.release.dependsOn(buildTasks.collect { task ->
+        allprojects.collect {
+            rootProject.name == it.name ? ":${task}" : ":${it.name}:${task}"
+        }.flatten()
+    }.flatten())
+
+    // 2.) The release process, when finished, can now upload artifacts.
+    def publishTasks = [uploadTask]
+    if (Boolean.valueOf(publishGithubPages).booleanValue() && releaseStage.trim().equals('final')) {
+        publishTasks << 'gitPublishPush'
     }
+    tasks.release.finalizedBy(publishTasks.collect { task ->
+        allprojects.collect {
+            rootProject.name == it.name ? ":${task}" : ":${it.name}:${task}"
+        }.flatten()
+    }.flatten())
 }
-
-// 1.) The release process must first build the main/sub projects.
-def buildTasks = ['build']
-tasks.productionRelease.dependsOn(buildTasks.collect { task ->
-    allprojects.collect {
-        rootProject.name == it.name ? ":${task}" : ":${it.name}:${task}"
-    }.flatten()
-}.flatten())
-
-// 2.) The release process, when finished, can now upload artifacts.
-def publishTasks = [uploadTask]
-if (Boolean.valueOf(publishGithubPages).booleanValue() && releaseStage.trim().equals('final')) {
-    publishTasks << 'gitPublishPush'
-}
-tasks.productionRelease.finalizedBy(publishTasks.collect { task ->
-    allprojects.collect {
-        rootProject.name == it.name ? ":${task}" : ":${it.name}:${task}"
-    }.flatten()
-}.flatten())
 
 apply from: "$rootDir/gradle/projects.gradle"

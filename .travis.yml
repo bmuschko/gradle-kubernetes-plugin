@@ -31,7 +31,7 @@ jobs:
       script: skip
       deploy:
         provider: script
-        script: ./gradlew -s clean productionRelease -PbintrayUsername=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PreleaseUsername=bmuschko -PreleasePassword=$GH_TOKEN -PreleaseRepository=gradle-plugins -PreleaseStage=final
+        script: ./gradlew -s clean release -PbintrayUsername=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PreleaseUsername=bmuschko -PreleasePassword=$GH_TOKEN -PreleaseRepository=gradle-plugins -PciRelease=true
         on:
           tags: true
 
