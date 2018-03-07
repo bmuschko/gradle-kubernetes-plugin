@@ -105,7 +105,7 @@ class GradleKubernetesContextLoader {
             configBuilder = kubernetesExtension.configureOn(configBuilder)
 
             // 3.) load `KubernetesClient` from our custom class-loader.
-            final String clientClassName = 'io.fabric8.kubernetes.client.DefaultKubernetesClient'
+            final String clientClassName = 'io.fabric8.openshift.client.DefaultOpenShiftClient'
             final Class clientClass = kubernetesClientClassLoader.loadClass(clientClassName)
 
             // 4.) create `KubernetesClient` instance from our custom class-loader.
