@@ -22,7 +22,7 @@ buildscript {
 
 // must be set prior to 'release-opinion' plugin getting applied
 // as they are magically used behind the scenes.
-if (ciRelease) {
+if (!Boolean.valueOf(project.ciRelease)) {
     rootProject.ext.setProperty('release.stage', releaseStage.trim())
     rootProject.ext.setProperty('release.scope', releaseScope.trim())
 }
@@ -42,7 +42,7 @@ release {
 }
 
 // only publish to Bintray and Github if done from CI environment.
-if (ciRelease) {
+if (Boolean.valueOf(project.ciRelease)) {
 
     // 1.) The release process must first build the main/sub projects.
     def buildTasks = ['build']
