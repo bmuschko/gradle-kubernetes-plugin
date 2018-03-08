@@ -83,7 +83,7 @@ This plugin provides various means of configuring, working with, and accessing p
 
 ### On config
 
-All Objects (e.g. Tasks, Extensions, etc) implement the [ConfigAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ConfigureAware.groovy) trait. As such the end-user can take advantage of the `config{}` closure to further configure said objects. The respective `config{}` closure maps to the backing/documented object. A typical use-case would be to configure a task like so:
+All tasks, as well as the `kubernetes` extension point, implement the [ConfigAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/ConfigureAware.groovy) trait. This in turn exposes the `config{}` closure allowing developers to further configure said objects. The respective `config{}` closure maps to the backing/documented object. A typical use-case would be to configure a task like so:
 ```
 task myCustomNameSpace(type: CreateNamespace) {
     config {
@@ -100,7 +100,7 @@ The `config{}` closure is an attempt at trying to provide a common means of conf
 
 ### On retry
 
-All tasks, as well as the `kubernetes` extension point, expose the `retry{}` closure. This allows the developer to define a common means, if used on the extension point, or a more granular way, if used on the task itself, to retry the internal task execution should things fail.
+All tasks, as well as the `kubernetes` extension point, implement the [RetryAware](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/domain/RetryAware.groovy) trait. This allows the developer to define a common means, via the `retry{}` closure, to configure how tasks should be re-run. Developers can either define the `retry{}` closure on the _extension point_ or on the _task itself_ for more granular configurations. Some typical use-cases are as follows:
 
 When defined on the extension:
 ```
@@ -123,8 +123,9 @@ task getNamespace(type: GetNamespace) {
 ```
 Task definitions of the `retry{}` closure take precedence over those defined on the extension point.
 
-We use the [failsafe](https://github.com/jhalterman/failsafe) library behind the scenes to execute code internally. As such when you define/code a `retry{}` closure you're actually configuring a newly created instance of [RetryPolicy](http://jodah.net/failsafe/javadoc/net/jodah/failsafe/RetryPolicy.html).
+We use the [failsafe](https://github.com/jhalterman/failsafe) library behind the scenes to execute code internally. Thus when you define/code a `retry{}` closure you're actually configuring a newly created instance of [RetryPolicy](http://jodah.net/failsafe/javadoc/net/jodah/failsafe/RetryPolicy.html).
 
+It should be noted that we are not actually re-running the actual `Task` through some gradle magic done behind the scenes. Instead we are just re-running the internal "execution block" that each task implements.
 
 ### On response
 
