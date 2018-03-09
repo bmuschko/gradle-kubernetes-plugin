@@ -115,11 +115,9 @@ class GradleKubernetesContextLoader {
             kubernetesClient = clientConstructor.newInstance(configBuilder.build());
 
             // 5.) register shutdown-hook to close kubernetes client.
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    kubernetesClient.close();
-                }
-            });
+            addShutdownHook {
+                kubernetesClient.close()
+            }
         }
 
         kubernetesClient
