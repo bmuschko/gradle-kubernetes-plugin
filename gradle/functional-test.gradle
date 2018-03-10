@@ -24,6 +24,27 @@ task functionalTest(type: Test) {
         showStandardStreams = true
         events 'started', 'passed', 'failed'
     }
+
+    def testingProperties = [:]
+    def possibleEndpoint = project.findProperty('testKubernetesEndpoint')?.trim()
+    if (possibleEndpoint) {
+        logger.quiet "Setting kubernetes endpoint for functional testing to '${possibleEndpoint}'"
+        testingProperties['test.kubernetes.endpoint'] = possibleEndpoint
+    }
+
+    def possibleUsername = project.findProperty('testKubernetesUsername')?.trim()
+    if (possibleUsername) {
+        logger.quiet "Setting kubernetes username for functional testing to '${possibleUsername}'"
+        testingProperties['test.kubernetes.username'] = possibleUsername
+    }
+
+    def possiblePassword = project.findProperty('testKubernetesPassword')?.trim()
+    if (possiblePassword) {
+        logger.quiet "Setting kubernetes password for functional testing to '${possiblePassword}'"
+        testingProperties['test.kubernetes.password'] = possiblePassword
+    }
+
+    systemProperties = testingProperties
 }
 
 dependencies {

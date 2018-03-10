@@ -56,6 +56,10 @@ abstract class AbstractFunctionalTest extends Specification {
     }
 
     protected void setupBuildfile() {
+        final String possibleEndpoint = System.getProperty('test.kubernetes.endpoint')
+        final String possibleUsername = System.getProperty('test.kubernetes.username')
+        final String possiblePassword = System.getProperty('test.kubernetes.password')
+
         if (buildFile) {
             buildFile.delete()
         }
@@ -70,6 +74,21 @@ abstract class AbstractFunctionalTest extends Specification {
                 jcenter()
             }
         """
+        if (possibleEndpoint) {
+            buildFile << """
+                kubernetes { config { withMasterUrl '$possibleEndpoint' } }
+            """  
+        }
+        if (possibleUsername) {
+            buildFile << """
+                kubernetes { config { withUsername '$possibleUsername' } }
+            """  
+        }
+        if (possiblePassword) {
+            buildFile << """
+                kubernetes { config { withPassword '$possiblePassword' } }
+            """  
+        }
 
         buildFile << """
             task kubernetesConfig(type: com.bmuschko.gradle.kubernetes.plugin.tasks.system.Configuration)
