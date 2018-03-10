@@ -47,11 +47,20 @@ publishing {
     }
 }
 
+ext {
+    githubSite = 'https://github.com'
+    orgName = rootProject.findProperty('organization')
+    publishRepository = (rootProject.findProperty('release.stage') == 'final'
+        || Boolean.valueOf(rootProject.findProperty('ciRelease')))
+            ? releaseRepository
+            : snapshotRepository
+}
+
 artifactory {
     contextUrl = artifactoryURL
     publish {
         repository {
-            repoKey = rootProject.findProperty('release.stage') == 'final' ? releaseRepository : snapshotRepository
+            repoKey = project.publishRepository
             username = artifactoryUser
             password = artifactoryPassword
             mavenCompatible = true
@@ -62,12 +71,6 @@ artifactory {
     }
 }
 
-ext {
-    githubSite = 'https://github.com'
-}
-
-def orgName = rootProject.findProperty('organization')
-
 bintray {
 
     user = resolveProperty('bintrayUsername')
@@ -76,15 +79,15 @@ bintray {
     publish = true
 
     pkg {
-        userOrg = orgName
-        repo = rootProject.findProperty('release.stage') == 'final' ? releaseRepository : snapshotRepository
+        userOrg = project.orgName
+        repo = project.publishRepository
         name = rootProject.name
-        websiteUrl = "${githubSite}/${orgName}/${project.name}"
-        issueTrackerUrl = "${githubSite}/${orgName}/${project.name}/issues"
-        vcsUrl = "${githubSite}/${orgName}/${project.name}.git"
+        websiteUrl = "${githubSite}/${project.orgName}/${project.name}"
+        issueTrackerUrl = "${githubSite}/${project.orgName}/${project.name}/issues"
+        vcsUrl = "${githubSite}/${project.orgName}/${project.name}.git"
         licenses = ['Apache-2.0']
         publicDownloadNumbers = true
-        githubRepo = "${orgName}/${project.name}"
+        githubRepo = "${project.orgName}/${project.name}"
         githubReleaseNotesFile = 'RELEASE_NOTES.md'
 
         version {
@@ -95,7 +98,7 @@ bintray {
 }
 
 gitPublish {
-    repoUri = "${githubSite}/${orgName}/${project.name}.git"
+    repoUri = "${githubSite}/${project.orgName}/${project.name}.git"
     branch = "${project.name}-gh-pages"
     contents {
         from zipTree(docsJar.archivePath)
