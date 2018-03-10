@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.system
+package com.bmuschko.gradle.kubernetes.plugin.tasks.client
 
 import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
@@ -22,22 +22,22 @@ import spock.lang.Requires
 
 /**
  *
- *  Functional tests for the `Configuration` task.
+ *  Functional tests for the `KubernetesClient` task.
  *
  */
-class ConfigurationFunctionalTest extends AbstractFunctionalTest {
+class KubernetesClientFunctionalTest extends AbstractFunctionalTest {
 
-    def "Can get Kubernetes Configuration and execute reactive-streams"() {
+    def "Can get KubernetesClient instance"() {
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.system.Configuration
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.client.KubernetesClient
 
-            task kubeConfig(type: Configuration) {
+            task kubernetesClient(type: KubernetesClient) {
                 onError {
                     logger.quiet '$ON_ERROR_NOT_REACHED'
                 }
-                onNext { output ->
-                    if (output) {
-                        logger.quiet '$ON_NEXT_REACHED'
+                onNext { client ->
+                    if (client) {
+                        logger.quiet "Master URL: \${client.getConfiguration().getMasterUrl()}"
                     }
                 }
                 onComplete {
@@ -50,17 +50,16 @@ class ConfigurationFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: kubeConfig)
+            task workflow(dependsOn: kubernetesClient)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Api-Version: ')
-            result.output.contains('Master-URL: ')
+            result.output.contains('Getting kubernetes-client...')
+            result.output.contains('Master URL:')
             !result.output.contains(ON_ERROR_NOT_REACHED)
-            result.output.contains(ON_NEXT_REACHED)
             result.output.contains(ON_COMPLETE_REACHED)
             result.output.contains(RESPONSE_SET_MESSAGE)
     }

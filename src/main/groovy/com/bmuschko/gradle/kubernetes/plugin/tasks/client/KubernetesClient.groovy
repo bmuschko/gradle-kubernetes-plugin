@@ -13,27 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bmuschko.gradle.kubernetes.plugin.tasks.system
+package com.bmuschko.gradle.kubernetes.plugin.tasks.client
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 
 /**
- * Get, and print minimally, the system Configuration.
+ * Get the `kubernetes-client` instance.
+ * 
+ * This is for advanced usage and is NOT advised for day to day developers
+ * to play around with as the instance handed to you is shared by all tasks
+ * and anything done to it can potentially effect everything else.
  */
-class Configuration extends AbstractKubernetesTask {
+class KubernetesClient extends AbstractKubernetesTask {
 
     @Override
     def handleClient(kubernetesClient) {
 
-        def objToConfigure = kubernetesClient.getConfiguration()
+        logger.quiet 'Getting kubernetes-client...'
+        def objToConfigure = kubernetesClient
+
+        // configure on instance
         def objReconfigured = configureOn(objToConfigure)
-
-        logger.quiet "Api-Version: ${objReconfigured.getApiVersion()}"
-        logger.quiet "Master-URL: ${objReconfigured.getMasterUrl()}"
-
-        // register response for downstream use and return list of items
-        // for `onNext` execution.
-        responseOn(objReconfigured)
+        
+        // apply user-defined inputs
+        def objWithUserInputs = applyInputs(objReconfigured)
+                   
+        // register response for downstream use which in this case
+        // is just a `kubernetes-client` instance.
+        responseOn(objWithUserInputs)
     }
 }
 
