@@ -45,7 +45,9 @@ class GetNamespaceFunctionalTest extends AbstractFunctionalTest {
             }
 
             task getNamespace(type: GetNamespace, dependsOn: createNamespace) {
-                namespace { tasks.createNamespace.response().getMetadata().getName() }
+                doFirst {
+                    namespace = tasks.createNamespace.response().getMetadata().getName()
+                }
                 doLast {
                     if (response().getMetadata().getName() != "${generateName}") {
                         logger.quiet "$SHOULD_NOT_REACH_HERE: foundName=\${response().getMetadata().getName()}, expected=${generateName}"
@@ -54,8 +56,10 @@ class GetNamespaceFunctionalTest extends AbstractFunctionalTest {
             }
 
             task deleteNamespace(type: DeleteNamespace, dependsOn: getNamespace) {
-                namespace { tasks.getNamespace.response().getMetadata().getName() } 
-                gracePeriod { 5000 }
+                doFirst {
+                    namespace = tasks.getNamespace.response().getMetadata().getName()
+                }
+                gracePeriod = 5000
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
@@ -108,7 +112,7 @@ class GetNamespaceFunctionalTest extends AbstractFunctionalTest {
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.GetNamespace
 
             task getNamespace(type: GetNamespace) {
-                namespace { "${randomString()}" }
+                namespace = "${randomString()}"
                 onError { exc ->
                     logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
                 }

@@ -19,6 +19,7 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 
 import java.util.UUID
+import org.gradle.api.GradleException
 
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -30,7 +31,7 @@ class CreateNamespace extends AbstractKubernetesTask {
 
     @Input
     @Optional
-    Closure<String> namespace
+    String namespace
 
     @Input
     @Optional
@@ -61,8 +62,11 @@ class CreateNamespace extends AbstractKubernetesTask {
         def objWithInputs = objectToApplyInputsOn
 
         if (!objectToApplyInputsOn.getName()) {
-            def namespaceName = namespace ? namespace.call() : UUID.randomUUID().toString()
-            objWithInputs = objWithInputs.withName(namespaceName)   
+            if (!namespace) {
+                throw new GradleException("Must define 'namespace' input if not setting through 'config{}' construct.")
+            } else {
+                objWithInputs = objWithInputs.withName(namespace)    
+            }  
         }
 
         if (withLabels) {

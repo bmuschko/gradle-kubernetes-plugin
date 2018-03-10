@@ -19,6 +19,7 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 
 /**
  * Get a namespace.
@@ -26,7 +27,8 @@ import org.gradle.api.tasks.Input
 class GetNamespace extends AbstractKubernetesTask {
 
     @Input
-    Closure<String> namespace
+    @Optional
+    String namespace
 
     @Override
     def handleClient(kubernetesClient) {
@@ -43,7 +45,7 @@ class GetNamespace extends AbstractKubernetesTask {
         // get the namespace
         def localResponse = objWithUserInputs.fromServer().get()
         if (!localResponse) {
-            throw new GradleException("Namespace '" + namespace.call() + "' could not be found.")
+            throw new GradleException("Namespace '" + namespace + "' could not be found.")
         }
                    
         // register response for downstream use which in this case
@@ -53,7 +55,9 @@ class GetNamespace extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(objectToApplyInputsOn) {
-        objectToApplyInputsOn.withName(namespace.call())
+        if (namespace) {
+            objectToApplyInputsOn.withName(namespace)
+        }
     }
 }
 

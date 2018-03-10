@@ -31,6 +31,9 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
             task createNamespace(type: CreateNamespace) {
+                doFirst {
+                    namespace = "${randomString()}"
+                }
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
                 }
@@ -66,7 +69,7 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
             task createNamespace(type: CreateNamespace) {
-                namespace { "${randomString()}" }
+                namespace = "${randomString()}"
                 withLabels = ["${randomString()}" : "${randomString()}"]
 
                 onError { exc ->
@@ -128,8 +131,10 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             }
 
             task deleteNamespace(type: DeleteNamespace) {
-                namespace { tasks.createNamespace.response().getMetadata().getName() } 
-                gracePeriod { 5000 }
+                doFirst {
+                    namespace = tasks.createNamespace.response().getMetadata().getName()
+                }
+                gracePeriod = 5000
             }
 
             task workflow(dependsOn: createNamespace) {

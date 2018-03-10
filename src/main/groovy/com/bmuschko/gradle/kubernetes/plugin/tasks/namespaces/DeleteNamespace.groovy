@@ -28,11 +28,11 @@ class DeleteNamespace extends AbstractKubernetesTask {
 
     @Input
     @Optional
-    Closure<String> namespace
+    String namespace
 
     @Input
     @Optional
-    Closure<Long> gracePeriod
+    Long gracePeriod
 
     @Override
     def handleClient(kubernetesClient) {
@@ -62,11 +62,11 @@ class DeleteNamespace extends AbstractKubernetesTask {
         def objWithInputs = objectToApplyInputsOn
 
         if (namespace) {
-            objWithInputs = objWithInputs.withName(namespace.call())
+            objWithInputs = objWithInputs.withName(namespace)
         }
         
         if (gracePeriod) {
-            objWithInputs = objWithInputs.withGracePeriod(gracePeriod.call())
+            objWithInputs = objWithInputs.withGracePeriod(gracePeriod)
         }
 
         objWithInputs

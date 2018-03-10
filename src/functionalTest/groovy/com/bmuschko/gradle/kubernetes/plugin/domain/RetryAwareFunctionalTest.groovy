@@ -40,7 +40,7 @@ class RetryAwareFunctionalTest extends AbstractFunctionalTest {
             }
 
             task getNamespace(type: GetNamespace) {
-                namespace { "${randomString()}" }
+                namespace = "${randomString()}"
                 onError { exc ->
                     logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
                 }
@@ -74,7 +74,7 @@ class RetryAwareFunctionalTest extends AbstractFunctionalTest {
 
             // retry defined on task takes precedence
             task getNamespace(type: GetNamespace) {
-                namespace { "${randomString()}" }
+                namespace = "${randomString()}"
                 retry {
                     withDelay(1, TimeUnit.SECONDS)
                     withMaxRetries(1)
