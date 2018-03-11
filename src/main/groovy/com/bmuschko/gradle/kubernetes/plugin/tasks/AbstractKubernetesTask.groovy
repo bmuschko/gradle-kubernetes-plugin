@@ -19,6 +19,7 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesPlugin
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesContextLoader
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesExtension
+import com.bmuschko.gradle.kubernetes.plugin.domain.CommonFunctions
 import com.bmuschko.gradle.kubernetes.plugin.domain.ConfigureAware
 import com.bmuschko.gradle.kubernetes.plugin.domain.ResponseAware
 import com.bmuschko.gradle.kubernetes.plugin.domain.RetryAware
@@ -70,7 +71,7 @@ import org.gradle.api.tasks.Internal
  *
  *
  */
-abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAware, ResponseAware, ReactiveStreamsAware, RetryAware {
+abstract class AbstractKubernetesTask extends DefaultTask implements ConfigureAware, ResponseAware, ReactiveStreamsAware, RetryAware, CommonFunctions {
 
     @Internal
     private static final RetryPolicy DEFAULT_RETRY_POLICY = RetryPolicy.NEVER

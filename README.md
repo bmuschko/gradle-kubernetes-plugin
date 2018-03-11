@@ -87,7 +87,7 @@ All tasks, as well as the `kubernetes` extension point, implement the [ConfigAwa
 ```
 task myCustomNameSpace(type: CreateNamespace) {
     config {
-        withName("hello-world")
+        withName("hello-world") // applying name via `config{}` construct instead of property
     }
 }
 ```
@@ -114,7 +114,7 @@ kubernetes {
 When defined on a task:
 ```
 task getNamespace(type: GetNamespace) {
-    namespace { "${randomString()}" }
+    namespace = "my-eventually-existing-namespace"
     retry {
         withDelay(10, TimeUnit.SECONDS)
         withMaxRetries(3)
@@ -134,8 +134,8 @@ All tasks implement the [ResponseAware](https://github.com/bmuschko/gradle-kuber
 As each task does some work in the backend it's sometimes helpful, or even desired, to get the returned object for further downstream inspection. Suppose you wanted a programmatic way of getting the name of the namespace you just created. You could do something like:
 ```
 task myCustomNameSpace(type: CreateNamespace) {
-    config { specialConfig ->
-        withName("hello-world")
+    config {
+        withName("hello-world") // applying name via `config{}` construct instead of property
     }
 }
 
@@ -163,7 +163,7 @@ The `onError` closure is passed the exception that is thrown for YOU to handle. 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
 
 task createNamespace(type: CreateNamespace) {
-    namespace { "namespace-that-possibly-exists" }
+    namespace = "namespace-that-possibly-exists"
     onError { exception ->
         if (exception.message.contains('namespace already exists')) { // not an actual message just an example
             // do nothing
@@ -200,7 +200,7 @@ The `onComplete` closure is not passed anything upon execution. It works in the 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.GetNamespace
 
 task getNamespace(type: GetNamespace) {
-    namespace { "my-namespace" }
+    namespace = "my-namespace"
     onComplete {
         logger.quiet 'Executes first'
     }

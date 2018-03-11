@@ -57,14 +57,9 @@ class ListNamespaces extends AbstractKubernetesTask {
     @Override
     def applyInputs(objectToApplyInputsOn) {
         def objWithInputs = objectToApplyInputsOn
-        
-        if (withLabels) {
-            objWithInputs = objWithInputs.withLabels(withLabels)
-        }
 
-        if (withoutLabels) {
-            objWithInputs = objWithInputs.withoutLabels(withoutLabels)
-        }
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withLabels', withLabels)
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withoutLabels', withoutLabels)
 
         objWithInputs
     }

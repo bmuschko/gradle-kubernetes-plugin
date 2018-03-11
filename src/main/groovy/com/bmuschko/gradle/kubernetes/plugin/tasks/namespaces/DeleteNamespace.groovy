@@ -61,13 +61,11 @@ class DeleteNamespace extends AbstractKubernetesTask {
     def applyInputs(objectToApplyInputsOn) {
         def objWithInputs = objectToApplyInputsOn
 
-        if (namespace) {
-            objWithInputs = objWithInputs.withName(namespace)
-        }
-        
-        if (gracePeriod) {
-            objWithInputs = objWithInputs.withGracePeriod(gracePeriod)
-        }
+        // the `withName` property can be applied through the `config{}` construct,
+        // which in turn may return another object by setting int, so we have to
+        // ensure that this object we're working on can actually respond to the method.
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withName', namespace)
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withGracePeriod', gracePeriod)
 
         objWithInputs
     }

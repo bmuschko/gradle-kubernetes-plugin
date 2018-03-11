@@ -61,17 +61,8 @@ class CreateNamespace extends AbstractKubernetesTask {
     def applyInputs(objectToApplyInputsOn) {
         def objWithInputs = objectToApplyInputsOn
 
-        if (!objectToApplyInputsOn.getName()) {
-            if (!namespace) {
-                throw new GradleException("Must define 'namespace' input if not setting through 'config{}' construct.")
-            } else {
-                objWithInputs = objWithInputs.withName(namespace)    
-            }  
-        }
-
-        if (withLabels) {
-            objWithInputs = objWithInputs.withLabels(withLabels)
-        }
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withName', namespace)
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withLabels', withLabels)
 
         objWithInputs
     }
