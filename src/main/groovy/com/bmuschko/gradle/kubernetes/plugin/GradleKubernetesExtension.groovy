@@ -22,7 +22,7 @@ import com.bmuschko.gradle.kubernetes.plugin.domain.RetryAware
 /**
  *  Extension point for the gradle-kubernetes-plugin. Currently this
  *  class serves only to provide a mapping to the `Config` instance
- *  of the `KubernetesClient`. Instead of defining a thousand properties
+ *  of the `kubernetes-client`. Instead of defining a thousand properties
  *  here, which are already defined elsewhere, we can instead do
  *  something like:
  *  
@@ -42,4 +42,6 @@ import com.bmuschko.gradle.kubernetes.plugin.domain.RetryAware
  */
 class GradleKubernetesExtension implements ConfigureAware, RetryAware {
 
+    // whether to use OpenShift client or not
+    boolean useOpenShiftAdapter = false
 }

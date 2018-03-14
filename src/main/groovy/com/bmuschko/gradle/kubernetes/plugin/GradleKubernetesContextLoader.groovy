@@ -104,17 +104,21 @@ class GradleKubernetesContextLoader {
             // 2.) map any configs passed in through extension to the configBuilder instance.
             configBuilder = kubernetesExtension.configureOn(configBuilder)
 
-            // 3.) load `KubernetesClient` from our custom class-loader.
-            final String clientClassName = 'io.fabric8.openshift.client.DefaultOpenShiftClient'
-            final Class clientClass = kubernetesClientClassLoader.loadClass(clientClassName)
-
-            // 4.) create `KubernetesClient` instance from our custom class-loader.
+            // 3.) Create Config clas.
             final String configClassName = 'io.fabric8.kubernetes.client.Config'
             final Class configClass = kubernetesClientClassLoader.loadClass(configClassName)
+            
+            // 4.) Choose which client object to create.
+            final String clientClassName = kubernetesExtension.useOpenShiftAdapter ?
+                'io.fabric8.openshift.client.DefaultOpenShiftClient' :
+                'io.fabric8.kubernetes.client.DefaultKubernetesClient'
+
+            // 5.) Create `kubernetes-client` Config and invoke client constructor.
+            final Class clientClass = kubernetesClientClassLoader.loadClass(clientClassName)
             def clientConstructor = clientClass.getConstructor(configClass)
             kubernetesClient = clientConstructor.newInstance(configBuilder.build());
 
-            // 5.) register shutdown-hook to close kubernetes client.
+            // 6.) register shutdown-hook to close kubernetes client.
             addShutdownHook {
                 kubernetesClient.close()
             }

@@ -18,9 +18,6 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 
-import java.util.UUID
-import org.gradle.api.GradleException
-
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 
@@ -45,13 +42,13 @@ class CreateNamespace extends AbstractKubernetesTask {
 
         // configure on meta-data
         def objReconfigured = configureOn(objToConfigure)
-        
+
         // apply user-defined inputs
         def objWithUserInputs = applyInputs(objReconfigured)
 
         // finalize creation of namespace
         def localResponse = objWithUserInputs.endMetadata().done()
-                   
+
         // register response for downstream use which in this case
         // is just a `Namespace` instance.
         responseOn(localResponse)
