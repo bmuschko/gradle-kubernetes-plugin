@@ -62,6 +62,12 @@ The below table(s) document each of our tasks and their respective `features` in
 | `onNext{}` | Object next iteration of `onNext{}` closure will receive. |
 | `response()` | Object `response()` method returns AFTER task execution has finished. |
 
+### Client operation **_ADVANCED USAGE and doesn't follow Task design patterns_
+
+| Name | `config{}` | `onNext{}` | `response()` |
+| --- | --- | --- | --- |
+| [KubernetesClient](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/client/KubernetesClient.groovy) | [KubernetesClient](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/KubernetesClient.java) | [KubernetesClient](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/KubernetesClient.java) | [KubernetesClient](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/KubernetesClient.java) |
+
 ### Namespace operations
 
 | Name | `config{}` | `onNext{}` | `response()` |
