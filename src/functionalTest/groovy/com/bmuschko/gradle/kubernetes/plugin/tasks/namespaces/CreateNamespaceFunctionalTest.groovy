@@ -26,13 +26,16 @@ import org.gradle.testkit.runner.BuildResult
  */
 class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
 
+    def randomNamespace = randomString()
+
     def "Create namespace with dynamic name, execute reactive-streams"() {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
 
             task createNamespace(type: CreateNamespace) {
                 doFirst {
-                    namespace = "${randomString()}"
+                    namespace = "${randomNamespace}"
                 }
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -50,7 +53,20 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: createNamespace)
+            task deleteNamespace(type: DeleteNamespace) {
+                doFirst {
+                    namespace = "${randomNamespace}"
+                }
+                gracePeriod = 5000
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
+                }
+            }
+
+            task workflow(dependsOn: createNamespace) {
+                finalizedBy deleteNamespace
+            }
         """
 
         when:
@@ -65,11 +81,15 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
     }
 
     def "Create namespace with dynamic name, execute reactive-streams, and with no config"() {
+
+        def randomNamespace = randomString()
+
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
 
             task createNamespace(type: CreateNamespace) {
-                namespace = "${randomString()}"
+                namespace = "${randomNamespace}"
                 withLabels = ["${randomString()}" : "${randomString()}"]
 
                 onError { exc ->
@@ -88,7 +108,20 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: createNamespace)
+            task deleteNamespace(type: DeleteNamespace) {
+                doFirst {
+                    namespace = "${randomNamespace}"
+                }
+                gracePeriod = 5000
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
+                }
+            }
+
+            task workflow(dependsOn: createNamespace) {
+                finalizedBy deleteNamespace
+            }
         """
 
         when:
