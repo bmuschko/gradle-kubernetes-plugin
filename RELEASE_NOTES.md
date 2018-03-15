@@ -1,5 +1,6 @@
 ### Version 0.0.4 (TBA)
 * Added task `ListServices` - [Pull request 10](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/10)
+* Added task `GetService` - [Pull request 11](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/11)
 
 ### Version 0.0.3 (March 14, 2018)
 * Added task `KubernetesClient` which returns a raw `kubernetes-client` instance to use.
