@@ -42,9 +42,9 @@ class DeleteService extends AbstractKubernetesTask {
     def handleClient(kubernetesClient) {
 
         logger.quiet 'Deleting service...'
-        def objToConfigure = kubernetesClient.namespaces()
+        def objToConfigure = kubernetesClient.services()
 
-        // configure on namespace
+        // configure on services
         def objReconfigured = configureOn(objToConfigure)
         
         // apply user-defined inputs
