@@ -82,6 +82,8 @@ The below table(s) document each of our tasks and their respective `features` in
 | Name | `config{}` | `onNext{}` | `response()` |
 | --- | --- | --- | --- |
 | [ListServices](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/services/ListServices.groovy) | [MixedOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/MixedOperation.html) | [Service](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Service.htmll) | [ServiceList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/ServiceList.html) |
+[GetService](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/services/GetService.groovy) | [N/A]() | [Service](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Service.htmll) | [Service](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Service.html) |
+
 
 ### System operations
 
