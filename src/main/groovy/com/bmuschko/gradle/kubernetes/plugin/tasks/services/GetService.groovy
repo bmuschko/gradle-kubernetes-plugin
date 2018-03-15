@@ -28,7 +28,11 @@ class GetService extends AbstractKubernetesTask {
 
     @Input
     @Optional
-    String serviceName
+    String namespace // which namespace the service exists within.
+    
+    @Input
+    @Optional
+    String service // name of the service to retrieve.
 
     @Override
     def handleClient(kubernetesClient) {
@@ -60,7 +64,8 @@ class GetService extends AbstractKubernetesTask {
         // the `withName` property can be applied through the `config{}` construct,
         // which in turn may return another object by setting int, so we have to
         // ensure that this object we're working on can actually respond to the method.
-        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withName', namespace)
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'inNamespace', namespace)
+        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withName', service)
 
         objWithInputs
     }
