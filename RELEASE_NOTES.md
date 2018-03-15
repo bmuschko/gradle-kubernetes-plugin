@@ -1,4 +1,4 @@
-### Version 0.0.2 (March 14, 2018)
+### Version 0.0.3 (March 14, 2018)
 * Added task `KubernetesClient` which returns a raw `kubernetes-client` instance to use.
 * All existing tasks have been refactored to prefer traditional property inputs over using Closures.
 * `GradleKubernetesExtension` gained property `useOpenShiftAdapter` to switch to using the _open-shift_ wrapper in favor or the default _kubernetes_ wrapper.
