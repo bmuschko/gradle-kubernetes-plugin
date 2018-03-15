@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
+package com.bmuschko.gradle.kubernetes.plugin.tasks.services
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.GradleException
@@ -22,19 +22,19 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 
 /**
- * Get a namespace.
+ * Get a service.
  */
-class GetNamespace extends AbstractKubernetesTask {
+class GetService extends AbstractKubernetesTask {
 
     @Input
     @Optional
-    String namespace
+    String serviceName
 
     @Override
     def handleClient(kubernetesClient) {
 
-        logger.quiet 'Getting namespace...'
-        def objToConfigure = kubernetesClient.namespaces()
+        logger.quiet 'Getting service...'
+        def objToConfigure = kubernetesClient.services()
 
         // no real options to supply so should amount to a no-op
         def objReconfigured = configureOn(objToConfigure)
@@ -42,14 +42,14 @@ class GetNamespace extends AbstractKubernetesTask {
         // apply user-defined inputs
         def objWithUserInputs = applyInputs(objReconfigured)
 
-        // get the namespace
+        // get the service
         def localResponse = objWithUserInputs.fromServer().get()
         if (!localResponse) {
-            throw new GradleException("Namespace could not be found.")
+            throw new GradleException("Service could not be found.")
         }
                    
         // register response for downstream use which in this case
-        // is just a `Namespace` instance.
+        // is just a `Service` instance.
         responseOn(localResponse)
     }
 
