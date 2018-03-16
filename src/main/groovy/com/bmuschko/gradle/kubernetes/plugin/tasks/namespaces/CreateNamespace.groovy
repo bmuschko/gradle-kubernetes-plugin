@@ -55,13 +55,9 @@ class CreateNamespace extends AbstractKubernetesTask {
     }
 
     @Override
-    def applyInputs(objectToApplyInputsOn) {
-        def objWithInputs = objectToApplyInputsOn
-
-        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withName', namespace)
-        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withLabels', withLabels)
-
-        objWithInputs
+    def applyInputs(obj) {
+        obj = invokeMethod(obj, 'withName', namespace)
+        invokeMethod(obj, 'withLabels', withLabels)
     }
 }
 

@@ -54,15 +54,8 @@ class GetNamespace extends AbstractKubernetesTask {
     }
 
     @Override
-    def applyInputs(objectToApplyInputsOn) {
-        def objWithInputs = objectToApplyInputsOn
-
-        // the `withName` property can be applied through the `config{}` construct,
-        // which in turn may return another object by setting int, so we have to
-        // ensure that this object we're working on can actually respond to the method.
-        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withName', namespace)
-
-        objWithInputs
+    def applyInputs(obj) {
+        invokeMethod(obj, 'withName', namespace)
     }
 }
 

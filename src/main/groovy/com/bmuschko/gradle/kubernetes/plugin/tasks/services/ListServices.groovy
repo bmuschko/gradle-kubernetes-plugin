@@ -55,13 +55,9 @@ class ListServices extends AbstractKubernetesTask {
     }
 
     @Override
-    def applyInputs(objectToApplyInputsOn) {
-        def objWithInputs = objectToApplyInputsOn
-
-        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withLabels', withLabels)
-        objWithInputs = invokeOnNonNullOrException(objWithInputs, 'withoutLabels', withoutLabels)
-
-        objWithInputs
+    def applyInputs(obj) {
+        obj = invokeMethod(obj, 'withLabels', withLabels)
+        invokeMethod(obj, 'withoutLabels', withoutLabels)
     }
 }
 
