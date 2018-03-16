@@ -29,6 +29,8 @@ import org.gradle.api.GradleException
  */
 trait CommonFunctions {
 
+    private static final def EMPTY_OBJECT_ARRAY = new Object[0]
+
     /**
      * Check if Object can invoke method, and then do so, otherwise throw Exception. If
      * args is null then `objectToInvoke` is simply returned.
@@ -38,7 +40,7 @@ trait CommonFunctions {
      * @param args arguments to pass to potential method
      * @return the output, or potentially new Object, created from calling the method
      */
-    def invokeOnNonNullOrException(final def objectToInvoke, final String methodName, final Object... args) {
+    def invokeMethod(def objectToInvoke, final String methodName, final Object... args) {
         if (args != null) {
             def metaMethod = objectToInvoke.metaClass.getMetaMethod(methodName, args)
             if (metaMethod) {
@@ -49,6 +51,10 @@ trait CommonFunctions {
         } else {
             objectToInvoke
         }
+    }
+
+    def invokeMethod(def objectToInvoke, final String methodName) {
+        invokeMethod(objectToInvoke, methodName, EMPTY_OBJECT_ARRAY)
     }
 }
 

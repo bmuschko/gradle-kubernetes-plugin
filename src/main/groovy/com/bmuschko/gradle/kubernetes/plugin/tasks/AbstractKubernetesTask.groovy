@@ -52,7 +52,7 @@ import org.gradle.api.tasks.Internal
  *              obj objReconfigured = configureOn(objToConfigure)
  *
  *              // 3.) Apply any user-defined inputs AFTER we satisfy `ConfigAware` contract.
- *              def objWithUserInputs = applyUserDefinedInputs(objReconfigured)
+ *              def objWithUserInputs = applyInputs(objReconfigured)
  *
  *              // 4.) Do some work with the `foundPods` object
  *              def localResponse = objWithUserInputs.list()
