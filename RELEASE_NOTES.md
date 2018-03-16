@@ -1,4 +1,4 @@
-### Version 0.0.4 (TBA)
+### Version 0.0.4 (March 16, 2018)
 * Added task `ListServices` - [Pull request 10](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/10)
 * Added task `GetService` - [Pull request 11](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/11)
 * Added task `DeleteService` - [Pull request 12](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/12)
