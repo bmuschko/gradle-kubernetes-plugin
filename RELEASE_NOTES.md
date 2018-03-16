@@ -3,6 +3,7 @@
 * Added task `GetService` - [Pull request 11](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/11)
 * Added task `DeleteService` - [Pull request 12](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/12)
 * Added task `CreateService` - [Pull request 13](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/13)
+* Bump `kubernetes-client` to `3.1.10` - [Pull request 14](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/14)
 
 ### Version 0.0.3 (March 14, 2018)
 * Added task `KubernetesClient` which returns a raw `kubernetes-client` instance to use.
