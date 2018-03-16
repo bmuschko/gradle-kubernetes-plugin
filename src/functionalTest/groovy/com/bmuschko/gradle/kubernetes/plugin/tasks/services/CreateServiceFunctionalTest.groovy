@@ -14,83 +14,34 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
+package com.bmuschko.gradle.kubernetes.plugin.tasks.services
 
 import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
 
 /**
  *
- * All functional tests for the `CreateNamespace` task.
+ * All functional tests for the `CreateService` task.
  *
  */
-class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
+class CreateServiceFunctionalTest extends AbstractFunctionalTest {
 
-    def randomNamespace = randomString()
+    def defaultNamespace = 'default'
 
-    def "Create namespace with dynamic name, execute reactive-streams"() {
-        buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+    def "Create service and execute reactive-streams"() {
 
-            task createNamespace(type: CreateNamespace) {
-                doFirst {
-                    namespace = "${randomNamespace}"
-                }
-                onError { exc ->
-                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
-                }
-                onNext { output ->
-                    logger.quiet "$SHOULD_REACH_HERE: next=\${output}"
-                }
-                onComplete {
-                    logger.quiet '$ON_COMPLETE_REACHED'
-                }
-                doLast {
-                    if (response()) {
-                        logger.quiet '$RESPONSE_SET_MESSAGE'
-                    }
-                }
-            }
-
-            task deleteNamespace(type: DeleteNamespace) {
-                doFirst {
-                    namespace = "${randomNamespace}"
-                }
-                gracePeriod = 5000
-
-                onError { exc ->
-                    logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
-                }
-            }
-
-            task workflow(dependsOn: createNamespace) {
-                finalizedBy deleteNamespace
-            }
-        """
-
-        when:
-            BuildResult result = build('workflow')
-
-        then:
-            result.output.contains('Creating namespace...')
-            result.output.contains(RESPONSE_SET_MESSAGE)
-            result.output.contains(SHOULD_REACH_HERE)
-            result.output.contains(ON_COMPLETE_REACHED)
-            !result.output.contains(SHOULD_NOT_REACH_HERE)
-    }
-
-    def "Create namespace with dynamic name, execute reactive-streams, and with no config"() {
-
-        def randomNamespace = randomString()
+        def randomService = randomString()
 
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.CreateService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.DeleteService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.GetService
+            import java.util.concurrent.TimeUnit
 
-            task createNamespace(type: CreateNamespace) {
-                namespace = "${randomNamespace}"
-                withLabels = ["${randomString()}" : "${randomString()}"]
+            task createService(type: CreateService) {
+                service = "${randomService}"
+                namespace = "${defaultNamespace}"
+                addSpec('NodePort', 12345, 32333, 8080, 'TCP')
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -108,19 +59,34 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task deleteNamespace(type: DeleteNamespace) {
+            task getService(type: GetService, dependsOn: createService) {
                 doFirst {
-                    namespace = "${randomNamespace}"
+                    service = "${randomService}"
+                    namespace = "${defaultNamespace}"
+                }
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
+                retry {
+                    withDelay(5, TimeUnit.SECONDS)
+                    withMaxRetries(5)
+                }
+            }
+
+            task deleteService(type: DeleteService) {
+                doFirst {
+                    service = "${randomService}"
+                    namespace = "${defaultNamespace}"
                 }
                 gracePeriod = 5000
 
                 onError { exc ->
-                    logger.quiet "$SHOULD_NOT_REACH_HERE: \${exc}"
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
                 }
             }
 
-            task workflow(dependsOn: createNamespace) {
-                finalizedBy deleteNamespace
+            task workflow(dependsOn: getService) {
+                finalizedBy deleteService
             }
         """
 
@@ -128,30 +94,37 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Creating namespace...')
+            result.output.contains('Creating service...')
             result.output.contains(RESPONSE_SET_MESSAGE)
             result.output.contains(SHOULD_REACH_HERE)
             result.output.contains(ON_COMPLETE_REACHED)
             !result.output.contains(SHOULD_NOT_REACH_HERE)
     }
 
-    def "Create namespace, execute reactive-streams, and with config"() {
+    def "Create service, using config, and execute reactive-streams"() {
+
+        def randomService = randomString()
 
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.CreateService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.DeleteService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.GetService
+            import java.util.concurrent.TimeUnit
 
-            task createNamespace(type: CreateNamespace) {
+            task createService(type: CreateService) {
                 config {
-                    withName("${randomString()}")
+                    withNewMetadata()
+                    .withName("${randomService}")
+                    .withNamespace("${defaultNamespace}")
+                    .endMetadata()
                 }
+                addSpec('NodePort', 12345, 32333, 8080, 'TCP')
+
                 onError { exc ->
-                    logger.quiet "$ON_ERROR_NOT_REACHED: exc=\${exc}"
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
                 }
                 onNext { output ->
-                    if (output) {
-                        logger.quiet "$ON_NEXT_REACHED with name \${output.getMetadata().getName()}"
-                    }
+                    logger.quiet "$SHOULD_REACH_HERE: next=\${output}"
                 }
                 onComplete {
                     logger.quiet '$ON_COMPLETE_REACHED'
@@ -163,15 +136,34 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task deleteNamespace(type: DeleteNamespace) {
+            task getService(type: GetService, dependsOn: createService) {
                 doFirst {
-                    namespace = tasks.createNamespace.response().getMetadata().getName()
+                    service = "${randomService}"
+                    namespace = "${defaultNamespace}"
                 }
-                gracePeriod = 5000
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
+                retry {
+                    withDelay(5, TimeUnit.SECONDS)
+                    withMaxRetries(5)
+                }
             }
 
-            task workflow(dependsOn: createNamespace) {
-                finalizedBy deleteNamespace
+            task deleteService(type: DeleteService) {
+                doFirst {
+                    service = "${randomService}"
+                    namespace = "${defaultNamespace}"
+                }
+                gracePeriod = 5000
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
+            }
+
+            task workflow(dependsOn: getService) {
+                finalizedBy deleteService
             }
         """
 
@@ -179,11 +171,10 @@ class CreateNamespaceFunctionalTest extends AbstractFunctionalTest {
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Creating namespace...')
-            !result.output.contains(ON_ERROR_NOT_REACHED)
-            !result.output.contains(SHOULD_NOT_REACH_HERE)
-            result.output.contains(ON_NEXT_REACHED)
-            result.output.contains(ON_COMPLETE_REACHED)
+            result.output.contains('Creating service...')
             result.output.contains(RESPONSE_SET_MESSAGE)
+            result.output.contains(SHOULD_REACH_HERE)
+            result.output.contains(ON_COMPLETE_REACHED)
+            !result.output.contains(SHOULD_NOT_REACH_HERE)
     }
 }
