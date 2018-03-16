@@ -17,6 +17,7 @@
 package com.bmuschko.gradle.kubernetes.plugin.tasks.services
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
+import org.gradle.api.GradleException
 import org.gradle.api.Nullable
 
 import org.gradle.api.tasks.Input
@@ -27,6 +28,8 @@ import org.gradle.api.tasks.Optional
  * Create a service.
  */
 class CreateService extends AbstractKubernetesTask {
+
+    public static final SERVICE_TYPES = ['ClusterIP', 'NodePort', 'LoadBalancer', 'ExternalName']
 
     @Input
     @Optional
@@ -71,7 +74,14 @@ class CreateService extends AbstractKubernetesTask {
         obj = invokeMethod(obj, 'endMetadata')
 
         obj = invokeMethod(obj, 'editOrNewSpec')
-        obj = invokeMethod(obj, 'withType', this.serviceSpec.type)
+        if (this.serviceSpec.type) {
+            if (SERVICE_TYPES.contains(this.serviceSpec.type)) {
+                obj = invokeMethod(obj, 'withType', this.serviceSpec.type)
+            } else {
+                throw new GradleException("Unknown service type '${this.serviceSpec.type}'. Acceptable values are: ${SERVICE_TYPES}")
+            }
+        }
+
         obj = invokeMethod(obj, 'addNewPort')
         obj = invokeMethod(obj, 'withPort', this.serviceSpec.port)
         obj = invokeMethod(obj, 'withNodePort', this.serviceSpec.nodePort)

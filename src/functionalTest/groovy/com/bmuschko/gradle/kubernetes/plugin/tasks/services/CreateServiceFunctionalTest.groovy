@@ -177,4 +177,37 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
             result.output.contains(ON_COMPLETE_REACHED)
             !result.output.contains(SHOULD_NOT_REACH_HERE)
     }
+
+    def "Create service with illegal spec Type"() {
+
+        def randomService = randomString()
+
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.CreateService
+
+            task createService(type: CreateService) {
+                config {
+                    withNewMetadata()
+                    .withName("${randomService}")
+                    .withNamespace("${defaultNamespace}")
+                    .endMetadata()
+                }
+                addSpec('BlahBlah', 12345, 32333, 8080, 'TCP')
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
+            }
+
+            task workflow(dependsOn: createService)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Creating service...')
+            result.output.contains('Unknown service type')
+            result.output.contains(SHOULD_NOT_REACH_HERE)
+    }
 }
