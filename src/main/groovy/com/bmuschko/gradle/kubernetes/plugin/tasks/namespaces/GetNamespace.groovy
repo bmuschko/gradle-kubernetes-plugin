@@ -55,7 +55,8 @@ class GetNamespace extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        invokeMethod(obj, 'withName', namespace)
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'withName', namespace).get()
     }
 }
 

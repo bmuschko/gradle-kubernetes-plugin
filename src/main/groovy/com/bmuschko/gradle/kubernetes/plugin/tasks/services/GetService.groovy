@@ -29,7 +29,7 @@ class GetService extends AbstractKubernetesTask {
     @Input
     @Optional
     String namespace // which namespace the service exists within.
-    
+
     @Input
     @Optional
     String service // name of the service to retrieve.
@@ -51,7 +51,7 @@ class GetService extends AbstractKubernetesTask {
         if (!localResponse) {
             throw new GradleException("Service could not be found.")
         }
-                   
+
         // register response for downstream use which in this case
         // is just a `Service` instance.
         responseOn(localResponse)
@@ -59,7 +59,8 @@ class GetService extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        obj = invokeMethod(obj, 'inNamespace', namespace)
-        invokeMethod(obj, 'withName', service)
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'inNamespace', namespace)
+        invokeMethod(objRef, 'withName', service).get()
     }
 }

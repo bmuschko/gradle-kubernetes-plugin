@@ -59,7 +59,8 @@ class GetPod extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        obj = invokeMethod(obj, 'inNamespace', namespace)
-        invokeMethod(obj, 'withName', pod)
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'inNamespace', namespace)
+        invokeMethod(objRef, 'withName', pod).get()
     }
 }

@@ -59,8 +59,9 @@ class DeleteNamespace extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        obj = invokeMethod(obj, 'withName', namespace)
-        invokeMethod(obj, 'withGracePeriod', gracePeriod)
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'withName', namespace)
+        invokeMethod(objRef, 'withGracePeriod', gracePeriod).get()
     }
 }
 

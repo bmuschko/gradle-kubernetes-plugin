@@ -56,8 +56,9 @@ class ListPods extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        obj = invokeMethod(obj, 'withLabels', withLabels)
-        invokeMethod(obj, 'withoutLabels', withoutLabels)
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'withLabels', withLabels)
+        invokeMethod(objRef, 'withoutLabels', withoutLabels).get()
     }
 }
 

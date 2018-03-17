@@ -63,9 +63,10 @@ class DeletePod extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        obj = invokeMethod(obj, 'inNamespace', namespace)
-        obj = invokeMethod(obj, 'withName', pod)
-        invokeMethod(obj, 'withGracePeriod', gracePeriod)
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'inNamespace', namespace)
+        invokeMethod(objRef, 'withName', pod)
+        invokeMethod(objRef, 'withGracePeriod', gracePeriod).get()
     }
 }
 
