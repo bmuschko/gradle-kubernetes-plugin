@@ -240,7 +240,8 @@ task getNamespace(type: GetNamespace) {
 
 The [functionalTests](https://github.com/bmuschko/gradle-kubernetes-plugin/tree/master/src/functionalTest/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks) provide many examples that you can use for inspiration within your own code. If there are any questions about how to use a given feature feel free to open an issue and just ask.
 
-## Additional Resources
+## Kubernetes Resources
 * [Kubernetes Client](https://github.com/fabric8io/kubernetes-client)
 * [Kubernetes Setup](https://kubernetes.io/docs/setup/pick-right-solution/)
-* [Release Process](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/docs/RELEASE_PROCESS.md)
+* [Reasons Kubernetes deployments fail: Part 1](https://kukulinski.com/10-most-common-reasons-kubernetes-deployments-fail-part-1/)
+* [Reasons Kubernetes deployments fail: Part 2](https://kukulinski.com/10-most-common-reasons-kubernetes-deployments-fail-part-2/)
