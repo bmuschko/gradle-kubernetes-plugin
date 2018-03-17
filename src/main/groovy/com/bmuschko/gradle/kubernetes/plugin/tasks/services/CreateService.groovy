@@ -68,28 +68,29 @@ class CreateService extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        obj = invokeMethod(obj, 'editOrNewMetadata')
-        obj = invokeMethod(obj, 'withName', service)
-        obj = invokeMethod(obj, 'withNamespace', namespace)
-        obj = invokeMethod(obj, 'endMetadata')
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'editOrNewMetadata')
+        invokeMethod(objRef, 'withName', service)
+        invokeMethod(objRef, 'withNamespace', namespace)
+        invokeMethod(objRef, 'endMetadata')
 
-        obj = invokeMethod(obj, 'editOrNewSpec')
+        invokeMethod(objRef, 'editOrNewSpec')
         if (this.serviceSpec.type) {
             if (SERVICE_TYPES.contains(this.serviceSpec.type)) {
-                obj = invokeMethod(obj, 'withType', this.serviceSpec.type)
+                invokeMethod(objRef, 'withType', this.serviceSpec.type)
             } else {
                 throw new GradleException("Unknown service type '${this.serviceSpec.type}'. Acceptable values are: ${SERVICE_TYPES}")
             }
         }
 
-        obj = invokeMethod(obj, 'addNewPort')
-        obj = invokeMethod(obj, 'withPort', this.serviceSpec.port)
-        obj = invokeMethod(obj, 'withNodePort', this.serviceSpec.nodePort)
-        obj = invokeMethod(obj, 'withNewTargetPort', this.serviceSpec.targetPort)
-        obj = invokeMethod(obj, 'withProtocol', this.serviceSpec.protocol)
-        obj = invokeMethod(obj, 'endPort')
-        obj = invokeMethod(obj, 'withSelector', this.selector)
-        invokeMethod(obj, 'endSpec') 
+        invokeMethod(objRef, 'addNewPort')
+        invokeMethod(objRef, 'withPort', this.serviceSpec.port)
+        invokeMethod(objRef, 'withNodePort', this.serviceSpec.nodePort)
+        invokeMethod(objRef, 'withNewTargetPort', this.serviceSpec.targetPort)
+        invokeMethod(objRef, 'withProtocol', this.serviceSpec.protocol)
+        invokeMethod(objRef, 'endPort')
+        invokeMethod(objRef, 'withSelector', this.selector)
+        invokeMethod(objRef, 'endSpec').get()
     }
 
     public void addSpec(@Nullable String type,

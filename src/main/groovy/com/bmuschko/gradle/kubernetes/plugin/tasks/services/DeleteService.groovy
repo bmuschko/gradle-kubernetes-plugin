@@ -63,9 +63,10 @@ class DeleteService extends AbstractKubernetesTask {
 
     @Override
     def applyInputs(obj) {
-        obj = invokeMethod(obj, 'inNamespace', namespace)
-        obj = invokeMethod(obj, 'withName', service)
-        invokeMethod(obj, 'withGracePeriod', gracePeriod)
+        def objRef = wrapAtomic(obj)
+        invokeMethod(objRef, 'inNamespace', namespace)
+        invokeMethod(objRef, 'withName', service)
+        invokeMethod(objRef, 'withGracePeriod', gracePeriod).get()
     }
 }
 

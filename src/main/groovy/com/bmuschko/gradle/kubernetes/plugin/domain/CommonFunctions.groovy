@@ -16,6 +16,8 @@
 
 package com.bmuschko.gradle.kubernetes.plugin.domain
 
+import java.util.concurrent.atomic.AtomicReference
+
 import org.gradle.api.GradleException
 
 /**
@@ -32,29 +34,49 @@ trait CommonFunctions {
     private static final def EMPTY_OBJECT_ARRAY = new Object[0]
 
     /**
-     * Check if Object can invoke method, and then do so, otherwise throw Exception. If
+     * Invoke no-arg method on Object with supplied arguments. If
      * args is null then `objectToInvoke` is simply returned.
-     * 
-     * @param objectToInvoke object to invoke method on
+     *
+     * The AtomicReference is updated with the potentially new value coming
+     * out of the invoked method.
+     *
+     * @param objectToInvoke AtomicReference holding object to invoke method on
      * @param methodName name of method to find and invoke
      * @param args arguments to pass to potential method
      * @return the output, or potentially new Object, created from calling the method
      */
-    def invokeMethod(def objectToInvoke, final String methodName, final Object... args) {
+    def invokeMethod(final AtomicReference<Object> objectToInvoke, final String methodName, final Object... args) {
         if (args != null) {
-            def metaMethod = objectToInvoke.metaClass.getMetaMethod(methodName, args)
+            def localObject = objectToInvoke.get()
+            def metaMethod = localObject.metaClass.getMetaMethod(methodName, args)
             if (metaMethod) {
-                metaMethod.invoke(objectToInvoke, args)
+                def localResponse = metaMethod.invoke(localObject, args)
+                objectToInvoke.set(localResponse)
             } else {
                 throw new GradleException("Cannot invoke method '${methodName}' on class '${objectToInvoke.class}'. Was it previously set?")
             }
-        } else {
-            objectToInvoke
         }
+        objectToInvoke
     }
 
-    def invokeMethod(def objectToInvoke, final String methodName) {
+    /**
+     * Invoke no-arg method on Object.
+     *
+     * The AtomicReference is updated with the potentially new value coming
+     * out of the invoked method.
+     *
+     * @param objectToInvoke AtomicReference holding object to invoke method on
+     * @param methodName name of method to find and invoke
+     * @return the output, or potentially new Object, created from calling the method
+     */
+    def invokeMethod(final AtomicReference<Object> objectToInvoke, final String methodName) {
         invokeMethod(objectToInvoke, methodName, EMPTY_OBJECT_ARRAY)
     }
-}
 
+    /**
+     * Wrap an arbitrary Object in an AtomicReference
+     */
+    def wrapAtomic(Object obj) {
+        new AtomicReference<Object>(obj)
+    }
+}
