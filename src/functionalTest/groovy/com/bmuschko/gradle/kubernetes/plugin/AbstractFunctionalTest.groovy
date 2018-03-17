@@ -41,9 +41,12 @@ abstract class AbstractFunctionalTest extends Specification {
     final String possiblePassword = System.getProperty('test.kubernetes.password')
     final String possibleOffline = System.getProperty('test.kubernetes.offline')
 
+    final String lineSeparator = System.getProperty("line.separator")
+
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
 
+    File defaultPodFile = loadResource('/pods/nginx-pod.yaml')
     File projectDir
     File buildFile
 
@@ -140,5 +143,30 @@ abstract class AbstractFunctionalTest extends Specification {
        }
 
        return count;
+    }
+
+    // load an arbitrary file from classpath resource
+    public static File loadResource(String resourcePath) {
+        this.getClass().getResource(resourcePath)
+    }
+
+    /**
+     * Copy and replace an arbitrary number of tokens in a given file. If no
+     * tokens are found then file is more/less just copied to new destination.
+     *
+     * @param source the source file we will replace tokens in
+     * @param destination the destination file we will write
+     * @param tokensToReplaceWithValues map where key=token-to-replace, value=value-to-replace-with
+     */
+    public static void copyAndReplaceTokensInFile(File source, File destination, def tokensToReplaceWithValues = [:]) {
+        destination.withWriter { dest ->
+            source.eachLine { line ->
+                def localLine = line
+                tokensToReplaceWithValues.each { k, v ->
+                    localLine = localLine.replaceAll(k, v)
+                }
+                dest << localLine + lineSeparator
+            }
+        }
     }
 }
