@@ -15,7 +15,6 @@ task functionalTest(type: Test) {
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
     mustRunAfter test
-    include '**/ListPods*'
 
     reports {
         html.destination = project.file("$html.destination/functional")
