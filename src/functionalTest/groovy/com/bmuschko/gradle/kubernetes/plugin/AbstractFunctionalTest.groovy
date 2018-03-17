@@ -46,7 +46,7 @@ abstract class AbstractFunctionalTest extends Specification {
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    File defaultPodFile = loadResource('/pods/nginx-pod.yaml')
+    URL defaultPodFile = loadResource('/pods/nginx-pod.yaml')
     File projectDir
     File buildFile
 
@@ -146,7 +146,7 @@ abstract class AbstractFunctionalTest extends Specification {
     }
 
     // load an arbitrary file from classpath resource
-    public static File loadResource(String resourcePath) {
+    public static URL loadResource(String resourcePath) {
         this.getClass().getResource(resourcePath)
     }
 

@@ -41,7 +41,7 @@ class CreatePod extends AbstractKubernetesTask {
 
     @Input
     @Optional
-    Map<String, String> labels
+    Map<String, String> withLabels
     
     @Internal
     private List<Container> containers = []
@@ -77,7 +77,7 @@ class CreatePod extends AbstractKubernetesTask {
         invokeMethod(objRef, 'editOrNewMetadata')
         invokeMethod(objRef, 'withName', pod)
         invokeMethod(objRef, 'withNamespace', namespace)
-        invokeMethod(objRef, 'withLabels', labels)
+        invokeMethod(objRef, 'withLabels', withLabels)
         invokeMethod(objRef, 'endMetadata')
 
         if (this.containers) {
