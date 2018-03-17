@@ -36,6 +36,11 @@ abstract class AbstractFunctionalTest extends Specification {
     public static final String SHOULD_NOT_REACH_HERE = "NOT A GOOD PLACE TO BE"
     public static final String SHOULD_REACH_HERE = "WE ARE HERE"
 
+    final String possibleEndpoint = System.getProperty('test.kubernetes.endpoint')
+    final String possibleUsername = System.getProperty('test.kubernetes.username')
+    final String possiblePassword = System.getProperty('test.kubernetes.password')
+    final String possibleOffline = System.getProperty('test.kubernetes.offline')
+
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
 
@@ -56,9 +61,6 @@ abstract class AbstractFunctionalTest extends Specification {
     }
 
     protected void setupBuildfile() {
-        final String possibleEndpoint = System.getProperty('test.kubernetes.endpoint')
-        final String possibleUsername = System.getProperty('test.kubernetes.username')
-        final String possiblePassword = System.getProperty('test.kubernetes.password')
 
         if (buildFile) {
             buildFile.delete()
@@ -71,6 +73,7 @@ abstract class AbstractFunctionalTest extends Specification {
             }
 
             repositories {
+                mavenLocal()
                 jcenter()
             }
         """
@@ -105,6 +108,9 @@ abstract class AbstractFunctionalTest extends Specification {
 
     private GradleRunner createAndConfigureGradleRunner(String... arguments) {
         def args = ['--stacktrace']
+        if (Boolean.valueOf(possibleOffline).booleanValue() == true) {
+            args << '--offline'
+        }
         if (arguments) {
             args.addAll(arguments)
         }

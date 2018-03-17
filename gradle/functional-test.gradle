@@ -15,6 +15,7 @@ task functionalTest(type: Test) {
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
     mustRunAfter test
+    include '**/ListPods*'
 
     reports {
         html.destination = project.file("$html.destination/functional")
@@ -42,6 +43,12 @@ task functionalTest(type: Test) {
     if (possiblePassword) {
         logger.quiet "Setting kubernetes password for functional testing to '${possiblePassword}'"
         testingProperties['test.kubernetes.password'] = possiblePassword
+    }
+
+    def possibleOffline = project.findProperty('testKubernetesOffline')?.trim()
+    if (possibleOffline) {
+        logger.quiet "Setting kubernetes offline for functional testing to '${possibleOffline}'"
+        testingProperties['test.kubernetes.offline'] = possibleOffline
     }
 
     systemProperties = testingProperties
