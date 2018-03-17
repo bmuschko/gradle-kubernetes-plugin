@@ -1,0 +1,42 @@
+/**
+ * 
+ * Script to hold common functions/methods/closures for the entire project to use.
+ * 
+ */
+
+// regular expression used primiarly when one wants to split a String
+// in camelCase format into its parts (i.e. helloWorld into ['hello', 'World']).
+ext.camelCaseSplitRegex = "(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])"
+
+/**
+ * Find a gradle property value, given the passed potentially camelCase key
+ * property name, and return a map where key is the said property but in snakeCase
+ * and value is the found property value. If no property exists than an empty map
+ * is returned.
+ *
+ * @param gradlePropertyToFind gradle property to search for
+ * @return map where key=passed prop in snakeCase format, value=value of found property
+ */
+ext.propertyInSystemFormat = { gradlePropertyToFind ->
+    def propertyMap = [:]
+    def possibleValue = rootProject.findProperty(gradlePropertyToFind)?.trim()
+    if (possibleValue) {
+        def parts = gradlePropertyToFind.split(project.ext.camelCaseSplitRegex)*.toLowerCase()
+        logger.quiet "Setting kubernetes '${parts.last()}' for functional testing to '${possibleValue}'"
+        propertyMap[parts.join('.')] = possibleValue
+    }
+    propertyMap
+}
+
+/*
+ * Check environment for property and if that fails
+ * ask gradle to find the property somewhere within
+ * the project hierarchy.
+ * 
+ * @param propKey the property to search for
+ * @return value of property found or null
+ */
+ext.resolveProperty = { propKey ->
+    String propValue = System.getenv()[propKey]
+    return propValue ?: rootProject.findProperty(propKey)
+}
