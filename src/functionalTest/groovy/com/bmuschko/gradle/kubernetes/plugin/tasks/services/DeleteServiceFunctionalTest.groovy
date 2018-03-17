@@ -50,4 +50,31 @@ class DeleteServiceFunctionalTest extends AbstractFunctionalTest {
             result.output.contains('Deleting service...')
             result.output.contains(SHOULD_REACH_HERE)
     }
+
+    def "Delete non-existent service with config"() {
+
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.DeleteService
+
+            task deleteService(type: DeleteService) {
+                config {
+                    withName("${randomString()}")
+                    .withGracePeriod(5000)
+                }
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
+                }
+            }
+
+            task workflow(dependsOn: deleteService)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Deleting service...')
+            result.output.contains(SHOULD_REACH_HERE)
+    }
 }

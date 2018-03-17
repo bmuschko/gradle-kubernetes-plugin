@@ -117,4 +117,31 @@ class DeleteNamespaceFunctionalTest extends AbstractFunctionalTest {
             result.output.contains('Deleting namespace...')
             result.output.contains(SHOULD_REACH_HERE)
     }
+
+    def "Delete non-existent namespace with config"() {
+
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.DeleteNamespace
+
+            task deleteNamespace(type: DeleteNamespace) {
+                config {
+                    withName("${randomString()}")
+                    .withGracePeriod(500)
+                }
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
+                }
+            }
+
+            task workflow(dependsOn: deleteNamespace)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Deleting namespace...')
+            result.output.contains(SHOULD_REACH_HERE)
+    }
 }

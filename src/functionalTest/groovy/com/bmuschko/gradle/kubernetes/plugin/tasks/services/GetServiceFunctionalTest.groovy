@@ -92,4 +92,31 @@ class GetServiceFunctionalTest extends AbstractFunctionalTest {
             result.output.contains(SHOULD_REACH_HERE)
             result.output.contains('could not be found.')
     }
+
+    def "Get non-existent service with config"() {
+
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.GetService
+
+            task getService(type: GetService) {
+                config {
+                    withName("${randomString()}")
+                }
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
+                }
+            }
+
+            task workflow(dependsOn: getService)
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Getting service...')
+            result.output.contains(SHOULD_REACH_HERE)
+            result.output.contains('could not be found.')
+    }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.services
+package com.bmuschko.gradle.kubernetes.plugin.tasks.pods
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.GradleException
