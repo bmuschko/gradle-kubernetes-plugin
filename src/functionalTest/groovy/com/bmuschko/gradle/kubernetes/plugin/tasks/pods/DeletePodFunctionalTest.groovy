@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces
+package com.bmuschko.gradle.kubernetes.plugin.tasks.pods
 
 import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
 
 /**
  *
- * All functional tests for the `DeleteService` task.
+ * All functional tests for the `DeletePod` task.
  *
  */
-class DeleteServiceFunctionalTest extends AbstractFunctionalTest {
+class DeletePodFunctionalTest extends AbstractFunctionalTest {
 
-    def "Delete non-existent service"() {
+    def "Delete non-existent pod"() {
 
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.DeleteService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.DeletePod
 
-            task deleteService(type: DeleteService) {
-                service = "${randomString()}"
+            task deletePod(type: DeletePod) {
+                pod = "${randomString()}"
                 gracePeriod = 5000
 
                 onError { exc ->
@@ -40,23 +40,23 @@ class DeleteServiceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: deleteService)
+            task workflow(dependsOn: deletePod)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Deleting service...')
+            result.output.contains('Deleting pod...')
             result.output.contains(SHOULD_REACH_HERE)
     }
 
-    def "Delete non-existent service with config"() {
+    def "Delete non-existent pod with config"() {
 
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.DeleteService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.DeletePod
 
-            task deleteService(type: DeleteService) {
+            task deletePod(type: DeletePod) {
                 config {
                     withName("${randomString()}")
                     .withGracePeriod(5000)
@@ -67,14 +67,14 @@ class DeleteServiceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: deleteService)
+            task workflow(dependsOn: deletePod)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Deleting service...')
+            result.output.contains('Deleting pod...')
             result.output.contains(SHOULD_REACH_HERE)
     }
 }

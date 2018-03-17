@@ -1,4 +1,5 @@
 apply plugin: 'java-gradle-plugin'
+apply from: "$rootDir/gradle/common.gradle"
 
 sourceSets {
     functionalTest {
@@ -14,6 +15,9 @@ task functionalTest(type: Test) {
     group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
+    maxHeapSize = '512m'
+    forkEvery = 1
+    maxParallelForks = 1
     mustRunAfter test
 
     reports {
@@ -26,23 +30,10 @@ task functionalTest(type: Test) {
     }
 
     def testingProperties = [:]
-    def possibleEndpoint = project.findProperty('testKubernetesEndpoint')?.trim()
-    if (possibleEndpoint) {
-        logger.quiet "Setting kubernetes endpoint for functional testing to '${possibleEndpoint}'"
-        testingProperties['test.kubernetes.endpoint'] = possibleEndpoint
-    }
-
-    def possibleUsername = project.findProperty('testKubernetesUsername')?.trim()
-    if (possibleUsername) {
-        logger.quiet "Setting kubernetes username for functional testing to '${possibleUsername}'"
-        testingProperties['test.kubernetes.username'] = possibleUsername
-    }
-
-    def possiblePassword = project.findProperty('testKubernetesPassword')?.trim()
-    if (possiblePassword) {
-        logger.quiet "Setting kubernetes password for functional testing to '${possiblePassword}'"
-        testingProperties['test.kubernetes.password'] = possiblePassword
-    }
+    testingProperties << propertyInSystemFormat('testKubernetesEndpoint')
+    testingProperties << propertyInSystemFormat('testKubernetesUsername')
+    testingProperties << propertyInSystemFormat('testKubernetesPassword')
+    testingProperties << propertyInSystemFormat('testKubernetesOffline')
 
     systemProperties = testingProperties
 }

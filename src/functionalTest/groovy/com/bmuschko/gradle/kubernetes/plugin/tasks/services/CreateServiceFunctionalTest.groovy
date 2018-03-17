@@ -207,7 +207,7 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
 
         then:
             result.output.contains('Creating service...')
-            result.output.contains('Unknown service type')
+            result.output.contains('No enum constant')
             result.output.contains(SHOULD_NOT_REACH_HERE)
     }
 }

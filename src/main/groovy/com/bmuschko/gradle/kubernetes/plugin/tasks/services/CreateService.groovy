@@ -29,7 +29,7 @@ import org.gradle.api.tasks.Optional
  */
 class CreateService extends AbstractKubernetesTask {
 
-    public static final SERVICE_TYPES = ['ClusterIP', 'NodePort', 'LoadBalancer', 'ExternalName']
+    public static final enum SERVICE_TYPES { ClusterIP, NodePort, LoadBalancer, ExternalName }
 
     @Input
     @Optional
@@ -76,11 +76,8 @@ class CreateService extends AbstractKubernetesTask {
 
         invokeMethod(objRef, 'editOrNewSpec')
         if (this.serviceSpec.type) {
-            if (SERVICE_TYPES.contains(this.serviceSpec.type)) {
-                invokeMethod(objRef, 'withType', this.serviceSpec.type)
-            } else {
-                throw new GradleException("Unknown service type '${this.serviceSpec.type}'. Acceptable values are: ${SERVICE_TYPES}")
-            }
+            def servType = SERVICE_TYPES.valueOf(this.serviceSpec.type)
+            invokeMethod(obj, 'withType', servType.toString())
         }
 
         invokeMethod(objRef, 'addNewPort')
