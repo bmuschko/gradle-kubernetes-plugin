@@ -82,6 +82,7 @@ The below table(s) document each of our tasks and their respective `features` in
 | Name | `config{}` | `onNext{}` | `response()` |
 | --- | --- | --- | --- |
 | [ListPods](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/pods/ListPods.groovy) | [MixedOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/MixedOperation.html) | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) | [PodList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/PodList.html) |
+[GetPod](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/pods/GetPod.groovy) | [N/A]() | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) |
 [DeletePod](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/pods/DeletePod.groovy) | [N/A]() | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) |
 
 ### Service operations
