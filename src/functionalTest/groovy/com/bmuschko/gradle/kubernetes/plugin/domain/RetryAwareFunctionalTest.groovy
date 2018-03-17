@@ -34,8 +34,8 @@ class RetryAwareFunctionalTest extends AbstractFunctionalTest {
 
             kubernetes {
                 retry {
-                    withDelay(10, TimeUnit.SECONDS)
-                    withMaxRetries(5)
+                    withDelay(2, TimeUnit.SECONDS)
+                    withMaxRetries(1)
                 }
             }
 
@@ -56,7 +56,7 @@ class RetryAwareFunctionalTest extends AbstractFunctionalTest {
             result.output.contains('Getting namespace...')
             result.output.contains(SHOULD_REACH_HERE)
             result.output.contains('could not be found.')
-            count(result.output, 'Getting namespace...') == 6
+            count(result.output, 'Getting namespace...') == 2
     }
 
     def "Retry defined on task"() {
@@ -67,8 +67,8 @@ class RetryAwareFunctionalTest extends AbstractFunctionalTest {
 
             kubernetes {
                 retry {
-                    withDelay(1, TimeUnit.SECONDS)
-                    withMaxRetries(3)
+                    withDelay(2, TimeUnit.SECONDS)
+                    withMaxRetries(1)
                 }
             }
 
@@ -76,8 +76,8 @@ class RetryAwareFunctionalTest extends AbstractFunctionalTest {
             task getNamespace(type: GetNamespace) {
                 namespace = "${randomString()}"
                 retry {
-                    withDelay(10, TimeUnit.SECONDS)
-                    withMaxRetries(5)
+                    withDelay(2, TimeUnit.SECONDS)
+                    withMaxRetries(2)
                 }
                 onError { exc ->
                     logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
@@ -94,6 +94,6 @@ class RetryAwareFunctionalTest extends AbstractFunctionalTest {
             result.output.contains('Getting namespace...')
             result.output.contains(SHOULD_REACH_HERE)
             result.output.contains('could not be found.')
-            count(result.output, 'Getting namespace...') == 6
+            count(result.output, 'Getting namespace...') == 3
     }
 }
