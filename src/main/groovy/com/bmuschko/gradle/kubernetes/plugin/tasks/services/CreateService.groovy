@@ -77,7 +77,7 @@ class CreateService extends AbstractKubernetesTask {
         invokeMethod(objRef, 'editOrNewSpec')
         if (this.serviceSpec.type) {
             def servType = SERVICE_TYPES.valueOf(this.serviceSpec.type)
-            invokeMethod(obj, 'withType', servType.toString())
+            invokeMethod(objRef, 'withType', servType.toString())
         }
 
         invokeMethod(objRef, 'addNewPort')
