@@ -2,6 +2,7 @@
 * Added task `ListPods` - [Pull request 16](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/16)
 * Added task `DeletePod` - [Pull request 17](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/17)
 * Added task `GetPod` - [Pull request 18](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/18)
+* Added task `CreatePod` - [Pull request 20](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/120)
 
 ### Version 0.0.4 (March 16, 2018)
 * Added task `ListServices` - [Pull request 10](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/10)
@@ -16,4 +17,7 @@
 * `GradleKubernetesExtension` gained property `useOpenShiftAdapter` to switch to using the _open-shift_ wrapper in favor or the default _kubernetes_ wrapper.
 
 ### Version 0.0.1 (March 10, 2018)
-* Initial release with CRUD operations for kubernetes _namespace_
+* Added task `ListNamespaces` - [Commit 331083a](https://github.com/bmuschko/gradle-kubernetes-plugin/commit/331083a)
+* Added task `GetNamspace` - [Commit 772ce86](https://github.com/bmuschko/gradle-kubernetes-plugin/commit/772ce86)
+* Added task `DeleteNamspace` - [Commit 2756f3e](https://github.com/bmuschko/gradle-kubernetes-plugin/commit/2756f3e)
+* Added task `CreateNamspace` - [Commit fa67d39](https://github.com/bmuschko/gradle-kubernetes-plugin/commit/fa67d39)
