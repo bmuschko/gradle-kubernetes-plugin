@@ -82,6 +82,7 @@ The below table(s) document each of our tasks and their respective `features` in
 | Name | `config{}` | `onNext{}` | `response()` |
 | --- | --- | --- | --- |
 | [ListPods](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/pods/ListPods.groovy) | [MixedOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/MixedOperation.html) | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) | [PodList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/PodList.html) |
+[CreatePod](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/pods/CreatePod.groovy) | [DoneablePod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/DoneablePod.html) | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) |
 [GetPod](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/pods/GetPod.groovy) | [N/A]() | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) | [Pod](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/Pod.html) |
 [DeletePod](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/pods/DeletePod.groovy) | [N/A]() | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) |
 
@@ -239,7 +240,8 @@ task getNamespace(type: GetNamespace) {
 
 The [functionalTests](https://github.com/bmuschko/gradle-kubernetes-plugin/tree/master/src/functionalTest/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks) provide many examples that you can use for inspiration within your own code. If there are any questions about how to use a given feature feel free to open an issue and just ask.
 
-## Additional Resources
+## Kubernetes Resources
 * [Kubernetes Client](https://github.com/fabric8io/kubernetes-client)
 * [Kubernetes Setup](https://kubernetes.io/docs/setup/pick-right-solution/)
-* [Release Process](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/docs/RELEASE_PROCESS.md)
+* [Reasons Kubernetes deployments fail: Part 1](https://kukulinski.com/10-most-common-reasons-kubernetes-deployments-fail-part-1/)
+* [Reasons Kubernetes deployments fail: Part 2](https://kukulinski.com/10-most-common-reasons-kubernetes-deployments-fail-part-2/)

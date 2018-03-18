@@ -45,7 +45,7 @@ trait CommonFunctions {
      * @param args arguments to pass to potential method
      * @return the output, or potentially new Object, created from calling the method
      */
-    def invokeMethod(final AtomicReference<Object> objectToInvoke, final String methodName, final Object... args) {
+    def static invokeMethod(final AtomicReference<Object> objectToInvoke, final String methodName, final Object... args) {
         if (args != null) {
             def localObject = objectToInvoke.get()
             def metaMethod = localObject.metaClass.getMetaMethod(methodName, args)
@@ -69,14 +69,22 @@ trait CommonFunctions {
      * @param methodName name of method to find and invoke
      * @return the output, or potentially new Object, created from calling the method
      */
-    def invokeMethod(final AtomicReference<Object> objectToInvoke, final String methodName) {
+    def static invokeMethod(final AtomicReference<Object> objectToInvoke, final String methodName) {
         invokeMethod(objectToInvoke, methodName, EMPTY_OBJECT_ARRAY)
     }
 
     /**
      * Wrap an arbitrary Object in an AtomicReference
      */
-    def wrapAtomic(Object obj) {
+    def static wrapAtomic(Object obj) {
         new AtomicReference<Object>(obj)
+    }
+
+    /**
+     * Random String prepended with, by default, the token `gkp-`
+     * which is shorthand for `gradle-kubernetes-plugin`.
+     */
+    def static String randomString(def prependWith = 'gkp-') {
+        prependWith + UUID.randomUUID().toString().replaceAll("-", "")
     }
 }
