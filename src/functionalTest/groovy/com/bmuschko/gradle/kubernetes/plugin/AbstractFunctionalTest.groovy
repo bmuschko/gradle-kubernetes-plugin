@@ -41,12 +41,10 @@ abstract class AbstractFunctionalTest extends Specification {
     final String possiblePassword = System.getProperty('test.kubernetes.password')
     final String possibleOffline = System.getProperty('test.kubernetes.offline')
 
-    final String lineSeparator = System.getProperty("line.separator")
-
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    URL defaultPodFile = loadResource('/pods/nginx-pod.yaml')
+    File defaultPodFile = new File(loadResource('/pods/nginx-pod.yaml').getFile())
     File projectDir
     File buildFile
 
@@ -163,9 +161,9 @@ abstract class AbstractFunctionalTest extends Specification {
             source.eachLine { line ->
                 def localLine = line
                 tokensToReplaceWithValues.each { k, v ->
-                    localLine = localLine.replaceAll(k, v)
+                    localLine = localLine.replaceAll(k, String.valueOf(v))
                 }
-                dest << localLine + lineSeparator
+                dest << localLine + System.getProperty('line.separator')
             }
         }
     }

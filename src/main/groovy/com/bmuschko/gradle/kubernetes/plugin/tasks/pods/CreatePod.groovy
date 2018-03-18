@@ -55,7 +55,18 @@ class CreatePod extends AbstractKubernetesTask {
     def handleClient(kubernetesClient) {
 
         logger.quiet 'Creating pod...'
-        def objToConfigure = (resource ? kubernetesClient.pods().load(resource) : kubernetesClient.pods()).createNew()
+        def objToConfigure
+        if (resource) {
+            def podObj = kubernetesClient.pods().load(resource).get()
+            objToConfigure = kubernetesClient.pods().createNew()
+                                .withApiVersion(podObj.getApiVersion())
+                                .withKind(podObj.getKind())
+                                .withMetadata(podObj.getMetadata())
+                                .withSpec(podObj.getSpec())
+                                .withStatus(podObj.getStatus())
+        } else {
+            objToConfigure = kubernetesClient.pods().createNew()
+        }
 
         // configure on meta-data
         def objReconfigured = configureOn(objToConfigure)
@@ -75,7 +86,9 @@ class CreatePod extends AbstractKubernetesTask {
     def applyInputs(obj) {
         def objRef = wrapAtomic(obj)
         invokeMethod(objRef, 'editOrNewMetadata')
-        invokeMethod(objRef, 'withName', pod)
+        if (!objRef.get().getName()) {
+            invokeMethod(objRef, 'withName', pod ?: randomString('gkp-pod-'))
+        } 
         invokeMethod(objRef, 'withNamespace', namespace)
         invokeMethod(objRef, 'withLabels', withLabels)
         invokeMethod(objRef, 'endMetadata')
@@ -84,7 +97,9 @@ class CreatePod extends AbstractKubernetesTask {
             invokeMethod(objRef, 'editOrNewSpec')
             this.containers.each { cont ->
                 invokeMethod(objRef, 'addNewContainer')
-                invokeMethod(objRef, 'withName', cont.name)
+                if (!objRef.get().getName()) {
+                    invokeMethod(objRef, 'withName', cont.name ?: randomString('gkp-container-'))
+                } 
                 invokeMethod(objRef, 'withImage', cont.image)
                 invokeMethod(objRef, 'withImagePullPolicy', cont.imagePullPolicy)
                 invokeMethod(objRef, 'addNewPort')

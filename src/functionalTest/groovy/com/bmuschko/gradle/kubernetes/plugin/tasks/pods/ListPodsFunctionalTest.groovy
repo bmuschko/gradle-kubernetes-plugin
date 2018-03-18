@@ -25,7 +25,7 @@ import org.gradle.testkit.runner.BuildResult
  *
  */
 class ListPodsFunctionalTest extends AbstractFunctionalTest {
-/*
+
     def "List pods, execute reactive-streams, with no config"() {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.ListPods
@@ -100,7 +100,7 @@ class ListPodsFunctionalTest extends AbstractFunctionalTest {
             result.output.contains(ON_COMPLETE_REACHED)
             result.output.contains(RESPONSE_SET_MESSAGE)
     }
-*/
+
     def "List non-existent pods with config"() {
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.ListPods
