@@ -41,6 +41,10 @@ class CreateService extends AbstractKubernetesTask {
 
     @Input
     @Optional
+    Map<String, String> withLabels
+
+    @Input
+    @Optional
     Map<String, String> selector
 
     @Internal
@@ -72,6 +76,7 @@ class CreateService extends AbstractKubernetesTask {
         invokeMethod(objRef, 'editOrNewMetadata')
         invokeMethod(objRef, 'withName', service)
         invokeMethod(objRef, 'withNamespace', namespace)
+        invokeMethod(objRef, 'withLabels', withLabels)
         invokeMethod(objRef, 'endMetadata')
 
         invokeMethod(objRef, 'editOrNewSpec')
