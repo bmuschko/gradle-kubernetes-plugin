@@ -101,10 +101,8 @@ class CreatePod extends AbstractKubernetesTask {
                     invokeMethod(objRef, 'withName', cont.name ?: randomString('gkp-container-'))
                 } 
                 invokeMethod(objRef, 'withImage', cont.image)
-                invokeMethod(objRef, 'withImagePullPolicy', cont.imagePullPolicy)
                 invokeMethod(objRef, 'addNewPort')
                 invokeMethod(objRef, 'withContainerPort', cont.containerPort)
-                invokeMethod(objRef, 'withHostPort', cont.hostPort)
                 invokeMethod(objRef, 'endPort')
                 invokeMethod(objRef, 'endContainer')
             }
@@ -115,15 +113,11 @@ class CreatePod extends AbstractKubernetesTask {
 
     public void addContainer(@Nullable String name,
             @Nullable String image,
-            @Nullable String imagePullPolicy,
-            @Nullable Integer containerPort,
-            @Nullable Integer hostPort) {
+            @Nullable Integer containerPort) {
 
         final Container cont = new Container(name: name,
             image: image,
-            imagePullPolicy: imagePullPolicy,
-            containerPort: containerPort,
-            hostPort: hostPort)
+            containerPort: containerPort)
 
         this.containers.add(cont)
     }
@@ -131,8 +125,6 @@ class CreatePod extends AbstractKubernetesTask {
     static class Container {
         public String name // name of container
         public String image // name of image
-        public String imagePullPolicy // pull policy of image
         public Integer containerPort // port exposed to pod
-        public Integer hostPort // port exposed to all pods
     }
 }

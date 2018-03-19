@@ -42,7 +42,7 @@ class CreatePodFunctionalTest extends AbstractFunctionalTest {
                 pod = "${randomPod}"
                 namespace = "${defaultNamespace}"
                 withLabels = ['name' : "${randomPod}-label"]
-                addContainer('nginx-container', 'nginx', 'IfNotPresent', 80, null)
+                addContainer('nginx-container', 'nginx', 80)
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -113,7 +113,7 @@ class CreatePodFunctionalTest extends AbstractFunctionalTest {
                     .endMetadata()
                 }
 
-                addContainer('nginx-container', 'nginx', 'IfNotPresent', 80, null)
+                addContainer('nginx-container', 'nginx', 80)
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
