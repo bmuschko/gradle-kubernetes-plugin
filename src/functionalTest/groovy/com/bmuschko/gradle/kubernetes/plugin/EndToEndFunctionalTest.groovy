@@ -89,7 +89,7 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
                 namespace = "${randomNamespace}"
                 withLabels = ['name' : 'end-to-end-service-label']
                 selector = ['name' : 'end-to-end-pod-label']
-                addSpec('NodePort', 5432, 32333, 5432, 'TCP')
+                addSpec('NodePort', 32333, 5432, 5432, 'TCP')
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -112,20 +112,30 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
                 namespace = "${randomNamespace}"
                 withLabels = ['name' : 'end-to-end-pod-label']
                 addContainer('end-to-end-container', 'postgres:10.3', 5432)
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
             }
 
             task getPod(type: GetPod, dependsOn: createPod) {
                 description = 'Wait until pod is available'
                 pod = "${randomPod}"
                 namespace = "${randomNamespace}"
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
             }
 
             task deletePod(type: DeletePod) {
                 pod = "${randomPod}"
+                namespace = "${randomNamespace}"
             }
 
             task deleteService(type: DeleteService, dependsOn: deletePod) {
                 service = "${randomService}"
+                namespace = "${randomNamespace}"
             }
 
             task deleteNamespace(type: DeleteNamespace, dependsOn: deleteService) {
@@ -141,14 +151,12 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
             BuildResult result = build('workflow')
 
         then:
+            result.output.contains('Creating namespace...')
+            result.output.contains('Creating service...')
             result.output.contains('Creating pod...')
-            result.output.contains('Getting pod...')
+            result.output.contains('Deleting namespace...')
+            result.output.contains('Deleting service...')
             result.output.contains('Deleting pod...')
-            result.output.contains('Listing pods...')
-            result.output.contains('Found our POD')
-            result.output.contains(RESPONSE_SET_MESSAGE)
-            result.output.contains(SHOULD_REACH_HERE)
-            result.output.contains(ON_COMPLETE_REACHED)
             !result.output.contains(SHOULD_NOT_REACH_HERE)
     }
 }

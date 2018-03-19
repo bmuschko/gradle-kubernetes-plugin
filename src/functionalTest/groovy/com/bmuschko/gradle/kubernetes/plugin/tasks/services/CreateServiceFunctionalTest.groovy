@@ -41,7 +41,7 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
             task createService(type: CreateService) {
                 service = "${randomService}"
                 namespace = "${defaultNamespace}"
-                addSpec('NodePort', 12345, 32333, 8080, 'TCP')
+                addSpec('NodePort', 32333, 12345, 8080, 'TCP')
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -118,7 +118,7 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
                     .withNamespace("${defaultNamespace}")
                     .endMetadata()
                 }
-                addSpec('NodePort', 12345, 32333, 8080, 'TCP')
+                addSpec('NodePort', 32333, 12345, 8080, 'TCP')
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -192,7 +192,7 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
                     .withNamespace("${defaultNamespace}")
                     .endMetadata()
                 }
-                addSpec('BlahBlah', 12345, 32333, 8080, 'TCP')
+                addSpec('BlahBlah', 32333, 12345, 8080, 'TCP')
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"

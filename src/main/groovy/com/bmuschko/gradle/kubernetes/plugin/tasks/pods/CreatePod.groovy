@@ -97,6 +97,8 @@ class CreatePod extends AbstractKubernetesTask {
             invokeMethod(objRef, 'editOrNewSpec')
             this.containers.each { cont ->
                 invokeMethod(objRef, 'addNewContainer')
+                invokeMethod(objRef, 'withCommand', cont.cmd)
+                invokeMethod(objRef, 'withArgs', cont.args)
                 if (!objRef.get().getName()) {
                     invokeMethod(objRef, 'withName', cont.name ?: randomString('gkp-container-'))
                 } 
@@ -111,13 +113,21 @@ class CreatePod extends AbstractKubernetesTask {
         objRef.get()
     }
 
+    public void addContainer(@Nullable String name, @Nullable String image, @Nullable Integer containerPort) {
+        addContainer(name, image, containerPort, null, null)
+    }
+
     public void addContainer(@Nullable String name,
             @Nullable String image,
-            @Nullable Integer containerPort) {
+            @Nullable Integer containerPort,
+            @Nullable Integer cmd,
+            @Nullable Integer args) {
 
         final Container cont = new Container(name: name,
             image: image,
-            containerPort: containerPort)
+            containerPort: containerPort,
+            cmd: cmd,
+            args: args)
 
         this.containers.add(cont)
     }
@@ -126,5 +136,7 @@ class CreatePod extends AbstractKubernetesTask {
         public String name // name of container
         public String image // name of image
         public Integer containerPort // port exposed to pod
+        public List<String> cmd // command to use when invoking container
+        public List<String> args // args to use to pass to command when invoking container
     }
 }

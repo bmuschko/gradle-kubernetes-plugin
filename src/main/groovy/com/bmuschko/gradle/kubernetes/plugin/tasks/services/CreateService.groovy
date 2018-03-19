@@ -86,8 +86,8 @@ class CreateService extends AbstractKubernetesTask {
         }
 
         invokeMethod(objRef, 'addNewPort')
-        invokeMethod(objRef, 'withPort', this.serviceSpec.port)
         invokeMethod(objRef, 'withNodePort', this.serviceSpec.nodePort)
+        invokeMethod(objRef, 'withPort', this.serviceSpec.podPort)
         invokeMethod(objRef, 'withNewTargetPort', this.serviceSpec.targetPort)
         invokeMethod(objRef, 'withProtocol', this.serviceSpec.protocol)
         invokeMethod(objRef, 'endPort')
@@ -96,23 +96,23 @@ class CreateService extends AbstractKubernetesTask {
     }
 
     public void addSpec(@Nullable String type,
-            @Nullable Integer port,
             @Nullable Integer nodePort,
+            @Nullable Integer podPort,
             @Nullable Integer targetPort,
             @Nullable String protocol) {
 
         final String localType = type?.trim() ?: 'ClusterIp'
         this.serviceSpec = new ServiceSpec(type: localType,
-            port: port,
             nodePort: nodePort,
+            podPort: podPort,
             targetPort: targetPort,
             protocol: protocol)
     }
 
     static class ServiceSpec {
         public String type // ClusterIp, NodePart, etc
-        public Integer port // port exposed to all pods
         public Integer nodePort // port exposed to world
+        public Integer podPort // port exposed to all pods
         public Integer targetPort // port exposed from container
         public String protocol // UDP, TCP, etc
     }
