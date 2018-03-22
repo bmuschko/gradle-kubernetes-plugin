@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.domain
+package com.bmuschko.gradle.kubernetes.plugin.common
 
 import java.util.concurrent.atomic.AtomicReference
 

@@ -19,11 +19,11 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesPlugin
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesContextLoader
 import com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesExtension
-import com.bmuschko.gradle.kubernetes.plugin.domain.CommonFunctions
-import com.bmuschko.gradle.kubernetes.plugin.domain.ConfigureAware
-import com.bmuschko.gradle.kubernetes.plugin.domain.ResponseAware
-import com.bmuschko.gradle.kubernetes.plugin.domain.RetryAware
-import com.bmuschko.gradle.kubernetes.plugin.domain.ReactiveStreamsAware
+import com.bmuschko.gradle.kubernetes.plugin.common.CommonFunctions
+import com.bmuschko.gradle.kubernetes.plugin.common.ConfigureAware
+import com.bmuschko.gradle.kubernetes.plugin.common.ResponseAware
+import com.bmuschko.gradle.kubernetes.plugin.common.RetryAware
+import com.bmuschko.gradle.kubernetes.plugin.common.ReactiveStreamsAware
 
 import net.jodah.failsafe.Failsafe
 import net.jodah.failsafe.RetryPolicy

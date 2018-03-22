@@ -16,8 +16,8 @@
 
 package com.bmuschko.gradle.kubernetes.plugin
 
-import com.bmuschko.gradle.kubernetes.plugin.domain.ConfigureAware
-import com.bmuschko.gradle.kubernetes.plugin.domain.RetryAware
+import com.bmuschko.gradle.kubernetes.plugin.common.ConfigureAware
+import com.bmuschko.gradle.kubernetes.plugin.common.RetryAware
 
 /**
  *  Extension point for the gradle-kubernetes-plugin. Currently this
