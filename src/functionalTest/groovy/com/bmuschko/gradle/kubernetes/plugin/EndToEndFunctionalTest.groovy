@@ -151,7 +151,7 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
             }
 
             task workflow(dependsOn: getPod) {
-                //finalizedBy deleteNamespace
+                finalizedBy deleteNamespace
             }
         """
 
