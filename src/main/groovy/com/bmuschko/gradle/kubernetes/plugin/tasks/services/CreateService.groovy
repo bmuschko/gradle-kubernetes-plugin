@@ -16,6 +16,7 @@
 
 package com.bmuschko.gradle.kubernetes.plugin.tasks.services
 
+import com.bmuschko.gradle.kubernetes.plugin.domain.PortSpec
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.GradleException
 import org.gradle.api.Nullable
@@ -27,7 +28,7 @@ import org.gradle.api.tasks.Optional
 /**
  * Create a service.
  */
-class CreateService extends AbstractKubernetesTask {
+class CreateService extends AbstractKubernetesTask implements PortSpec {
 
     public static final enum SERVICE_TYPES { ClusterIP, NodePort, LoadBalancer, ExternalName }
 
@@ -41,14 +42,15 @@ class CreateService extends AbstractKubernetesTask {
 
     @Input
     @Optional
+    String type // defaults to SERVICE_TYPES.ClusterIP if not defined
+
+    @Input
+    @Optional
     Map<String, String> withLabels
 
     @Input
     @Optional
     Map<String, String> selector
-
-    @Internal
-    private ServiceSpec serviceSpec = new ServiceSpec()
 
     @Override
     def handleClient(kubernetesClient) {
@@ -80,40 +82,22 @@ class CreateService extends AbstractKubernetesTask {
         invokeMethod(objRef, 'endMetadata')
 
         invokeMethod(objRef, 'editOrNewSpec')
-        if (this.serviceSpec.type) {
-            def servType = SERVICE_TYPES.valueOf(this.serviceSpec.type)
-            invokeMethod(objRef, 'withType', servType.toString())
+        if (this.type) {
+            invokeMethod(objRef, 'withType', SERVICE_TYPES.valueOf(this.type).toString())
+        }
+        invokeMethod(objRef, 'addToSelector', this.selector)
+
+        // add requested port specs
+        portSpecs.each { portMap ->
+            invokeMethod(objRef, 'addNewPort')
+            invokeMethod(objRef, 'withName', portMap.name)
+            invokeMethod(objRef, 'withProtocol', portMap.protocol)
+            invokeMethod(objRef, 'withNodePort', portMap.nodePort)
+            invokeMethod(objRef, 'withPort', portMap.podPort)
+            invokeMethod(objRef, 'withNewTargetPort', portMap.targetPort)
+            invokeMethod(objRef, 'endPort') 
         }
 
-        invokeMethod(objRef, 'addNewPort')
-        invokeMethod(objRef, 'withNodePort', this.serviceSpec.nodePort)
-        invokeMethod(objRef, 'withPort', this.serviceSpec.podPort)
-        invokeMethod(objRef, 'withNewTargetPort', this.serviceSpec.targetPort)
-        invokeMethod(objRef, 'withProtocol', this.serviceSpec.protocol)
-        invokeMethod(objRef, 'endPort')
-        invokeMethod(objRef, 'withSelector', this.selector)
         invokeMethod(objRef, 'endSpec').get()
-    }
-
-    public void addSpec(@Nullable String type,
-            @Nullable Integer nodePort,
-            @Nullable Integer podPort,
-            @Nullable Integer targetPort,
-            @Nullable String protocol) {
-
-        final String localType = type?.trim() ?: 'ClusterIp'
-        this.serviceSpec = new ServiceSpec(type: localType,
-            nodePort: nodePort,
-            podPort: podPort,
-            targetPort: targetPort,
-            protocol: protocol)
-    }
-
-    static class ServiceSpec {
-        public String type // ClusterIp, NodePart, etc
-        public Integer nodePort // port exposed to world
-        public Integer podPort // port exposed to all pods
-        public Integer targetPort // port exposed from container
-        public String protocol // UDP, TCP, etc
     }
 }

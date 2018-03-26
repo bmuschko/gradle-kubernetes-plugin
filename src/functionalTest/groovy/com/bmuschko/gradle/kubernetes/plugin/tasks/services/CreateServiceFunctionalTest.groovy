@@ -41,7 +41,8 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
             task createService(type: CreateService) {
                 service = "${randomService}"
                 namespace = "${defaultNamespace}"
-                addSpec('NodePort', 32333, 12345, 8080, 'TCP')
+                type = 'NodePort'
+                addPorts(null, 'TCP', 32333, 12345, 8080,).addPorts('special-name', 'TCP', 32334, 12346, 8081)
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -118,7 +119,8 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
                     .withNamespace("${defaultNamespace}")
                     .endMetadata()
                 }
-                addSpec('NodePort', 32333, 12345, 8080, 'TCP')
+                type = 'NodePort'
+                addPorts(32333, 12345, 8080)
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -178,7 +180,7 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
             !result.output.contains(SHOULD_NOT_REACH_HERE)
     }
 
-    def "Create service with illegal spec Type"() {
+    def "Create service with illegal Type"() {
 
         def randomService = randomString()
 
@@ -192,7 +194,8 @@ class CreateServiceFunctionalTest extends AbstractFunctionalTest {
                     .withNamespace("${defaultNamespace}")
                     .endMetadata()
                 }
-                addSpec('BlahBlah', 32333, 12345, 8080, 'TCP')
+                type = 'BlahBlah'
+                addPorts(32333, 12345, 8080)
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"

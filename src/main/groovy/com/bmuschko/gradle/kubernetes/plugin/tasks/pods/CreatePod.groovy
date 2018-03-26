@@ -16,7 +16,10 @@
 
 package com.bmuschko.gradle.kubernetes.plugin.tasks.pods
 
+import static com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesUtils.randomString
+
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
+import com.bmuschko.gradle.kubernetes.plugin.domain.ContainerSpec
 import org.gradle.api.GradleException
 import org.gradle.api.Nullable
 
@@ -42,9 +45,13 @@ class CreatePod extends AbstractKubernetesTask {
     @Input
     @Optional
     Map<String, String> withLabels
-    
+
+    @Input
+    @Optional
+    Map<String, String> volumes = [:] // key=name,value=size-limit (can be null)
+
     @Internal
-    private List<Container> containers = []
+    private Map<String, ContainerSpec> containers = [:]
 
     // Can be a String path to a File, a File object, a URL, or an InputStream
     @Input
@@ -95,17 +102,60 @@ class CreatePod extends AbstractKubernetesTask {
 
         if (this.containers) {
             invokeMethod(objRef, 'editOrNewSpec')
-            this.containers.each { cont ->
+
+            // add requested volumes
+            this.volumes.each { volName, sizeLimit ->
+                logger.info "Adding volume: ${volName}"
+                invokeMethod(objRef, 'addNewVolume')
+                invokeMethod(objRef, 'withName', volName)
+                invokeMethod(objRef, 'editOrNewEmptyDir')
+                invokeMethod(objRef, 'withNewSizeLimit', sizeLimit)
+                invokeMethod(objRef, 'endEmptyDir')
+                invokeMethod(objRef, 'endVolume')
+            }
+
+            // add requested containers
+            this.containers.each { cName, cont ->
+                logger.info "Adding container: ${cName}"
                 invokeMethod(objRef, 'addNewContainer')
+                invokeMethod(objRef, 'withName', cName)
+                invokeMethod(objRef, 'withImage', cont.image)
                 invokeMethod(objRef, 'withCommand', cont.cmd)
                 invokeMethod(objRef, 'withArgs', cont.args)
-                if (!objRef.get().getName()) {
-                    invokeMethod(objRef, 'withName', cont.name ?: randomString('gkp-container-'))
-                } 
-                invokeMethod(objRef, 'withImage', cont.image)
-                invokeMethod(objRef, 'addNewPort')
-                invokeMethod(objRef, 'withContainerPort', cont.containerPort)
-                invokeMethod(objRef, 'endPort')
+
+                // add requested container ports
+                cont.ports.each { port ->
+                    invokeMethod(objRef, 'addNewPort')
+                    invokeMethod(objRef, 'withContainerPort', port.containerPort)
+                    invokeMethod(objRef, 'withHostPort', port.hostPort)
+                    invokeMethod(objRef, 'endPort')
+                }
+
+                // add requested environment variables
+                cont.envs.each { key, value ->
+                    invokeMethod(objRef, 'addNewEnv')
+                    invokeMethod(objRef, 'withName', key)
+                    invokeMethod(objRef, 'withValue', value)
+                    invokeMethod(objRef, 'endEnv')
+                }
+
+                // add requested container volume mounts
+                cont.volumeMounts.each { volMount ->
+                    invokeMethod(objRef, 'addNewVolumeMount')
+                    invokeMethod(objRef, 'withName', volMount.name)
+                    invokeMethod(objRef, 'withMountPath', volMount.mountPath)
+                    invokeMethod(objRef, 'endVolumeMount')
+                }
+
+                // add requested liveness probe
+                if (cont.livenessProbe) {
+                    invokeMethod(objRef, 'editOrNewLivenessProbe')
+                    invokeMethod(objRef, 'withPeriodSeconds', cont.livenessProbe.periodSeconds)
+                    invokeMethod(objRef, 'withInitialDelaySeconds', cont.livenessProbe.initialDelaySeconds)
+                    invokeMethod(objRef, 'withTimeoutSeconds', cont.livenessProbe.timeoutSeconds)
+                    invokeMethod(objRef, 'endLivenessProbe')         
+                }
+
                 invokeMethod(objRef, 'endContainer')
             }
             invokeMethod(objRef, 'endSpec')
@@ -113,30 +163,38 @@ class CreatePod extends AbstractKubernetesTask {
         objRef.get()
     }
 
-    public void addContainer(@Nullable String name, @Nullable String image, @Nullable Integer containerPort) {
-        addContainer(name, image, containerPort, null, null)
+    /**
+     *  Add a named volume for Pod use.
+     *
+     *  @volumeName name of volume.
+     *  @sizeLimit size of volume or unbounded if null.
+     */    
+    public void volume(String volumeName, @Nullable String sizeLimit) {
+        this.volumes.put(Objects.requireNonNull(volumeName), sizeLimit)
     }
 
-    public void addContainer(@Nullable String name,
-            @Nullable String image,
-            @Nullable Integer containerPort,
-            @Nullable Integer cmd,
-            @Nullable Integer args) {
+    /**
+     *  Add a named container to this pod.
+     *
+     *  @containerName name of container.
+     *  @image the image to use to start container.
+     *  @envs environment variables to pass to container (optional).
+     *  @cmd the cmd to pass into container (optional).
+     *  @args the args to expose to container (optional).
+     *  @return the ContainerSpec instance
+     */ 
+    ContainerSpec addContainer(String containerName,
+        String image,
+        @Nullable Map<String, String> envs,
+        @Nullable List<String> cmd,
+        @Nullable List<String> args) {
 
-        final Container cont = new Container(name: name,
-            image: image,
-            containerPort: containerPort,
+        final ContainerSpec cont = new ContainerSpec(image: Objects.requireNonNull(image),
+            envs: envs,
             cmd: cmd,
             args: args)
 
-        this.containers.add(cont)
-    }
-
-    static class Container {
-        public String name // name of container
-        public String image // name of image
-        public Integer containerPort // port exposed to pod
-        public List<String> cmd // command to use when invoking container
-        public List<String> args // args to use to pass to command when invoking container
+        this.containers.put(Objects.requireNonNull(containerName), cont)
+        cont
     }
 }

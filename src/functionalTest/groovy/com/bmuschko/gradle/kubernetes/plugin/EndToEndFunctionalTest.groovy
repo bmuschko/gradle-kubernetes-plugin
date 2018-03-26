@@ -89,7 +89,8 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
                 namespace = "${randomNamespace}"
                 withLabels = ['name' : 'end-to-end-service-label']
                 selector = ['name' : 'end-to-end-pod-label']
-                addSpec('NodePort', 32333, 5432, 5432, 'TCP')
+                type = 'NodePort'
+                addPorts(32333, 5432, 5432)
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -111,7 +112,8 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
                 pod = "${randomPod}"
                 namespace = "${randomNamespace}"
                 withLabels = ['name' : 'end-to-end-pod-label']
-                addContainer('end-to-end-container', 'postgres:10.3', 5432)
+                addContainer('end-to-end-container', 'postgres:10.3', null, null, null).withPorts(5432, null)
+                addContainer('end-to-end-container-busybox', 'busybox', null, null, ['sleep', '10000'])
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
@@ -125,6 +127,12 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
+
+                doLast {
+                    if(response().getSpec().getContainers().size() != 2) {
+                        logger.quiet "$SHOULD_NOT_REACH_HERE: container-count=\${response().getSpec().getContainers().size()}"
+                    }
                 }
             }
 
@@ -143,7 +151,7 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
             }
 
             task workflow(dependsOn: getPod) {
-                finalizedBy deleteNamespace
+                //finalizedBy deleteNamespace
             }
         """
 
