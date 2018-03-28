@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.domain
+package com.bmuschko.gradle.kubernetes.plugin.domain.container
 
+import com.bmuschko.gradle.kubernetes.plugin.domain.container.ExecProbe
+import com.bmuschko.gradle.kubernetes.plugin.domain.container.HttpProbe
+
+import org.gradle.api.GradleException
 import org.gradle.api.Nullable
+import org.gradle.api.tasks.Internal
 
 /**
  * 
@@ -29,7 +34,16 @@ import org.gradle.api.Nullable
  *   
  */   
 trait ContainerSpec {
-    final Map<String, InnerContainerSpec> containerSpecs = [:]
+
+    public static final enum PROBE_TYPES { liveness, readiness }
+
+    // marking this as internal, and then creating a method to access it,
+    // is mainly done to get around various gradle "syntax validation checks".
+    @Internal
+    private final Map<String, InnerContainerSpec> containerSpecs = [:]
+    public Map<String, InnerContainerSpec> containerSpecs() {
+        containerSpecs
+    }
 
     /**
      *  Add a named container to this pod.
@@ -63,7 +77,8 @@ trait ContainerSpec {
         public List<String> args = [] // args to use to pass to command when invoking container
         public List<VolumeMount> volumeMounts = [] // mounts for container
         public List<Ports> ports = [] // ports for container
-        public LivenessProbe livenessProbe // optional liveness probe for container
+        public Probe livenessProbe // optional liveness probe for container
+        public Probe readinessProbe // optional readiness probe for container
 
         /**
          *  Add a named volume mount for container use.
@@ -91,27 +106,37 @@ trait ContainerSpec {
         }
 
         /**
-         *  Add an exec command probe.
+         *  Add an exec command liveness probe.
          *
+         *  @type can be either 'liveness' or 'readiness' (default to former)
          *  @periodSeconds delay between probe requests.
          *  @initialDelaySeconds delay before first probe kicks.
          *  @timeoutSeconds # of seconds before probe is considered failure.
          *  @command the command on container to execute.
          */  
-        InnerContainerSpec withExecProbe(@Nullable Integer periodSeconds,
+        InnerContainerSpec withExecProbe(@Nullable String type = 'liveness',
+                                @Nullable Integer periodSeconds,
                                 @Nullable Integer initialDelaySeconds,
                                 @Nullable Integer timeoutSeconds,
                                 List<String> command = []) {
-            this.livenessProbe = new LivenessProbe(periodSeconds: periodSeconds,
-                                                    initialDelaySeconds: initialDelaySeconds,
-                                                    timeoutSeconds: timeoutSeconds,
-                                                    probeType: new ExecProbe(command: command))
+            final Probe localProbe = new Probe(periodSeconds: periodSeconds,
+                                            initialDelaySeconds: initialDelaySeconds,
+                                            timeoutSeconds: timeoutSeconds,
+                                            probeInstance: new ExecProbe(command: command))
+
+            // set proper probe
+            switch (type.trim().toLowerCase()) {
+                case 'liveness': livenessProbe = localProbe; break;
+                case 'readiness': readinessProbe = localProbe; break;
+                default: throw new GradleException("Unknown probe type: ${type}")
+            }
             this
         }
 
         /**
-         *  Add an http probe.
+         *  Add an http liveness probe.
          *
+         *  @type can be either 'liveness' or 'readiness' (default to former)
          *  @periodSeconds delay between probe requests.
          *  @initialDelaySeconds delay before first probe kicks.
          *  @timeoutSeconds # of seconds before probe is considered failure.
@@ -119,16 +144,23 @@ trait ContainerSpec {
          *  @port the port to query.
          *  @headers the optional headers to pass.
          */  
-        InnerContainerSpec withHttpProbe(@Nullable Integer periodSeconds,
+        InnerContainerSpec withHttpProbe(@Nullable String type = 'liveness',
+                                @Nullable Integer periodSeconds,
                                 @Nullable Integer initialDelaySeconds,
                                 @Nullable Integer timeoutSeconds,
                                 String path,
                                 @Nullable Integer port,
                                 @Nullable Map<String, String> headers = [:]) {
-            this.livenessProbe = new LivenessProbe(periodSeconds: periodSeconds,
-                                                    initialDelaySeconds: initialDelaySeconds,
-                                                    timeoutSeconds: timeoutSeconds,
-                                                    probeType: new HttpProbe(path: path, port: port, headers: headers))
+            final Probe localProbe = new Probe(periodSeconds: periodSeconds,
+                                            initialDelaySeconds: initialDelaySeconds,
+                                            timeoutSeconds: timeoutSeconds,
+                                            probeInstance: new HttpProbe(path: path, port: port, headers: headers))
+            // set proper probe
+            switch (type.trim().toLowerCase()) {
+                case 'liveness': livenessProbe = localProbe; break;
+                case 'readiness': readinessProbe = localProbe; break;
+                default: throw new GradleException("Unknown probe type: ${type}")
+            }
             this
         }
 
@@ -144,24 +176,12 @@ trait ContainerSpec {
             public Integer hostPort // port exposed to ALL pods (generally 
         }
 
-        // liveness probe for container
-        static class LivenessProbe {
+        // probe for container
+        static class Probe {
             public Integer periodSeconds // perform probe every X number of seconds
             public Integer initialDelaySeconds // initial delay before performing first probe
             public Integer timeoutSeconds // # of seconds before we timeout and fail
-            def probeType
-        }
-
-        // probe for executing command on container
-        static class ExecProbe {
-            public List<String> command = []
-        }
-
-        // probe for performing http requests against container
-        static class HttpProbe {
-            public String path
-            public Integer port
-            public Map<String, String> headers = []
+            public def probeInstance // arbitrary probe that must be inferred at runtime
         }
     }
 }

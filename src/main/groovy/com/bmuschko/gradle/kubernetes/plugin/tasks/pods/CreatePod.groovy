@@ -19,7 +19,9 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.pods
 import static com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesUtils.randomString
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
-import com.bmuschko.gradle.kubernetes.plugin.domain.ContainerSpec
+import com.bmuschko.gradle.kubernetes.plugin.domain.container.ContainerSpec
+import com.bmuschko.gradle.kubernetes.plugin.domain.container.ExecProbe
+import com.bmuschko.gradle.kubernetes.plugin.domain.container.HttpProbe
 import org.gradle.api.GradleException
 import org.gradle.api.Nullable
 
@@ -101,7 +103,7 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
 
         // add requested volumes
         this.volumes.each { volName, sizeLimit ->
-            logger.info "Adding volume: ${volName}"
+
             invokeMethod(objRef, 'addNewVolume')
             invokeMethod(objRef, 'withName', volName)
             invokeMethod(objRef, 'editOrNewEmptyDir')
@@ -111,7 +113,7 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
         }
 
         // add requested containers
-        containerSpecs.each { cName, cont ->
+        containerSpecs().each { cName, cont ->
 
             invokeMethod(objRef, 'addNewContainer')
             invokeMethod(objRef, 'withName', cName)
@@ -149,7 +151,54 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
                 invokeMethod(objRef, 'withPeriodSeconds', cont.livenessProbe.periodSeconds)
                 invokeMethod(objRef, 'withInitialDelaySeconds', cont.livenessProbe.initialDelaySeconds)
                 invokeMethod(objRef, 'withTimeoutSeconds', cont.livenessProbe.timeoutSeconds)
-                invokeMethod(objRef, 'endLivenessProbe')         
+
+                def foundProbe = cont.livenessProbe.probeInstance
+                if (foundProbe instanceof ExecProbe) {
+                    invokeMethod(objRef, 'editOrNewExec')
+                    invokeMethod(objRef, 'withCommand', foundProbe.command)
+                    invokeMethod(objRef, 'endExec')
+                } else if (foundProbe instanceof HttpProbe) {
+                    invokeMethod(objRef, 'editOrNewHttpGet')
+                    invokeMethod(objRef, 'withPath', foundProbe.path)
+                    invokeMethod(objRef, 'editOrNewPort')
+                    invokeMethod(objRef, 'withIntVal', foundProbe.port)
+                    invokeMethod(objRef, 'endPort')
+                    foundProbe.headers?.each { kHeader, vHeader ->
+                        invokeMethod(objRef, 'addNewHttpHeader', kHeader, vHeader)
+                    }
+                    invokeMethod(objRef, 'endHttpGet')
+                } else {
+                    throw new GradleException("Must specify a valid probeType: ${foundProbe}")
+                }
+                invokeMethod(objRef, 'endLivenessProbe')
+            }
+
+            // add requested readiness probe
+            if (cont.readinessProbe) {
+                invokeMethod(objRef, 'withNewReadinessProbe')
+                invokeMethod(objRef, 'withPeriodSeconds', cont.readinessProbe.periodSeconds)
+                invokeMethod(objRef, 'withInitialDelaySeconds', cont.readinessProbe.initialDelaySeconds)
+                invokeMethod(objRef, 'withTimeoutSeconds', cont.readinessProbe.timeoutSeconds)
+
+                def foundProbe = cont.readinessProbe.probeInstance
+                if (foundProbe instanceof ExecProbe) {
+                    invokeMethod(objRef, 'editOrNewExec')
+                    invokeMethod(objRef, 'withCommand', foundProbe.command)
+                    invokeMethod(objRef, 'endExec')
+                } else if (foundProbe instanceof HttpProbe) {
+                    invokeMethod(objRef, 'editOrNewHttpGet')
+                    invokeMethod(objRef, 'withPath', foundProbe.path)
+                    invokeMethod(objRef, 'editOrNewPort')
+                    invokeMethod(objRef, 'withIntVal', foundProbe.port)
+                    invokeMethod(objRef, 'endPort')
+                    foundProbe.headers?.each { kHeader, vHeader ->
+                        invokeMethod(objRef, 'addNewHttpHeader', kHeader, vHeader)
+                    }
+                    invokeMethod(objRef, 'endHttpGet')
+                } else {
+                    throw new GradleException("Must specify a valid probeType: ${foundProbe}")
+                }
+                invokeMethod(objRef, 'endReadinessProbe')
             }
 
             invokeMethod(objRef, 'endContainer')

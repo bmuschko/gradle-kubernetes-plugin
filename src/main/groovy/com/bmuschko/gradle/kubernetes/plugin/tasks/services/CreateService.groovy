@@ -16,7 +16,7 @@
 
 package com.bmuschko.gradle.kubernetes.plugin.tasks.services
 
-import com.bmuschko.gradle.kubernetes.plugin.domain.PortSpec
+import com.bmuschko.gradle.kubernetes.plugin.domain.services.PortSpec
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.GradleException
 import org.gradle.api.Nullable
@@ -88,7 +88,7 @@ class CreateService extends AbstractKubernetesTask implements PortSpec {
         invokeMethod(objRef, 'addToSelector', this.selector)
 
         // add requested port specs
-        portSpecs.each { portMap ->
+        portSpecs().each { portMap ->
             invokeMethod(objRef, 'addNewPort')
             invokeMethod(objRef, 'withName', portMap.name)
             invokeMethod(objRef, 'withProtocol', portMap.protocol)

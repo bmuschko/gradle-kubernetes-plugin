@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.domain
+package com.bmuschko.gradle.kubernetes.plugin.domain.services
 
 import static com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesUtils.randomString
 
 import org.gradle.api.Nullable
+import org.gradle.api.tasks.Internal
 
 /**
  *
- * Trait for holding port mappings.
+ * Trait for holding port mappings typically used by a Service.
  *
  */
 trait PortSpec {
-    final List<InnerPortSpec> portSpecs = []
+
+    // marking this as internal, and then creating a method to access it,
+    // is mainly done to get around various gradle "syntax validation checks".
+    @Internal
+    private final List<InnerPortSpec> portSpecs = []
+    public List<InnerPortSpec> portSpecs() {
+        portSpecs
+    }
 
     /**
      *  Add ports for this service to expose.

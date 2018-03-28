@@ -36,12 +36,6 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
         def randomService = 'end-to-end-service'
         def randomPod = 'end-to-end-pod'
 
-        def tokenMap = ['POD_NAME' : randomPod,
-                        'CONTAINER_NAME' : "${randomPod}-container",
-                        'PORT' : 80]
-        def destinationFile = new File(projectDir, 'temp-nginx-pod.yaml')
-        copyAndReplaceTokensInFile(defaultPodFile, destinationFile, tokenMap)
-
         buildFile << """
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.CreateNamespace
             import com.bmuschko.gradle.kubernetes.plugin.tasks.namespaces.GetNamespace

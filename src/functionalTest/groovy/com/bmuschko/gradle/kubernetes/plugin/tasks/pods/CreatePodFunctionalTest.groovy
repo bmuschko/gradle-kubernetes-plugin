@@ -245,4 +245,89 @@ class CreatePodFunctionalTest extends AbstractFunctionalTest {
             result.output.contains(ON_COMPLETE_REACHED)
             !result.output.contains(SHOULD_NOT_REACH_HERE)
     }
+
+    /**
+     *
+     *  Recreating examples from:
+     *
+     *      https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-command
+     *
+     *      and
+     *
+     *      https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#define-a-liveness-http-request
+     *      
+     */
+    def "Create pod with liveness http and cmd probe"() {
+
+        def randomPod = randomString()
+
+        buildFile << """
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.CreatePod
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.GetPod
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.DeletePod
+            import java.util.concurrent.TimeUnit
+
+            task createPod(type: CreatePod) {
+                pod = "${randomPod}"
+                namespace = "${defaultNamespace}"
+                withLabels = ['test' : 'liveness']
+
+                def cmdArgs = ['/bin/sh', '-c', 'touch /tmp/healthy; sleep 10']
+                def cmdProbe = ['cat', '/tmp/healthy']
+                addContainer("cmd-${randomPod}", 'k8s.gcr.io/busybox', null, null, cmdArgs).
+                    withExecProbe('liveness', 5, 5, 30, cmdProbe)
+
+                def httpArgs = ['/server']
+                def httpHeaders = ['X-Custom-Header' : 'Awesome']
+                addContainer("http-${randomPod}", 'k8s.gcr.io/liveness', null, null, httpArgs).
+                    withHttpProbe('liveness', 3, 3, 30, '/healthz', 8080, httpHeaders)
+
+                onError { exc ->
+                    logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
+                }
+                onNext { output ->
+                    logger.quiet "$SHOULD_REACH_HERE: next=\${output}"
+                }
+                onComplete {
+                    logger.quiet '$ON_COMPLETE_REACHED'
+                }
+                doLast {
+                    if (response()) {
+                        logger.quiet '$RESPONSE_SET_MESSAGE'
+                    }
+                }
+            }
+
+            task getPod(type: GetPod, dependsOn: createPod){
+                pod = "${randomPod}"
+                namespace = "${defaultNamespace}"
+                retry {
+                    withDelay(30, TimeUnit.SECONDS)
+                    withMaxRetries(6)
+                }
+            }
+
+            task deletePod(type: DeletePod){
+                pod = "${randomPod}"
+                namespace = "${defaultNamespace}"
+                gracePeriod = 5000
+            }
+
+            task workflow(dependsOn: getPod) {
+                finalizedBy deletePod
+            }
+        """
+
+        when:
+            BuildResult result = build('workflow')
+
+        then:
+            result.output.contains('Creating pod...')
+            result.output.contains('Getting pod...')
+            result.output.contains('Deleting pod...')
+            result.output.contains(RESPONSE_SET_MESSAGE)
+            result.output.contains(SHOULD_REACH_HERE)
+            result.output.contains(ON_COMPLETE_REACHED)
+            !result.output.contains(SHOULD_NOT_REACH_HERE)
+    }
 }
