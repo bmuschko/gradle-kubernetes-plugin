@@ -22,6 +22,8 @@ import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.ContainerSpec
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.ExecProbe
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.HttpProbe
+import com.bmuschko.gradle.kubernetes.plugin.domain.container.RestartPolicy
+
 import org.gradle.api.GradleException
 import org.gradle.api.Nullable
 
@@ -43,6 +45,11 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
     @Input
     @Optional
     String pod
+
+    // restart policy of pod (defaults to Always)
+    @Input
+    @Optional
+    String restartPolicy
 
     @Input
     @Optional
@@ -100,6 +107,7 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
         invokeMethod(objRef, 'endMetadata')
 
         invokeMethod(objRef, 'editOrNewSpec')
+        invokeMethod(objRef, 'withRestartPolicy', RestartPolicy.from(this.restartPolicy).toString())
 
         // add requested volumes
         this.volumes.each { volName, sizeLimit ->
