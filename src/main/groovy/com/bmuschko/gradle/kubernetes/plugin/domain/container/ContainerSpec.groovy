@@ -16,9 +16,6 @@
 
 package com.bmuschko.gradle.kubernetes.plugin.domain.container
 
-import com.bmuschko.gradle.kubernetes.plugin.domain.container.ExecProbe
-import com.bmuschko.gradle.kubernetes.plugin.domain.container.HttpProbe
-
 import org.gradle.api.GradleException
 import org.gradle.api.Nullable
 import org.gradle.api.tasks.Internal
@@ -79,6 +76,7 @@ trait ContainerSpec {
         public List<Ports> ports = [] // ports for container
         public Probe livenessProbe // optional liveness probe for container
         public Probe readinessProbe // optional readiness probe for container
+        public TerminationMessage terminationMessage // optional termination message options
 
         /**
          *  Add a named volume mount for container use.
@@ -119,10 +117,10 @@ trait ContainerSpec {
                                 @Nullable Integer initialDelaySeconds,
                                 @Nullable Integer timeoutSeconds,
                                 List<String> command = []) {
-            final Probe localProbe = new Probe(periodSeconds: periodSeconds,
-                                            initialDelaySeconds: initialDelaySeconds,
-                                            timeoutSeconds: timeoutSeconds,
-                                            probeInstance: new ExecProbe(command: command))
+            Probe localProbe = new Probe(periodSeconds: periodSeconds,
+                                        initialDelaySeconds: initialDelaySeconds,
+                                        timeoutSeconds: timeoutSeconds,
+                                        probeInstance: new ExecProbe(command: command))
 
             // set proper probe
             switch (type.trim().toLowerCase()) {
@@ -151,16 +149,28 @@ trait ContainerSpec {
                                 String path,
                                 @Nullable Integer port,
                                 @Nullable Map<String, String> headers = [:]) {
-            final Probe localProbe = new Probe(periodSeconds: periodSeconds,
-                                            initialDelaySeconds: initialDelaySeconds,
-                                            timeoutSeconds: timeoutSeconds,
-                                            probeInstance: new HttpProbe(path: path, port: port, headers: headers))
+            Probe localProbe = new Probe(periodSeconds: periodSeconds,
+                                        initialDelaySeconds: initialDelaySeconds,
+                                        timeoutSeconds: timeoutSeconds,
+                                        probeInstance: new HttpProbe(path: path, port: port, headers: headers))
             // set proper probe
             switch (type.trim().toLowerCase()) {
                 case 'liveness': livenessProbe = localProbe; break;
                 case 'readiness': readinessProbe = localProbe; break;
                 default: throw new GradleException("Unknown probe type: ${type}")
             }
+            this
+        }
+
+        /**
+         *  Set the termination policy and message path.
+         *
+         *  @param policy the termination message policy (defaults to `File`)
+         *  @param path the termination message path (default to `/dev/termination-log`)
+         */
+        InnerContainerSpec withTerminationMessage(@Nullable String policy, @Nullable String path) {
+            final TerminationMessagePolicy localPolicy = TerminationMessagePolicy.from(policy).toString()
+            terminationMessage = new TerminationMessage(policy: localPolicy.toString(), path: path)
             this
         }
 
@@ -182,6 +192,12 @@ trait ContainerSpec {
             public Integer initialDelaySeconds // initial delay before performing first probe
             public Integer timeoutSeconds // # of seconds before we timeout and fail
             public def probeInstance // arbitrary probe that must be inferred at runtime
+        }
+
+        // termination message and policy for container
+        static class TerminationMessage {
+            String policy
+            String path
         }
     }
 }

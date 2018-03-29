@@ -23,6 +23,7 @@ import com.bmuschko.gradle.kubernetes.plugin.domain.container.ContainerSpec
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.ExecProbe
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.HttpProbe
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.RestartPolicy
+import com.bmuschko.gradle.kubernetes.plugin.domain.container.TerminationMessagePolicy
 
 import org.gradle.api.GradleException
 import org.gradle.api.Nullable
@@ -128,6 +129,12 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
             invokeMethod(objRef, 'withImage', cont.image)
             invokeMethod(objRef, 'withCommand', cont.cmd)
             invokeMethod(objRef, 'withArgs', cont.args)
+            
+            // add requested termination policy
+            if (cont.terminationMessage) {
+                invokeMethod(objRef, 'withTerminationMessagePolicy', cont.terminationMessage.policy)
+                invokeMethod(objRef, 'withTerminationMessagePath', cont.terminationMessage.path) 
+            }
 
             // add requested container ports
             cont.ports.each { port ->

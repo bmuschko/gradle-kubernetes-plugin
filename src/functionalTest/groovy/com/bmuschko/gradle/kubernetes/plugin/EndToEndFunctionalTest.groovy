@@ -105,10 +105,14 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
                 description = 'Create end-to-end pod'
                 pod = "${randomPod}"
                 namespace = "${randomNamespace}"
-                restartPolicy = 'never' // one of either Always, OnFailure, or Never (case is irrelevant)
+
+                // one of either Always, OnFailure, or Never (case is irrelevant)
+                restartPolicy = 'never'
+
                 withLabels = ['name' : 'end-to-end-pod-label']
                 addContainer('end-to-end-container', 'postgres:10.3', null, null, null).withPorts(5432, null)
-                addContainer('end-to-end-container-busybox', 'busybox', null, null, ['sleep', '10000'])
+                addContainer('end-to-end-container-busybox', 'busybox', null, null, ['sleep', '10000']).
+                    withTerminationMessage('FallbackToLogsOnError', null)
 
                 onError { exc ->
                     logger.quiet "$SHOULD_NOT_REACH_HERE: exception=\${exc}"
