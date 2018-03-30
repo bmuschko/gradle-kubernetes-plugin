@@ -106,6 +106,7 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
                 pod = "${randomPod}"
                 namespace = "${randomNamespace}"
                 withLabels = ['name' : 'end-to-end-pod-label']
+                withAnnotations = ['custom-anno' : 'hello-world']
 
                 // one of either Always, OnFailure, or Never (case is irrelevant)
                 restartPolicy = 'Never'

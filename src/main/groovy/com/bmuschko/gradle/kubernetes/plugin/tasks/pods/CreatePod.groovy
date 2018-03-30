@@ -58,6 +58,10 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
 
     @Input
     @Optional
+    Map<String, String> withAnnotations
+
+    @Input
+    @Optional
     Map<String, String> volumes = [:] // key=name,value=size-limit (can be null)
 
     // Can be a String path to a File, a File object, a URL, or an InputStream
@@ -105,6 +109,7 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
         } 
         invokeMethod(objRef, 'withNamespace', namespace)
         invokeMethod(objRef, 'withLabels', withLabels)
+        invokeMethod(objRef, 'withAnnotations', withAnnotations)
         invokeMethod(objRef, 'endMetadata')
 
         invokeMethod(objRef, 'editOrNewSpec')
