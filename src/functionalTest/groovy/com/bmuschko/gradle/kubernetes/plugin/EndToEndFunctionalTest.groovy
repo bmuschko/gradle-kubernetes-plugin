@@ -105,12 +105,14 @@ class EndToEndFunctionalTest extends AbstractFunctionalTest {
                 description = 'Create end-to-end pod'
                 pod = "${randomPod}"
                 namespace = "${randomNamespace}"
+                withLabels = ['name' : 'end-to-end-pod-label']
 
                 // one of either Always, OnFailure, or Never (case is irrelevant)
-                restartPolicy = 'never'
+                restartPolicy = 'Never'
 
-                withLabels = ['name' : 'end-to-end-pod-label']
-                addContainer('end-to-end-container', 'postgres:10.3', null, null, null).withPorts(5432, null)
+                addContainer('end-to-end-container', 'postgres:10.3', null, null, null).withPorts(5432, null).
+                    withTerminationMessage(0, null)
+
                 addContainer('end-to-end-container-busybox', 'busybox', null, null, ['sleep', '10000']).
                     withTerminationMessage('FallbackToLogsOnError', null)
 

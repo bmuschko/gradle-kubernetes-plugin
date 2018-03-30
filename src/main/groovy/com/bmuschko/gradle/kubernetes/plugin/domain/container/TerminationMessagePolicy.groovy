@@ -20,7 +20,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Nullable
 
 /**
- *  Enum for all possible termination message policies
+ *  Enum for all possible termination message policies.
  */
 enum TerminationMessagePolicy {
     File,
@@ -30,20 +30,24 @@ enum TerminationMessagePolicy {
      *  Get a TerminationMessagePolicy from the passed String. If the passed String is null
      *  then the default kubernetes value of `File` is returned.
      *  
-     *  @param possiblePolicy the String to marshal into a TerminationMessagePolicy.
+     *  @param possiblePolicy the `def` to marshal into a TerminationMessagePolicy.
      *  @return TerminationMessagePolicy the found RestartPolicy.
      */
-    static TerminationMessagePolicy from(@Nullable String possiblePolicy) {
-        if (possiblePolicy) {
+    static TerminationMessagePolicy from(@Nullable def possiblePolicy) {
+        if (possiblePolicy == null) {
+            return this.values().first()
+        } else if (this.isInstance(possiblePolicy)) {
+            return possiblePolicy
+        } else if (possiblePolicy instanceof Integer) {
+            return this.values()[possiblePolicy]
+        } else {
             final String localPolicy = possiblePolicy.trim()
-            for (final TerminationMessagePolicy pol : this.values()) {
+            for (final def pol : this.values()) {
                 if (pol.name().equalsIgnoreCase(localPolicy)) {
                     return pol
                 }
             }
-            throw new GradleException("Illegal policy: '${localPolicy}'")
-        } else {
-            return File
+            throw new GradleException("Illegal policy: '${localPolicy}'")  
         }
     }
 }

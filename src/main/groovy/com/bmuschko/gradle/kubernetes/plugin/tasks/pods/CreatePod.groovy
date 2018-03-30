@@ -50,7 +50,7 @@ class CreatePod extends AbstractKubernetesTask implements ContainerSpec {
     // restart policy of pod (defaults to Always)
     @Input
     @Optional
-    String restartPolicy
+    def restartPolicy
 
     @Input
     @Optional

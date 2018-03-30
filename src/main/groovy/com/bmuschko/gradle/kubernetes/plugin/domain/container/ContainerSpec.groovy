@@ -168,7 +168,7 @@ trait ContainerSpec {
          *  @param policy the termination message policy (defaults to `File`)
          *  @param path the termination message path (default to `/dev/termination-log`)
          */
-        InnerContainerSpec withTerminationMessage(@Nullable String policy, @Nullable String path) {
+        InnerContainerSpec withTerminationMessage(@Nullable def policy, @Nullable String path) {
             final TerminationMessagePolicy localPolicy = TerminationMessagePolicy.from(policy).toString()
             terminationMessage = new TerminationMessage(policy: localPolicy.toString(), path: path)
             this

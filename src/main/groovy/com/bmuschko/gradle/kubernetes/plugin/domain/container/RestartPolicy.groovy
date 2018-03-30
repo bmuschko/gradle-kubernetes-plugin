@@ -20,7 +20,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Nullable
 
 /**
- *  Enum for all possible RestartPolicy's
+ *  Enum for all possible RestartPolicy's.
  */
 enum RestartPolicy {
     Always,
@@ -31,20 +31,24 @@ enum RestartPolicy {
      *  Get a RestartPolicy from the passed String. If the passed String is null
      *  then the default kubernetes value of `Always` is returned.
      *  
-     *  @param possiblePolicy the String to marshal into a RestartPolicy.
+     *  @param possiblePolicy the `def` to marshal into a RestartPolicy.
      *  @return RestartPolicy the found RestartPolicy.
      */
-    static RestartPolicy from(@Nullable String possiblePolicy) {
-        if (possiblePolicy) {
+    static RestartPolicy from(@Nullable def possiblePolicy) {
+        if (possiblePolicy == null) {
+            return this.values().first()
+        } else if (this.isInstance(possiblePolicy)) {
+            return possiblePolicy
+        } else if (possiblePolicy instanceof Integer) {
+            return this.values()[possiblePolicy]
+        } else {
             final String localPolicy = possiblePolicy.trim()
-            for (final RestartPolicy pol : this.values()) {
+            for (final def pol : this.values()) {
                 if (pol.name().equalsIgnoreCase(localPolicy)) {
                     return pol
                 }
             }
-            throw new GradleException("Illegal policy: '${localPolicy}'")
-        } else {
-            return Always
+            throw new GradleException("Illegal policy: '${localPolicy}'")  
         }
     }
 }
