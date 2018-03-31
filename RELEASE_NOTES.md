@@ -1,4 +1,4 @@
-### Version 0.9.0 (TBA)
+### Version 0.9.0 (March 31, 2018)
 * Added task `ListPods` - [Pull request 16](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/16)
 * Added task `DeletePod` - [Pull request 17](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/17)
 * Added task `GetPod` - [Pull request 18](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/18)
