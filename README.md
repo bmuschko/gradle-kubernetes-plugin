@@ -73,7 +73,8 @@ The below table(s) document each of our tasks and their respective `features` in
 
 | Name | `config{}` | `onNext{}` | `response()` |
 | --- | --- | --- | --- |
-| [ListDeployments](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | [MixedOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/MixedOperation.html) | [Deployment](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/extensions/Deployment.html) | [DeploymentList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/extensions/DeploymentList.html) |
+| [ListDeployments](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/deployments/ListDeployments.groovy) | [MixedOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/MixedOperation.html) | [Deployment](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/extensions/Deployment.html) | [DeploymentList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/extensions/DeploymentList.html) |
+[DeleteDeployment](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/deployments/DeleteDeployment.groovy) | [N/A]() | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) | [Boolean](https://docs.oracle.com/javase/7/docs/api/java/lang/Boolean.html) |
 
 ### Namespace operations
 
