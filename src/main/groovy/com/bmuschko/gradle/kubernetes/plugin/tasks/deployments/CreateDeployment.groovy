@@ -19,6 +19,7 @@ package com.bmuschko.gradle.kubernetes.plugin.tasks.deployments
 import static com.bmuschko.gradle.kubernetes.plugin.GradleKubernetesUtils.randomString
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
+import com.bmuschko.gradle.kubernetes.plugin.tasks.pods.CreatePod
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.ContainerSpec
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.ExecProbe
 import com.bmuschko.gradle.kubernetes.plugin.domain.container.HttpProbe
@@ -26,6 +27,7 @@ import com.bmuschko.gradle.kubernetes.plugin.domain.container.HttpProbe
 import org.gradle.api.GradleException
 
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 
 /**
@@ -55,10 +57,17 @@ class CreateDeployment extends AbstractKubernetesTask implements ContainerSpec {
     @Optional
     Integer replicas
 
+    @Input
+    @Optional
+    Map<String, String> withSelectorLabels
+
     // Can be a String path to a File, a File object, a URL, or an InputStream
     @Input
     @Optional
     def resource
+
+    @Internal
+    private Closure<CreatePod> pod
 
     @Override
     def handleClient(kubernetesClient) {
@@ -93,6 +102,7 @@ class CreateDeployment extends AbstractKubernetesTask implements ContainerSpec {
 
     @Override
     def applyInputs(obj) {
+
         def objRef = wrapAtomic(obj)
         invokeMethod(objRef, 'editOrNewMetadata')
         if (!objRef.get().getName()) {
@@ -102,113 +112,44 @@ class CreateDeployment extends AbstractKubernetesTask implements ContainerSpec {
         invokeMethod(objRef, 'withLabels', withLabels)
         invokeMethod(objRef, 'withAnnotations', withAnnotations)
         invokeMethod(objRef, 'endMetadata')
+
         invokeMethod(objRef, 'editOrNewSpec')
         invokeMethod(objRef, 'withReplicas', replicas)
+        invokeMethod(objRef, 'editOrNewSelector')
+        def localSelectorLabels = withSelectorLabels ?: ['gkp-app' : randomString().toString()]
+        invokeMethod(objRef, 'withMatchLabels', localSelectorLabels)
+        invokeMethod(objRef, 'endSelector')
         
         invokeMethod(objRef, 'editOrNewTemplate')
-        invokeMethod(objRef, 'editOrNewSpec')
 
-        // add requested containers
-        containerSpecs().each { cName, cont ->
+        // if user did not define a pod closure than we will create one to ensure
+        // that the selector-lables are properly applied as they are required.
+        Closure<CreatePod> localPod = pod ?: {}
+        final CreatePod createPod = project.tasks.create(randomString(), CreatePod)
+        localPod.resolveStrategy = Closure.DELEGATE_FIRST
+        localPod.delegate = createPod
+        localPod.call(createPod)
 
-            invokeMethod(objRef, 'addNewContainer')
-            invokeMethod(objRef, 'withName', cName)
-            invokeMethod(objRef, 'withImage', cont.image)
-            invokeMethod(objRef, 'withCommand', cont.cmd)
-            invokeMethod(objRef, 'withArgs', cont.args)
-            
-            // add requested termination policy
-            if (cont.terminationMessage) {
-                invokeMethod(objRef, 'withTerminationMessagePolicy', cont.terminationMessage.policy)
-                invokeMethod(objRef, 'withTerminationMessagePath', cont.terminationMessage.path) 
-            }
-
-            // add requested container ports
-            cont.ports.each { port ->
-                invokeMethod(objRef, 'addNewPort')
-                invokeMethod(objRef, 'withContainerPort', port.containerPort)
-                invokeMethod(objRef, 'withHostPort', port.hostPort)
-                invokeMethod(objRef, 'endPort')
-            }
-
-            // add requested environment variables
-            cont.envs.each { key, value ->
-                invokeMethod(objRef, 'addNewEnv')
-                invokeMethod(objRef, 'withName', key)
-                invokeMethod(objRef, 'withValue', value)
-                invokeMethod(objRef, 'endEnv')
-            }
-
-            // add requested container volume mounts
-            cont.volumeMounts.each { volMount ->
-                invokeMethod(objRef, 'addNewVolumeMount')
-                invokeMethod(objRef, 'withName', volMount.name)
-                invokeMethod(objRef, 'withMountPath', volMount.mountPath)
-                invokeMethod(objRef, 'endVolumeMount')
-            }
-
-            // add requested liveness probe
-            if (cont.livenessProbe) {
-                invokeMethod(objRef, 'editOrNewLivenessProbe')
-                invokeMethod(objRef, 'withPeriodSeconds', cont.livenessProbe.periodSeconds)
-                invokeMethod(objRef, 'withInitialDelaySeconds', cont.livenessProbe.initialDelaySeconds)
-                invokeMethod(objRef, 'withTimeoutSeconds', cont.livenessProbe.timeoutSeconds)
-
-                def foundProbe = cont.livenessProbe.probeInstance
-                if (foundProbe instanceof ExecProbe) {
-                    invokeMethod(objRef, 'editOrNewExec')
-                    invokeMethod(objRef, 'withCommand', foundProbe.command)
-                    invokeMethod(objRef, 'endExec')
-                } else if (foundProbe instanceof HttpProbe) {
-                    invokeMethod(objRef, 'editOrNewHttpGet')
-                    invokeMethod(objRef, 'withPath', foundProbe.path)
-                    invokeMethod(objRef, 'editOrNewPort')
-                    invokeMethod(objRef, 'withIntVal', foundProbe.port)
-                    invokeMethod(objRef, 'endPort')
-                    foundProbe.headers?.each { kHeader, vHeader ->
-                        invokeMethod(objRef, 'addNewHttpHeader', kHeader, vHeader)
-                    }
-                    invokeMethod(objRef, 'endHttpGet')
-                } else {
-                    throw new GradleException("Must specify a valid probeType: ${foundProbe}")
-                }
-                invokeMethod(objRef, 'endLivenessProbe')
-            }
-
-            // add requested readiness probe
-            if (cont.readinessProbe) {
-                invokeMethod(objRef, 'withNewReadinessProbe')
-                invokeMethod(objRef, 'withPeriodSeconds', cont.readinessProbe.periodSeconds)
-                invokeMethod(objRef, 'withInitialDelaySeconds', cont.readinessProbe.initialDelaySeconds)
-                invokeMethod(objRef, 'withTimeoutSeconds', cont.readinessProbe.timeoutSeconds)
-
-                def foundProbe = cont.readinessProbe.probeInstance
-                if (foundProbe instanceof ExecProbe) {
-                    invokeMethod(objRef, 'editOrNewExec')
-                    invokeMethod(objRef, 'withCommand', foundProbe.command)
-                    invokeMethod(objRef, 'endExec')
-                } else if (foundProbe instanceof HttpProbe) {
-                    invokeMethod(objRef, 'editOrNewHttpGet')
-                    invokeMethod(objRef, 'withPath', foundProbe.path)
-                    invokeMethod(objRef, 'editOrNewPort')
-                    invokeMethod(objRef, 'withIntVal', foundProbe.port)
-                    invokeMethod(objRef, 'endPort')
-                    foundProbe.headers?.each { kHeader, vHeader ->
-                        invokeMethod(objRef, 'addNewHttpHeader', kHeader, vHeader)
-                    }
-                    invokeMethod(objRef, 'endHttpGet')
-                } else {
-                    throw new GradleException("Must specify a valid probeType: ${foundProbe}")
-                }
-                invokeMethod(objRef, 'endReadinessProbe')
-            }
-
-            invokeMethod(objRef, 'endContainer')
-        }
-        invokeMethod(objRef, 'editOrNewSpec')
+        // The pod itself needs to have the selector-labels as actual labels
+        // so that it can be found and referenced. Here we are simply forcing
+        // them to be present and if the user has already defined them then
+        // things amount to a no-op.
+        def foundLabels = createPod.withLabels != null ? createPod.withLabels : [:]
+        foundLabels << localSelectorLabels
+        createPod.withLabels = foundLabels
+        def podWithInputs = createPod.applyInputs(objRef.get())
+        objRef = wrapAtomic(podWithInputs)
+        
         invokeMethod(objRef, 'endTemplate')
         invokeMethod(objRef, 'endSpec')
         
         objRef.get()
+    }
+
+    /**
+     *  Configure an instance of `CreatePod` for this deployment.
+     */
+    public void pod(Closure<CreatePod> pod) {
+        this.pod = pod
     }
 }

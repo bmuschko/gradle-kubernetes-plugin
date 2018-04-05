@@ -53,7 +53,8 @@ trait CommonFunctions {
                 def localResponse = metaMethod.invoke(localObject, args)
                 objectToInvoke.set(localResponse)
             } else {
-                throw new GradleException("Cannot invoke method '${methodName}' on class '${objectToInvoke.class}' with args '${args}'. Was it previously set?")
+                throw new GradleException("Cannot invoke method '${methodName}' on class '${localObject.metaClass.getTheClass().name}' with args '${args}'. " +
+                    "Possible methods to call are: ${localObject.metaClass.methods*.name.sort().unique()}")
             }
         }
         objectToInvoke
