@@ -69,6 +69,12 @@ The below table(s) document each of our tasks and their respective `features` in
 | --- | --- | --- | --- |
 | [KubernetesClient](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/client/KubernetesClient.groovy) | [KubernetesClient](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/KubernetesClient.java) | [KubernetesClient](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/KubernetesClient.java) | [KubernetesClient](https://github.com/fabric8io/kubernetes-client/blob/master/kubernetes-client/src/main/java/io/fabric8/kubernetes/client/KubernetesClient.java) |
 
+### Deployment operations
+
+| Name | `config{}` | `onNext{}` | `response()` |
+| --- | --- | --- | --- |
+| [ListDeployments](https://github.com/bmuschko/gradle-kubernetes-plugin/blob/master/src/main/groovy/com/bmuschko/gradle/kubernetes/plugin/tasks/namespaces/ListNamespaces.groovy) | [MixedOperation](http://static.javadoc.io/io.fabric8/kubernetes-client/3.1.8/io/fabric8/kubernetes/client/dsl/MixedOperation.html) | [Deployment](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/extensions/Deployment.html) | [DeploymentList](http://static.javadoc.io/io.fabric8/kubernetes-model/2.0.8/io/fabric8/kubernetes/api/model/extensions/DeploymentList.html) |
+
 ### Namespace operations
 
 | Name | `config{}` | `onNext{}` | `response()` |
