@@ -45,7 +45,7 @@ class GetNamespace extends AbstractKubernetesTask {
         // get the namespace
         def localResponse = objWithUserInputs.fromServer().get()
         if (!localResponse) {
-            throw new GradleException("Namespace could not be found.")
+            throw new GradleException('Namespace could not be found.')
         }
                    
         // register response for downstream use which in this case
