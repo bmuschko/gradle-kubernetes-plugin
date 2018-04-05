@@ -14,91 +14,48 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.services
+package com.bmuschko.gradle.kubernetes.plugin.tasks.deployments
 
 import com.bmuschko.gradle.kubernetes.plugin.AbstractFunctionalTest
 import org.gradle.testkit.runner.BuildResult
 
 /**
  *
- * All functional tests for the `GetService` task.
+ * All functional tests for the `GetDeployment` task.
  *
  */
-class GetServiceFunctionalTest extends AbstractFunctionalTest {
+class GetDeploymentFunctionalTest extends AbstractFunctionalTest {
 
-    def defaultService = 'kubernetes'
-    def defaultNamespace = "default"
-
-    def generateName = randomString()
-    def "Get default service"() {
+    def "Get non-existent deployment"() {
 
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.GetService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.deployments.GetDeployment
 
-            task getService(type: GetService) {
-                doFirst {
-                    service = "${defaultService}"
-                    namespace = "${defaultNamespace}"
-                }
-                onNext { serv ->
-                    logger.quiet "${ON_NEXT_REACHED}: service=\${serv}"
-                }
-                doLast {
-                    if (response().getMetadata().getName() != "${defaultService}") {
-                        logger.quiet "$SHOULD_NOT_REACH_HERE: foundName=\${response().getMetadata().getName()}, expected=${defaultService}"
-                    } else {
-                        logger.quiet '$RESPONSE_SET_MESSAGE'
-                    }
-                }
-                onComplete {
-                    logger.quiet "${ON_COMPLETE_REACHED}"
-                }
-            }
-
-            task workflow(dependsOn: getService)
-        """
-
-        when:
-            BuildResult result = build('workflow')
-
-        then:
-            result.output.contains('Getting service...')
-            !result.output.contains(SHOULD_NOT_REACH_HERE)
-            result.output.contains(ON_NEXT_REACHED)
-            result.output.contains(ON_COMPLETE_REACHED)
-            result.output.contains(RESPONSE_SET_MESSAGE)
-    }
-
-    def "Get non-existent service"() {
-
-        buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.GetService
-
-            task getService(type: GetService) {
-                service = "${randomString()}"
+            task getDeployment(type: GetDeployment) {
+                deployment = "${randomString()}"
                 onError { exc ->
                     logger.quiet "$SHOULD_REACH_HERE value=\${exc}"
                 }
             }
 
-            task workflow(dependsOn: getService)
+            task workflow(dependsOn: getDeployment)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Getting service...')
+            result.output.contains('Getting deployment...')
             result.output.contains(SHOULD_REACH_HERE)
             result.output.contains('could not be found.')
     }
 
-    def "Get non-existent service with config"() {
+    def "Get non-existent deployment with config"() {
 
         buildFile << """
-            import com.bmuschko.gradle.kubernetes.plugin.tasks.services.GetService
+            import com.bmuschko.gradle.kubernetes.plugin.tasks.deployments.GetDeployment
 
-            task getService(type: GetService) {
+            task getDeployment(type: GetDeployment) {
                 config {
                     withName("${randomString()}")
                 }
@@ -108,14 +65,14 @@ class GetServiceFunctionalTest extends AbstractFunctionalTest {
                 }
             }
 
-            task workflow(dependsOn: getService)
+            task workflow(dependsOn: getDeployment)
         """
 
         when:
             BuildResult result = build('workflow')
 
         then:
-            result.output.contains('Getting service...')
+            result.output.contains('Getting deployment...')
             result.output.contains(SHOULD_REACH_HERE)
             result.output.contains('could not be found.')
     }
