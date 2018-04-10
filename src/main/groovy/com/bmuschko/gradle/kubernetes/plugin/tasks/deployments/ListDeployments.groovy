@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.pods
+package com.bmuschko.gradle.kubernetes.plugin.tasks.deployments
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 
 /**
- * List available Pods.
+ * List available Deployments.
  */
-class ListPods extends AbstractKubernetesTask {
+class ListDeployments extends AbstractKubernetesTask {
 
     @Input
     @Optional
@@ -40,16 +40,16 @@ class ListPods extends AbstractKubernetesTask {
     @Override
     def handleClient(kubernetesClient) {
 
-        logger.quiet 'Listing pods...'
-        def objToConfigure = kubernetesClient.pods()
+        logger.quiet 'Listing deployments...'
+        def objToConfigure = kubernetesClient.extensions().deployments()
 
-        // configure on the pods instance itself
+        // configure on the deployments instance itself
         def objReconfigured = configureOn(objToConfigure)
         
         // apply user-defined inputs
         def objWithUserInputs = applyInputs(objReconfigured)
 
-        // get the `PodList` object which in itself is NOT a list.
+        // get the `DeploymentList` object which in itself is NOT a list.
         def localResponse = objWithUserInputs.list()
 
         // register response for downstream use and return list of items
