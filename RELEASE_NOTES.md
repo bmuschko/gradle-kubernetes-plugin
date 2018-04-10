@@ -1,8 +1,14 @@
+### Version 0.9.1 (April 11, 2018)
+* Added task `ListDeployments` - [Pull request 21](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/21)
+* Added task `DeleteDeployments` - [Pull request 22](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/22)
+* Added task `GetDeployments` - [Pull request 23](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/23)
+* Added task `CreateDeployments` - [Pull request 24](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/24)
+
 ### Version 0.9.0 (March 31, 2018)
 * Added task `ListPods` - [Pull request 16](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/16)
 * Added task `DeletePod` - [Pull request 17](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/17)
 * Added task `GetPod` - [Pull request 18](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/18)
-* Added task `CreatePod` - [Pull request 20](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/120)
+* Added task `CreatePod` - [Pull request 20](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/20)
 
 ### Version 0.0.4 (March 16, 2018)
 * Added task `ListServices` - [Pull request 10](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/10)
