@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bmuschko.gradle.kubernetes.plugin.tasks.pods
+package com.bmuschko.gradle.kubernetes.plugin.tasks.deployments
 
 import com.bmuschko.gradle.kubernetes.plugin.tasks.AbstractKubernetesTask
 import org.gradle.api.GradleException
@@ -22,23 +22,23 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 
 /**
- * Get a pod.
+ * Get a deployment.
  */
-class GetPod extends AbstractKubernetesTask {
+class GetDeployment extends AbstractKubernetesTask {
 
     @Input
     @Optional
-    String namespace // which namespace the service exists within.
-    
+    String namespace // which namespace the deployment exists within.
+
     @Input
     @Optional
-    String pod // name of the pod to retrieve.
+    String deployment // name of the deployment to retrieve.
 
     @Override
     def handleClient(kubernetesClient) {
 
-        logger.quiet 'Getting pod...'
-        def objToConfigure = kubernetesClient.pods()
+        logger.quiet 'Getting deployment...'
+        def objToConfigure = kubernetesClient.services()
 
         // no real options to supply so should amount to a no-op
         def objReconfigured = configureOn(objToConfigure)
@@ -49,11 +49,11 @@ class GetPod extends AbstractKubernetesTask {
         // get the service
         def localResponse = objWithUserInputs.fromServer().get()
         if (!localResponse) {
-            throw new GradleException('Pod could not be found.')
+            throw new GradleException('Deployment could not be found.')
         }
-                   
+
         // register response for downstream use which in this case
-        // is just a `Pod` instance.
+        // is just a `Service` instance.
         responseOn(localResponse)
     }
 
@@ -61,6 +61,6 @@ class GetPod extends AbstractKubernetesTask {
     def applyInputs(obj) {
         def objRef = wrapAtomic(obj)
         invokeMethod(objRef, 'inNamespace', namespace)
-        invokeMethod(objRef, 'withName', pod).get()
+        invokeMethod(objRef, 'withName', deployment).get()
     }
 }

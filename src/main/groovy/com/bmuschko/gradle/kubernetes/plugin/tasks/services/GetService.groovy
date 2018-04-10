@@ -49,7 +49,7 @@ class GetService extends AbstractKubernetesTask {
         // get the service
         def localResponse = objWithUserInputs.fromServer().get()
         if (!localResponse) {
-            throw new GradleException("Service could not be found.")
+            throw new GradleException('Service could not be found.')
         }
 
         // register response for downstream use which in this case
