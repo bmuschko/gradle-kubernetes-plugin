@@ -38,7 +38,7 @@ class GetDeployment extends AbstractKubernetesTask {
     def handleClient(kubernetesClient) {
 
         logger.quiet 'Getting deployment...'
-        def objToConfigure = kubernetesClient.services()
+        def objToConfigure = kubernetesClient.extensions().deployments()
 
         // no real options to supply so should amount to a no-op
         def objReconfigured = configureOn(objToConfigure)

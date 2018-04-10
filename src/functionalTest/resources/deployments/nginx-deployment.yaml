@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: DEPLOYMENT_NAME
+spec:
+  replicas: REPLICA_COUNT
+  selector:
+    matchLabels:
+      app: nginx-pod-label
+  template:
+    metadata:
+      labels:
+        app: nginx-pod-label
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: PORT

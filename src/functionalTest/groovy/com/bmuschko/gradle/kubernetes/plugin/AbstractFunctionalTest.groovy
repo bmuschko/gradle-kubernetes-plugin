@@ -44,6 +44,7 @@ abstract class AbstractFunctionalTest extends Specification {
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
 
+    File defaultDeploymentFile = new File(loadResource('/deployments/nginx-deployment.yaml').getFile())
     File defaultPodFile = new File(loadResource('/pods/nginx-pod.yaml').getFile())
     File projectDir
     File buildFile
