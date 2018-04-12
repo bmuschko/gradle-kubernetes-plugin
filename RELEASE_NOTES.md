@@ -1,3 +1,5 @@
+### Version 0.9.2 (TBA)
+
 ### Version 0.9.1 (April 11, 2018)
 * Added task `ListDeployments` - [Pull request 21](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/21)
 * Added task `DeleteDeployments` - [Pull request 22](https://github.com/bmuschko/gradle-kubernetes-plugin/pull/22)
