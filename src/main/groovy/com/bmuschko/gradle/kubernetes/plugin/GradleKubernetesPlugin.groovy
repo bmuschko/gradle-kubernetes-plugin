@@ -29,7 +29,7 @@ import org.gradle.api.file.FileCollection
 class GradleKubernetesPlugin implements Plugin<Project> {
 
     public static final String KUBERNETES_CLIENT_CONFIGURATION_NAME = 'kubernetesClient'
-    public static final String KUBERNETES_CLIENT_DEFAULT_VERSION = '3.1.10'
+    public static final String KUBERNETES_CLIENT_DEFAULT_VERSION = '4.0.5'
     public static final String EXTENSION_NAME = 'kubernetes'
     public static final String DEFAULT_TASK_GROUP = 'Kubernetes'
 
