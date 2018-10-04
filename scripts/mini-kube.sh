@@ -1,20 +1,26 @@
 #!/usr/bin/env bash
 
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo cp minikube /usr/local/bin/ && rm minikube
+curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo cp kubectl /usr/local/bin/ && rm kubectl
+
+export MINIKUBE_WANTUPDATENOTIFICATION=false
+export MINIKUBE_WANTREPORTERRORPROMPT=false
+export MINIKUBE_HOME=$HOME
 export CHANGE_MINIKUBE_NONE_USER=true
-KUBE_VERSION="v1.9.4"
+mkdir -p $HOME/.kube
+mkdir -p $HOME/.minikube
+touch $HOME/.kube/config
 
-# Download kubectl, which is a requirement for using minikube.
-curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$KUBE_VERSION/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+export KUBECONFIG=$HOME/.kube/config
+sudo -E minikube start --vm-driver=none
 
-# Download minikube and start.
-curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+# this for loop waits until kubectl can access the api server that Minikube has created
+for i in {1..150}; do # timeout for 5 minutes
+   kubectl get po &> /dev/null
+   if [ $? -ne 1 ]; then
+      break
+  fi
+  sleep 2
+done
 
-sudo minikube delete
-sudo minikube start --vm-driver=none --bootstrapper=localkube --kubernetes-version=$KUBE_VERSION
-
-# Fix the kubectl context, as it's often stale.
-sudo minikube update-context
-
-# Wait for Kubernetes to be up and ready.
-JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
 sudo kubectl cluster-info
