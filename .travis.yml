@@ -1,8 +1,5 @@
 sudo: required
 
-env:
-- CHANGE_MINIKUBE_NONE_USER=true
-
 language: java
 jdk: oraclejdk8
 install: true
@@ -16,7 +13,7 @@ jobs:
     - stage: all tests
       script:
         # Download and start minikube.
-        - ./scripts/mini-kube.sh
+        - ./scripts/mini-kube.sh up
         # Run functional tests against kubernetes instance.
         - ./gradlew -s -Dorg.gradle.daemon=false clean build functionalTest publishToMavenLocal
       after_script: bash <(curl -s https://codecov.io/bash)
