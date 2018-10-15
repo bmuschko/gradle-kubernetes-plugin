@@ -9,6 +9,8 @@
 # If minikube/kubernetes is not installed than an attempt will be made to
 # install it using docker containers.
 #
+# *** Ideas in this script taken from: https://github.com/LiliC/travis-minikube
+#
 ################################################################################
 ################################################################################
 ################################################################################
@@ -44,7 +46,7 @@ up () {
   # install kubectl if not already present
   exit_status=`command -v kubectl &> /dev/null; echo $?`
   if [ $exit_status -eq 1 ]; then
-    curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
     chmod +x kubectl
     sudo cp kubectl /usr/local/bin/
     rm kubectl
@@ -53,7 +55,7 @@ up () {
   # if not already started attempt to start
   exit_status=`sudo minikube status &> /dev/null; echo $?`
   if [ $exit_status -eq 1 ]; then
-    sudo -E minikube start --vm-driver=none --extra-config=apiserver.Authorization.Mode=RBAC --bootstrapper=localkube
+    sudo minikube start --vm-driver=none --bootstrapper=localkube --kubernetes-version=v1.10.0
     minikube update-context
 
     # this for loop waits until kubectl can access the api server that Minikube has created
