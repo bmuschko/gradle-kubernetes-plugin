@@ -53,7 +53,7 @@ up () {
   # if not already started attempt to start
   exit_status=`sudo minikube status &> /dev/null; echo $?`
   if [ $exit_status -eq 1 ]; then
-    sudo -E minikube start --vm-driver=none
+    sudo -E minikube start --vm-driver=none --bootstrapper kubeadm
 
     # this for loop waits until kubectl can access the api server that Minikube has created
     for i in {1..150}; do # timeout for 5 minutes
